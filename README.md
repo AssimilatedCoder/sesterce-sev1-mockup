@@ -33,17 +33,28 @@ python3 serve-dashboard.py
 # Access at: http://localhost:8080/sev1-warroom-dashboard.html
 ```
 
-**Production/Ubuntu Server:**
+**Production/Ubuntu Server (nginx - Recommended):**
 ```bash
-# Background mode (recommended)
+# One-time setup
+./setup-nginx.sh
+
+# Management
+./nginx-management.sh start    # Start server
+./nginx-management.sh status   # Check status
+./nginx-management.sh test     # Test functionality
+
+# Access at: http://YOUR_IP:7777
+```
+
+**Alternative: Python Server:**
+```bash
+# Background mode
 python3 server.py --background
 # OR use the control script
 ./dashboard start
 
 # Foreground mode (interactive)
 python3 server.py --foreground
-
-# Access at: http://YOUR_IP:7777
 ```
 
 **Expected output:**
@@ -77,19 +88,23 @@ For remote access on Ubuntu server:
 git clone https://github.com/YOUR_USERNAME/grafana-sev1-dashboard.git
 cd grafana-sev1-dashboard
 
-# 2. Find your Ubuntu IP
-hostname -I
+# 2. Setup nginx (recommended)
+./setup-nginx.sh
 
-# 3. Start production server (background mode)
-python3 server.py --background
-# OR use control script: ./dashboard start
-
-# 4. Open firewall (if needed)
+# 3. Open firewall (if needed)
 sudo ufw allow 7777/tcp
 
-# 5. Check status anytime
-python3 server.py --status
-# OR: ./dashboard status
+# 4. Check status
+./nginx-management.sh status
+./nginx-management.sh test
+```
+
+### Alternative: Python Server Setup
+```bash
+# 1-2. Same as above
+# 3. Start Python server
+python3 server.py --background
+# 4-5. Same as above, but use: ./dashboard status
 ```
 
 **Share this URL:** `http://YOUR_UBUNTU_IP:7777`
@@ -103,8 +118,11 @@ Grafana Sesterce/
 ├── sev1-warroom-dashboard.html    # Main dashboard HTML
 ├── dashboard-data-loader.js       # Data parsing and chart logic
 ├── serve-dashboard.py            # Local development server
-├── server.py                     # Production server (smart)
-├── dashboard                     # Control script
+├── server.py                     # Production Python server
+├── dashboard                     # Python server control script
+├── setup-nginx.sh                # nginx setup script (recommended)
+├── nginx-management.sh           # nginx control script
+├── nginx-sev1-dashboard.conf     # nginx configuration
 ├── DEPLOYMENT.md                 # Ubuntu deployment guide
 ├── README.md                     # This file
 └── superpod_sev1_fake_telemetry/ # Synthetic data files
@@ -120,7 +138,17 @@ Grafana Sesterce/
 
 ## 🎛️ Server Management
 
-### Control Script (Recommended)
+### nginx (Recommended)
+```bash
+./nginx-management.sh start    # Start nginx
+./nginx-management.sh stop     # Stop nginx
+./nginx-management.sh restart  # Restart nginx
+./nginx-management.sh status   # Check status
+./nginx-management.sh test     # Test functionality
+./nginx-management.sh logs     # View logs
+```
+
+### Python Server (Alternative)
 ```bash
 ./dashboard start      # Start in background
 ./dashboard stop       # Stop server
