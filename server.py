@@ -75,18 +75,39 @@ def get_local_ip():
 
 def find_process_on_port(port):
     """Find process using the specified port"""
+    pids = []
+    
+    # Method 1: Try lsof (most reliable)
     try:
-        # Try lsof first (more reliable)
         result = subprocess.run(['lsof', '-ti', f':{port}'], 
                               capture_output=True, text=True, timeout=5)
         if result.returncode == 0 and result.stdout.strip():
-            pids = result.stdout.strip().split('\n')
-            return [int(pid) for pid in pids if pid.isdigit()]
+            pids = [int(pid) for pid in result.stdout.strip().split('\n') if pid.isdigit()]
+            if pids:
+                return pids
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
         pass
     
+    # Method 2: Try ss (modern replacement for netstat)
     try:
-        # Fallback to netstat
+        result = subprocess.run(['ss', '-tlnp'], 
+                              capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            for line in result.stdout.split('\n'):
+                if f':{port} ' in line and 'LISTEN' in line:
+                    # ss format: users:(("python3",pid=12345,fd=3))
+                    if 'users:' in line:
+                        import re
+                        match = re.search(r'pid=(\d+)', line)
+                        if match:
+                            pids.append(int(match.group(1)))
+            if pids:
+                return pids
+    except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    
+    # Method 3: Try netstat (fallback)
+    try:
         result = subprocess.run(['netstat', '-tlnp'], 
                               capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
@@ -96,8 +117,22 @@ def find_process_on_port(port):
                     if len(parts) > 6 and '/' in parts[6]:
                         pid_str = parts[6].split('/')[0]
                         if pid_str.isdigit():
-                            return [int(pid_str)]
+                            pids.append(int(pid_str))
+            if pids:
+                return pids
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    
+    # Method 4: Try direct socket test
+    try:
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            result = s.connect_ex(('localhost', port))
+            if result == 0:
+                # Port is in use, but we can't determine PID
+                # Return a dummy PID to indicate port is occupied
+                return [-1]  # Special marker for "port in use but unknown PID"
+    except Exception:
         pass
     
     return []
@@ -116,6 +151,19 @@ def kill_processes_on_port(port, max_retries=3):
         killed_any = False
         for pid in pids:
             try:
+                # Handle special case of unknown PID (port in use but PID unknown)
+                if pid == -1:
+                    print(f"⚠️  Port {port} is in use but PID unknown")
+                    # Try aggressive cleanup with system commands
+                    try:
+                        subprocess.run(['sudo', 'fuser', '-k', f'{port}/tcp'], 
+                                     check=False, capture_output=True, timeout=5)
+                        killed_any = True
+                        print(f"🔨 Attempted to kill processes on port {port} with fuser")
+                    except (subprocess.TimeoutExpired, FileNotFoundError):
+                        pass
+                    continue
+                
                 # Check if it's our own process
                 if PID_FILE.exists():
                     try:
@@ -276,6 +324,8 @@ def main():
                        help='Check server status')
     parser.add_argument('--force-cleanup', action='store_true',
                        help='Force cleanup port 7777 (kills all processes)')
+    parser.add_argument('--force', action='store_true',
+                       help='Force start server (skip port check)')
     
     args = parser.parse_args()
     
@@ -364,14 +414,17 @@ def main():
     if not validate_files():
         return 1
     
-    # Check if port is in use and kill existing processes
-    if find_process_on_port(PORT):
-        print(f"🔍 Port {PORT} is in use, attempting to free it...")
-        if not kill_processes_on_port(PORT):
-            print(f"❌ Could not free port {PORT}")
-            print(f"💡 Try manual cleanup: sudo lsof -ti:{PORT} | xargs sudo kill -9")
-            print(f"💡 Or wait a few minutes for processes to timeout")
-            return 1
+    # Check if port is in use and kill existing processes (unless --force is used)
+    if not args.force:
+        if find_process_on_port(PORT):
+            print(f"🔍 Port {PORT} is in use, attempting to free it...")
+            if not kill_processes_on_port(PORT):
+                print(f"❌ Could not free port {PORT}")
+                print(f"💡 Try manual cleanup: sudo lsof -ti:{PORT} | xargs sudo kill -9")
+                print(f"💡 Or use --force to skip port check: python3 server.py --force")
+                return 1
+    else:
+        print(f"⚡ Force mode: Skipping port check for {PORT}")
     
     # Determine run mode
     run_background = args.background or (not args.foreground and not sys.stdin.isatty())
