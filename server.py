@@ -414,7 +414,19 @@ def main():
     if not validate_files():
         return 1
     
+    # Determine run mode first
+    run_background = args.background or (not args.foreground and not sys.stdin.isatty())
+    
+    if run_background:
+        print(f"🌙 Starting in background mode...")
+        daemonize()
+        # After daemonizing, we're in the child process
+        # Now check port in the actual process that will bind to it
+    else:
+        print(f"🌞 Starting in foreground mode...")
+    
     # Check if port is in use and kill existing processes (unless --force is used)
+    # Do this AFTER daemonizing so we check in the correct process
     if not args.force:
         if find_process_on_port(PORT):
             print(f"🔍 Port {PORT} is in use, attempting to free it...")
@@ -425,15 +437,6 @@ def main():
                 return 1
     else:
         print(f"⚡ Force mode: Skipping port check for {PORT}")
-    
-    # Determine run mode
-    run_background = args.background or (not args.foreground and not sys.stdin.isatty())
-    
-    if run_background:
-        print(f"🌙 Starting in background mode...")
-        daemonize()
-    else:
-        print(f"🌞 Starting in foreground mode...")
     
     # Get local IP for display
     local_ip = get_local_ip()
