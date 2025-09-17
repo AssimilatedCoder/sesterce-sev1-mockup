@@ -38,10 +38,14 @@ case "$1" in
             echo "❌ Server not running"
         fi
         ;;
+    force-cleanup|cleanup)
+        echo "🔨 Force cleaning up port 7777..."
+        python3 "$SERVER_SCRIPT" --force-cleanup
+        ;;
     *)
         echo "SEV-1 Dashboard Control Script"
         echo ""
-        echo "Usage: $0 {start|stop|restart|status|foreground|logs}"
+        echo "Usage: $0 {start|stop|restart|status|foreground|logs|cleanup}"
         echo ""
         echo "Commands:"
         echo "  start      - Start server in background"
@@ -50,11 +54,13 @@ case "$1" in
         echo "  status     - Check server status"
         echo "  foreground - Start server in foreground (interactive)"
         echo "  logs       - Show log information"
+        echo "  cleanup    - Force cleanup port 7777 (kills all processes)"
         echo ""
         echo "Examples:"
         echo "  $0 start           # Start and detach"
         echo "  $0 status          # Check if running"
         echo "  $0 foreground      # Start interactively"
+        echo "  $0 cleanup         # Force kill processes on port 7777"
         echo ""
         exit 1
         ;;

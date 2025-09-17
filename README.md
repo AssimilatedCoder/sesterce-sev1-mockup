@@ -127,14 +127,16 @@ Grafana Sesterce/
 ./dashboard restart    # Restart server
 ./dashboard status     # Check status
 ./dashboard foreground # Start interactively
+./dashboard cleanup    # Force cleanup port 7777
 ```
 
 ### Direct Python Commands
 ```bash
-python3 server.py --background  # Start in background
-python3 server.py --foreground  # Start in foreground
-python3 server.py --status      # Check status
-python3 server.py --stop        # Stop server
+python3 server.py --background    # Start in background
+python3 server.py --foreground    # Start in foreground
+python3 server.py --status        # Check status
+python3 server.py --stop          # Stop server
+python3 server.py --force-cleanup # Force cleanup port 7777
 ```
 
 ### Smart Features
@@ -142,6 +144,8 @@ python3 server.py --stop        # Stop server
 - **Background mode**: Runs as daemon, survives terminal close
 - **PID tracking**: Tracks server process for clean management
 - **Status checking**: Real-time server status and URL display
+- **Force cleanup**: Aggressive port cleanup for stubborn processes
+- **Retry logic**: Multiple attempts with escalating force levels
 
 ## 🎛️ Dashboard Features
 
@@ -189,23 +193,38 @@ python3 server.py --stop        # Stop server
 
 ### **Port Already in Use Error**
 ```bash
-OSError: [Errno 48] Address already in use
+OSError: [Errno 98] Address already in use
+❌ Error: Port 7777 is still in use after cleanup attempt
 ```
 
-**Solutions:**
-1. **Kill existing server:**
+**Solutions (in order of preference):**
+
+1. **Use built-in cleanup (Recommended):**
    ```bash
-   # Find the process using port 8080
-   lsof -ti:8080 | xargs kill -9
+   # Force cleanup with control script
+   ./dashboard cleanup
    
-   # Then restart
-   python3 serve-dashboard.py
+   # Or with Python directly
+   python3 server.py --force-cleanup
+   
+   # Then start normally
+   ./dashboard start
    ```
 
-2. **Use a different port:**
+2. **Manual cleanup:**
    ```bash
-   # Edit serve-dashboard.py and change PORT = 8080 to PORT = 8081
-   # Then access: http://localhost:8081/sev1-warroom-dashboard.html
+   # Find and kill processes on port 7777
+   sudo lsof -ti:7777 | xargs sudo kill -9
+   
+   # Then start server
+   python3 server.py --background
+   ```
+
+3. **Wait it out:**
+   ```bash
+   # Sometimes processes take time to fully release ports
+   # Wait 2-3 minutes, then try again
+   python3 server.py --background
    ```
 
 ### **Browser Shows "Loading..." Charts**

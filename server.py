@@ -102,55 +102,96 @@ def find_process_on_port(port):
     
     return []
 
-def kill_processes_on_port(port):
-    """Kill processes using the specified port"""
-    pids = find_process_on_port(port)
+def kill_processes_on_port(port, max_retries=3):
+    """Kill processes using the specified port with retry logic"""
+    for attempt in range(max_retries):
+        pids = find_process_on_port(port)
+        
+        if not pids:
+            return True  # No processes found, port is free
+        
+        if attempt > 0:
+            print(f"🔄 Retry attempt {attempt + 1}/{max_retries}")
+        
+        killed_any = False
+        for pid in pids:
+            try:
+                # Check if it's our own process
+                if PID_FILE.exists():
+                    try:
+                        with open(PID_FILE, 'r') as f:
+                            our_pid = int(f.read().strip())
+                            if pid == our_pid:
+                                print(f"🔄 Found existing server process (PID: {pid})")
+                                os.kill(pid, signal.SIGTERM)
+                                time.sleep(2)  # Give more time for graceful shutdown
+                                killed_any = True
+                                continue
+                    except (ValueError, ProcessLookupError):
+                        pass
+                
+                # Kill other processes
+                print(f"🔪 Killing process on port {port} (PID: {pid})")
+                
+                # Try SIGTERM first
+                try:
+                    os.kill(pid, signal.SIGTERM)
+                    time.sleep(1)
+                    
+                    # Check if process still exists
+                    try:
+                        os.kill(pid, 0)
+                        # Still exists, try SIGKILL
+                        print(f"🔨 Force killing process (PID: {pid})")
+                        os.kill(pid, signal.SIGKILL)
+                        time.sleep(1)
+                    except ProcessLookupError:
+                        pass  # Process is dead
+                    
+                    killed_any = True
+                    
+                except ProcessLookupError:
+                    # Process already dead
+                    killed_any = True
+                except PermissionError:
+                    print(f"⚠️  Permission denied killing PID {pid}")
+                    # Try with sudo as fallback
+                    try:
+                        subprocess.run(['sudo', 'kill', '-9', str(pid)], 
+                                     check=True, capture_output=True, timeout=5)
+                        print(f"✅ Killed with sudo (PID: {pid})")
+                        killed_any = True
+                    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                        print(f"❌ Failed to kill PID {pid} even with sudo")
+                except Exception as e:
+                    print(f"⚠️  Error killing PID {pid}: {e}")
+            
+            except Exception as e:
+                print(f"⚠️  Unexpected error with PID {pid}: {e}")
+        
+        if killed_any:
+            # Wait for processes to fully terminate and port to be released
+            print(f"⏳ Waiting for port {port} to be released...")
+            for wait_attempt in range(5):  # Wait up to 5 seconds
+                time.sleep(1)
+                if not find_process_on_port(port):
+                    print(f"✅ Port {port} is now free")
+                    return True
+                print(f"   Still waiting... ({wait_attempt + 1}/5)")
+        
+        # If we get here, either nothing was killed or port is still in use
+        if attempt < max_retries - 1:
+            print(f"⏳ Waiting before retry...")
+            time.sleep(2)
     
-    if not pids:
+    # Final check
+    remaining_pids = find_process_on_port(port)
+    if remaining_pids:
+        print(f"❌ Failed to free port {port}. Remaining PIDs: {remaining_pids}")
+        print(f"💡 Manual cleanup: sudo lsof -ti:{port} | xargs sudo kill -9")
         return False
     
-    killed_any = False
-    for pid in pids:
-        try:
-            # Check if it's our own process
-            if PID_FILE.exists():
-                try:
-                    with open(PID_FILE, 'r') as f:
-                        our_pid = int(f.read().strip())
-                        if pid == our_pid:
-                            print(f"🔄 Found existing server process (PID: {pid})")
-                            os.kill(pid, signal.SIGTERM)
-                            time.sleep(1)
-                            killed_any = True
-                            continue
-                except (ValueError, ProcessLookupError):
-                    pass
-            
-            # Kill other processes
-            print(f"🔪 Killing process on port {port} (PID: {pid})")
-            os.kill(pid, signal.SIGTERM)
-            time.sleep(0.5)
-            
-            # If SIGTERM didn't work, try SIGKILL
-            try:
-                os.kill(pid, 0)  # Check if process still exists
-                print(f"🔨 Force killing process (PID: {pid})")
-                os.kill(pid, signal.SIGKILL)
-                time.sleep(0.5)
-            except ProcessLookupError:
-                pass  # Process already dead
-            
-            killed_any = True
-            
-        except ProcessLookupError:
-            # Process already dead
-            pass
-        except PermissionError:
-            print(f"⚠️  Permission denied killing PID {pid}. Try: sudo kill {pid}")
-        except Exception as e:
-            print(f"⚠️  Error killing PID {pid}: {e}")
-    
-    return killed_any
+    return True
 
 def daemonize():
     """Run the server as a daemon process"""
@@ -233,8 +274,47 @@ def main():
                        help='Stop background server')
     parser.add_argument('--status', action='store_true', 
                        help='Check server status')
+    parser.add_argument('--force-cleanup', action='store_true',
+                       help='Force cleanup port 7777 (kills all processes)')
     
     args = parser.parse_args()
+    
+    # Handle force cleanup command
+    if args.force_cleanup:
+        print(f"🔨 Force cleaning up port {PORT}...")
+        pids = find_process_on_port(PORT)
+        if not pids:
+            print(f"✅ Port {PORT} is already free")
+            return 0
+        
+        print(f"🔍 Found {len(pids)} process(es) on port {PORT}: {pids}")
+        
+        # Try aggressive cleanup
+        for pid in pids:
+            try:
+                print(f"🔪 Force killing PID {pid}")
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                print(f"   PID {pid} already dead")
+            except PermissionError:
+                try:
+                    subprocess.run(['sudo', 'kill', '-9', str(pid)], 
+                                 check=True, capture_output=True, timeout=5)
+                    print(f"   Killed PID {pid} with sudo")
+                except Exception:
+                    print(f"   Failed to kill PID {pid}")
+        
+        # Wait and verify
+        time.sleep(2)
+        remaining = find_process_on_port(PORT)
+        if remaining:
+            print(f"❌ Still {len(remaining)} process(es) remaining: {remaining}")
+            print(f"💡 Manual cleanup: sudo lsof -ti:{PORT} | xargs sudo kill -9")
+            return 1
+        else:
+            print(f"✅ Port {PORT} successfully freed")
+            cleanup_pid_file()
+            return 0
     
     # Handle stop command
     if args.stop:
@@ -287,11 +367,10 @@ def main():
     # Check if port is in use and kill existing processes
     if find_process_on_port(PORT):
         print(f"🔍 Port {PORT} is in use, attempting to free it...")
-        if kill_processes_on_port(PORT):
-            print(f"✅ Port {PORT} freed")
-            time.sleep(1)  # Give it a moment
-        else:
+        if not kill_processes_on_port(PORT):
             print(f"❌ Could not free port {PORT}")
+            print(f"💡 Try manual cleanup: sudo lsof -ti:{PORT} | xargs sudo kill -9")
+            print(f"💡 Or wait a few minutes for processes to timeout")
             return 1
     
     # Determine run mode
