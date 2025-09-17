@@ -35,8 +35,15 @@ python3 serve-dashboard.py
 
 **Production/Ubuntu Server:**
 ```bash
-python3 server.py
-# Access at: http://YOUR_IP:7777/sev1-warroom-dashboard.html
+# Background mode (recommended)
+python3 server.py --background
+# OR use the control script
+./dashboard start
+
+# Foreground mode (interactive)
+python3 server.py --foreground
+
+# Access at: http://YOUR_IP:7777
 ```
 
 **Expected output:**
@@ -73,11 +80,16 @@ cd grafana-sev1-dashboard
 # 2. Find your Ubuntu IP
 hostname -I
 
-# 3. Start production server
-python3 server.py
+# 3. Start production server (background mode)
+python3 server.py --background
+# OR use control script: ./dashboard start
 
 # 4. Open firewall (if needed)
 sudo ufw allow 7777/tcp
+
+# 5. Check status anytime
+python3 server.py --status
+# OR: ./dashboard status
 ```
 
 **Share this URL:** `http://YOUR_UBUNTU_IP:7777`
@@ -90,7 +102,10 @@ sudo ufw allow 7777/tcp
 Grafana Sesterce/
 ├── sev1-warroom-dashboard.html    # Main dashboard HTML
 ├── dashboard-data-loader.js       # Data parsing and chart logic
-├── serve-dashboard.py            # HTTP server script
+├── serve-dashboard.py            # Local development server
+├── server.py                     # Production server (smart)
+├── dashboard                     # Control script
+├── DEPLOYMENT.md                 # Ubuntu deployment guide
 ├── README.md                     # This file
 └── superpod_sev1_fake_telemetry/ # Synthetic data files
     ├── queue_wait_quantiles.csv
@@ -102,6 +117,31 @@ Grafana Sesterce/
     ├── change_timeline.log
     └── ... (20+ data files)
 ```
+
+## 🎛️ Server Management
+
+### Control Script (Recommended)
+```bash
+./dashboard start      # Start in background
+./dashboard stop       # Stop server
+./dashboard restart    # Restart server
+./dashboard status     # Check status
+./dashboard foreground # Start interactively
+```
+
+### Direct Python Commands
+```bash
+python3 server.py --background  # Start in background
+python3 server.py --foreground  # Start in foreground
+python3 server.py --status      # Check status
+python3 server.py --stop        # Stop server
+```
+
+### Smart Features
+- **Auto-kill**: Automatically kills existing servers on port 7777
+- **Background mode**: Runs as daemon, survives terminal close
+- **PID tracking**: Tracks server process for clean management
+- **Status checking**: Real-time server status and URL display
 
 ## 🎛️ Dashboard Features
 

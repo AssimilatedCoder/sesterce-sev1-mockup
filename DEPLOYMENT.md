@@ -22,8 +22,10 @@ cd grafana-sev1-dashboard
 # Make sure Python 3 is installed
 python3 --version
 
-# Start the production server
-python3 server.py
+# Start the production server (background mode)
+python3 server.py --background
+# OR use the control script
+./dashboard start
 ```
 
 ### 3. Access Remotely
@@ -39,6 +41,31 @@ The server will display URLs like:
 ```
 
 **Share this URL:** `http://YOUR_UBUNTU_IP:7777`
+
+## 🎛️ Server Management
+
+### Control Script (Recommended)
+```bash
+./dashboard start      # Start in background
+./dashboard stop       # Stop server  
+./dashboard restart    # Restart server
+./dashboard status     # Check status
+./dashboard foreground # Start interactively
+```
+
+### Direct Commands
+```bash
+python3 server.py --background  # Start in background
+python3 server.py --foreground  # Start in foreground  
+python3 server.py --status      # Check status
+python3 server.py --stop        # Stop server
+```
+
+### Smart Features
+- **Auto-kill**: Automatically terminates existing servers on port 7777
+- **Background mode**: Runs as daemon, survives SSH disconnection
+- **PID tracking**: Clean process management with PID files
+- **Status monitoring**: Real-time server status and accessible URLs
 
 ## 🔧 Ubuntu Server Configuration
 

@@ -1,0 +1,61 @@
+#!/bin/bash
+# SEV-1 Dashboard Control Script
+# Simple wrapper for server.py with common operations
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SERVER_SCRIPT="$SCRIPT_DIR/server.py"
+
+case "$1" in
+    start)
+        echo "🚀 Starting SEV-1 Dashboard Server..."
+        python3 "$SERVER_SCRIPT" --background
+        ;;
+    stop)
+        echo "🛑 Stopping SEV-1 Dashboard Server..."
+        python3 "$SERVER_SCRIPT" --stop
+        ;;
+    restart)
+        echo "🔄 Restarting SEV-1 Dashboard Server..."
+        python3 "$SERVER_SCRIPT" --stop 2>/dev/null
+        sleep 2
+        python3 "$SERVER_SCRIPT" --background
+        ;;
+    status)
+        python3 "$SERVER_SCRIPT" --status
+        ;;
+    foreground|fg)
+        echo "🌞 Starting SEV-1 Dashboard Server in foreground..."
+        python3 "$SERVER_SCRIPT" --foreground
+        ;;
+    logs)
+        echo "📋 Server logs (if running in background, logs go to terminal that started it)"
+        if [ -f "$SCRIPT_DIR/server.pid" ]; then
+            PID=$(cat "$SCRIPT_DIR/server.pid")
+            echo "Server PID: $PID"
+            echo "Use: tail -f /proc/$PID/fd/1  # to see stdout"
+            echo "Use: tail -f /proc/$PID/fd/2  # to see stderr"
+        else
+            echo "❌ Server not running"
+        fi
+        ;;
+    *)
+        echo "SEV-1 Dashboard Control Script"
+        echo ""
+        echo "Usage: $0 {start|stop|restart|status|foreground|logs}"
+        echo ""
+        echo "Commands:"
+        echo "  start      - Start server in background"
+        echo "  stop       - Stop background server"
+        echo "  restart    - Restart server"
+        echo "  status     - Check server status"
+        echo "  foreground - Start server in foreground (interactive)"
+        echo "  logs       - Show log information"
+        echo ""
+        echo "Examples:"
+        echo "  $0 start           # Start and detach"
+        echo "  $0 status          # Check if running"
+        echo "  $0 foreground      # Start interactively"
+        echo ""
+        exit 1
+        ;;
+esac
