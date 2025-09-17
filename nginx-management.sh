@@ -4,6 +4,32 @@
 case "$1" in
     start)
         echo "🚀 Starting nginx..."
+        
+        # Fix permissions for nginx to access files
+        echo "🔧 Fixing permissions..."
+        PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        
+        # Make directories readable by nginx
+        chmod 755 "$HOME" 2>/dev/null || true
+        chmod 755 "$HOME/Projects" 2>/dev/null || true
+        chmod 755 "$PROJECT_ROOT"
+        
+        # Make files readable
+        chmod 644 "$PROJECT_ROOT/sev1-warroom-dashboard.html"
+        chmod 644 "$PROJECT_ROOT/dashboard-data-loader.js"
+        chmod 644 "$PROJECT_ROOT"/*.html 2>/dev/null || true
+        chmod 644 "$PROJECT_ROOT"/*.js 2>/dev/null || true
+        chmod 644 "$PROJECT_ROOT"/*.css 2>/dev/null || true
+        
+        # Fix telemetry data permissions
+        if [ -d "$PROJECT_ROOT/superpod_sev1_fake_telemetry" ]; then
+            chmod 755 "$PROJECT_ROOT/superpod_sev1_fake_telemetry"
+            chmod 644 "$PROJECT_ROOT/superpod_sev1_fake_telemetry"/*
+        fi
+        
+        echo "✅ Permissions fixed"
+        
+        # Start nginx
         sudo systemctl start nginx
         sudo systemctl status nginx --no-pager -l
         ;;
@@ -14,6 +40,32 @@ case "$1" in
         ;;
     restart)
         echo "🔄 Restarting nginx..."
+        
+        # Fix permissions for nginx to access files
+        echo "🔧 Fixing permissions..."
+        PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        
+        # Make directories readable by nginx
+        chmod 755 "$HOME" 2>/dev/null || true
+        chmod 755 "$HOME/Projects" 2>/dev/null || true
+        chmod 755 "$PROJECT_ROOT"
+        
+        # Make files readable
+        chmod 644 "$PROJECT_ROOT/sev1-warroom-dashboard.html"
+        chmod 644 "$PROJECT_ROOT/dashboard-data-loader.js"
+        chmod 644 "$PROJECT_ROOT"/*.html 2>/dev/null || true
+        chmod 644 "$PROJECT_ROOT"/*.js 2>/dev/null || true
+        chmod 644 "$PROJECT_ROOT"/*.css 2>/dev/null || true
+        
+        # Fix telemetry data permissions
+        if [ -d "$PROJECT_ROOT/superpod_sev1_fake_telemetry" ]; then
+            chmod 755 "$PROJECT_ROOT/superpod_sev1_fake_telemetry"
+            chmod 644 "$PROJECT_ROOT/superpod_sev1_fake_telemetry"/*
+        fi
+        
+        echo "✅ Permissions fixed"
+        
+        # Restart nginx
         sudo systemctl restart nginx
         sudo systemctl status nginx --no-pager -l
         ;;
