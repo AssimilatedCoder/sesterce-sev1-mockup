@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEV-1 War Room — Nvidia SuperPod (RoCEv2 + VAST NVMe-oF)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <style>
         * {
@@ -969,6 +969,23 @@
             document.querySelector('.dashboard-meta span:last-child').textContent = `Last updated: ${timestamp}`;
         }, 30000);
 
+        // Test if JavaScript is working
+        console.log('🧪 JavaScript is working!');
+        
+        // Test if Chart.js is loaded
+        if (typeof Chart !== 'undefined') {
+            console.log('📊 Chart.js is loaded');
+        } else {
+            console.error('❌ Chart.js is NOT loaded');
+        }
+        
+        // Test if data loader script is loaded
+        if (typeof DashboardDataLoader !== 'undefined') {
+            console.log('📈 DashboardDataLoader is loaded');
+        } else {
+            console.error('❌ DashboardDataLoader is NOT loaded');
+        }
+        
         // Data loader handles its own initialization
         // See dashboard-data-loader.js for automatic data population
     </script>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <h1>Dashboard Test</h1>
+    <canvas id="testChart" width="400" height="200"></canvas>
+    
+    <script>
+        console.log('🧪 Test page loaded');
+        
+        // Test Chart.js
+        if (typeof Chart !== 'undefined') {
+            console.log('📊 Chart.js loaded successfully');
+            
+            // Create a simple test chart
+            const ctx = document.getElementById('testChart');
+            if (ctx) {
+                console.log('✅ Canvas found');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar'],
+                        datasets: [{
+                            label: 'Test Data',
+                            data: [10, 20, 30],
+                            borderColor: '#ff6b35'
+                        }]
+                    }
+                });
+                console.log('📈 Test chart created');
+            } else {
+                console.error('❌ Canvas not found');
+            }
+        } else {
+            console.error('❌ Chart.js not loaded');
+        }
+        
+        // Test CSV loading
+        fetch('superpod_sev1_fake_telemetry/gpu_utilization.csv')
+            .then(response => {
+                console.log('📄 CSV fetch response:', response.status);
+                return response.text();
+            })
+            .then(text => {
+                console.log('📊 CSV loaded, length:', text.length);
+                console.log('First 100 chars:', text.substring(0, 100));
+            })
+            .catch(error => {
+                console.error('❌ CSV fetch failed:', error);
+            });
+    </script>
+</body>
+</html>

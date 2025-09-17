@@ -1217,18 +1217,24 @@ class DashboardDataLoader {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Data loader starting...');
-    try {
-        const loader = new DashboardDataLoader();
-        console.log('📊 Data loader created, initializing...');
-        await loader.initialize();
-        console.log('✅ Data loader initialization complete!');
-        
-        // Set up auto-refresh
-        setInterval(() => {
-            loader.updateGPUStats();
-            loader.updateSLAStats();
-        }, 30000);
-    } catch (error) {
-        console.error('❌ Data loader failed:', error);
-    }
+    
+    // Add a small delay to ensure all elements are ready
+    setTimeout(async () => {
+        try {
+            console.log('📊 Creating data loader...');
+            const loader = new DashboardDataLoader();
+            console.log('📈 Data loader created, initializing...');
+            await loader.initialize();
+            console.log('✅ Data loader initialization complete!');
+            
+            // Set up auto-refresh
+            setInterval(() => {
+                loader.updateGPUStats();
+                loader.updateSLAStats();
+            }, 30000);
+        } catch (error) {
+            console.error('❌ Data loader failed:', error);
+            console.error('Error details:', error.stack);
+        }
+    }, 1000); // Wait 1 second after DOM loaded
 });
