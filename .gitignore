@@ -53,6 +53,9 @@ server.pid
 *.log
 logs/
 
+# But allow synthetic data logs
+!superpod_sev1_fake_telemetry/*.log
+
 # Temporary files
 *.tmp
 *.temp

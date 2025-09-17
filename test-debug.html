@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Debug Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <h1>Dashboard Debug Test</h1>
+    <div id="debug-log" style="background: #000; color: #0f0; padding: 10px; font-family: monospace; height: 200px; overflow-y: scroll;"></div>
+    
+    <h2>Test Chart</h2>
+    <canvas id="testChart" width="600" height="300"></canvas>
+    
+    <script>
+        // Debug logging function
+        function debugLog(message) {
+            const log = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}<br>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        debugLog('🧪 Debug test starting...');
+        
+        // Test Chart.js
+        if (typeof Chart !== 'undefined') {
+            debugLog('📊 Chart.js loaded successfully');
+        } else {
+            debugLog('❌ Chart.js not loaded');
+        }
+        
+        // Test CSV loading and parsing (like the data loader does)
+        debugLog('📄 Testing CSV fetch...');
+        fetch('superpod_sev1_fake_telemetry/gpu_utilization.csv')
+            .then(response => {
+                debugLog(`📄 CSV response status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(csvText => {
+                debugLog(`📊 CSV loaded, length: ${csvText.length} chars`);
+                
+                // Parse CSV like the data loader does
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',');
+                debugLog(`📋 CSV headers: ${headers.join(', ')}`);
+                debugLog(`📊 CSV has ${lines.length - 1} data rows`);
+                
+                // Parse first few rows
+                const data = [];
+                for (let i = 1; i < Math.min(6, lines.length); i++) {
+                    const values = lines[i].split(',');
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        const value = values[index];
+                        if (!isNaN(value) && value !== '') {
+                            row[header] = parseFloat(value);
+                        } else {
+                            row[header] = value;
+                        }
+                    });
+                    data.push(row);
+                }
+                
+                debugLog(`✅ Parsed ${data.length} sample rows`);
+                debugLog(`📊 Sample data: ${JSON.stringify(data[0])}`);
+                
+                // Create a chart with the real data
+                const ctx = document.getElementById('testChart');
+                if (ctx && data.length > 0) {
+                    debugLog('📈 Creating chart with real data...');
+                    
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.map(row => new Date(row.timestamp).toLocaleTimeString()),
+                            datasets: [{
+                                label: 'GPU Allocated %',
+                                data: data.map(row => row.gpu_allocated_percent),
+                                borderColor: '#ff6b35',
+                                backgroundColor: 'rgba(255, 107, 53, 0.1)'
+                            }, {
+                                label: 'GPU Busy %',
+                                data: data.map(row => row.gpu_busy_percent),
+                                borderColor: '#73bf69',
+                                backgroundColor: 'rgba(115, 191, 105, 0.1)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Percentage'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    debugLog('✅ Chart created successfully!');
+                } else {
+                    debugLog('❌ Canvas not found or no data');
+                }
+                
+            })
+            .catch(error => {
+                debugLog(`❌ CSV fetch failed: ${error.message}`);
+            });
+        
+        // Test if the data loader script can be loaded
+        debugLog('📜 Testing data loader script...');
+        fetch('dashboard-data-loader.js')
+            .then(response => {
+                debugLog(`📜 Data loader response: ${response.status}`);
+                return response.text();
+            })
+            .then(jsText => {
+                debugLog(`📜 Data loader size: ${jsText.length} chars`);
+                debugLog(`📜 Contains DashboardDataLoader: ${jsText.includes('class DashboardDataLoader')}`);
+                debugLog(`📜 Contains initialize: ${jsText.includes('initialize()')}`);
+                debugLog(`📜 Contains DOMContentLoaded: ${jsText.includes('DOMContentLoaded')}`);
+            })
+            .catch(error => {
+                debugLog(`❌ Data loader fetch failed: ${error.message}`);
+            });
+            
+        debugLog('🏁 Debug test setup complete');
+    </script>
+</body>
+</html>
