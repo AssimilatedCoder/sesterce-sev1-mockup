@@ -969,46 +969,8 @@
             document.querySelector('.dashboard-meta span:last-child').textContent = `Last updated: ${timestamp}`;
         }, 30000);
 
-        // Initialize placeholder charts for panels that don't have real data yet
-        document.addEventListener('DOMContentLoaded', () => {
-            const chartConfigs = [
-                { id: 'ncclLatencyChart', type: 'scatter' },
-                { id: 'pfcPauseChart', type: 'bar' },
-                { id: 'linkUtilChart', type: 'line' },
-                { id: 'queueDepthChart', type: 'line' },
-                { id: 'ioMixChart', type: 'doughnut' },
-                { id: 'feUtilChart', type: 'line' },
-                { id: 'transportErrorsChart', type: 'bar' },
-                { id: 'backlogChart', type: 'line' },
-                { id: 'tenantAllocChart', type: 'bar' },
-                { id: 'jobFailureChart', type: 'line' }
-            ];
-
-            chartConfigs.forEach(config => {
-                const ctx = document.getElementById(config.id);
-                if (ctx) {
-                    new Chart(ctx.getContext('2d'), {
-                        type: config.type,
-                        data: {
-                            labels: ['Loading...'],
-                            datasets: [{
-                                label: 'Data Loading',
-                                data: config.type === 'scatter' ? [{x: 0, y: 0}] : [0],
-                                backgroundColor: '#404043',
-                                borderColor: '#ff6b35'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { labels: { color: '#d9d9d9' } }
-                            }
-                        }
-                    });
-                }
-            });
-        });
+        // Data loader handles its own initialization
+        // See dashboard-data-loader.js for automatic data population
     </script>
 </body>
 </html>
