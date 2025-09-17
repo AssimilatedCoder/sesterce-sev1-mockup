@@ -20,6 +20,14 @@ class ProductionHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
     
+    def do_GET(self):
+        # Redirect root path to dashboard
+        if self.path == '/' or self.path == '':
+            self.path = '/sev1-warroom-dashboard.html'
+        
+        # Call parent's do_GET method
+        return super().do_GET()
+    
     def end_headers(self):
         # Add CORS headers and security headers
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -91,13 +99,14 @@ def main():
     # Create and start the server
     try:
         with socketserver.TCPServer((HOST, PORT), ProductionHTTPRequestHandler) as httpd:
-            print(f"🌐 Server running on all interfaces:")
-            print(f"   Local:    http://localhost:{PORT}/sev1-warroom-dashboard.html")
-            print(f"   Network:  http://{local_ip}:{PORT}/sev1-warroom-dashboard.html")
-            print(f"   External: http://YOUR_UBUNTU_IP:{PORT}/sev1-warroom-dashboard.html")
+            print(f"🌐 SEV-1 Dashboard Server running on all interfaces:")
+            print(f"   Local:    http://localhost:{PORT}")
+            print(f"   Network:  http://{local_ip}:{PORT}")
+            print(f"   External: http://YOUR_UBUNTU_IP:{PORT}")
             print()
+            print(f"📊 Dashboard automatically loads at root URL")
+            print(f"🔗 Share this: http://{local_ip}:{PORT}")
             print(f"🔄 Press Ctrl+C to stop the server")
-            print(f"📊 Dashboard ready for remote access!")
             print()
             
             # Start serving requests

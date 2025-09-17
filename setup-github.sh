@@ -76,6 +76,6 @@ echo "   git clone https://github.com/YOUR_USERNAME/REPO_NAME.git"
 echo "   cd REPO_NAME"
 echo "   python3 server.py"
 echo
-echo "📊 Dashboard will be available at: http://YOUR_UBUNTU_IP:7777/sev1-warroom-dashboard.html"
+echo "📊 Dashboard will be available at: http://YOUR_UBUNTU_IP:7777"
 echo
 echo "✨ Setup complete! Ready for GitHub and Ubuntu deployment."

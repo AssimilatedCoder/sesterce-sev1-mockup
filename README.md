@@ -55,7 +55,7 @@ python3 server.py
 
 ### 3. Access the Dashboard
 **Local:** http://localhost:8080/sev1-warroom-dashboard.html  
-**Ubuntu Server:** http://YOUR_UBUNTU_IP:7777/sev1-warroom-dashboard.html
+**Ubuntu Server:** http://YOUR_UBUNTU_IP:7777
 
 ### 4. Stop the Server
 Press `Ctrl+C` in the terminal to stop the server.
@@ -80,7 +80,7 @@ python3 server.py
 sudo ufw allow 7777/tcp
 ```
 
-**Share this URL:** `http://YOUR_UBUNTU_IP:7777/sev1-warroom-dashboard.html`
+**Share this URL:** `http://YOUR_UBUNTU_IP:7777`
 
 📋 **See [DEPLOYMENT.md](DEPLOYMENT.md) for complete Ubuntu setup guide**
 

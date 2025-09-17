@@ -29,13 +29,16 @@ python3 server.py
 ### 3. Access Remotely
 The server will display URLs like:
 ```
-🌐 Server running on all interfaces:
-   Local:    http://localhost:7777/sev1-warroom-dashboard.html
-   Network:  http://192.168.1.100:7777/sev1-warroom-dashboard.html
-   External: http://YOUR_UBUNTU_IP:7777/sev1-warroom-dashboard.html
+🌐 SEV-1 Dashboard Server running on all interfaces:
+   Local:    http://localhost:7777
+   Network:  http://192.168.1.100:7777
+   External: http://YOUR_UBUNTU_IP:7777
+
+📊 Dashboard automatically loads at root URL
+🔗 Share this: http://192.168.1.100:7777
 ```
 
-**Share this URL:** `http://YOUR_UBUNTU_IP:7777/sev1-warroom-dashboard.html`
+**Share this URL:** `http://YOUR_UBUNTU_IP:7777`
 
 ## 🔧 Ubuntu Server Configuration
 
@@ -105,7 +108,7 @@ sudo systemctl status sev1-dashboard
 ## 🌐 Network Access
 
 ### Local Network Access
-- **Same WiFi/LAN:** `http://UBUNTU_IP:7777/sev1-warroom-dashboard.html`
+- **Same WiFi/LAN:** `http://UBUNTU_IP:7777`
 - **VPN:** Works if Ubuntu is on VPN network
 
 ### Internet Access (Advanced)
@@ -189,7 +192,7 @@ sudo ufw allow 7777
 Hey team! 👋
 
 SEV-1 Dashboard is live at:
-🔗 http://192.168.1.100:7777/sev1-warroom-dashboard.html
+🔗 http://192.168.1.100:7777
 
 This shows our EMEA Pod-2 incident simulation with:
 - Real-time metrics degradation
@@ -202,7 +205,7 @@ Your Name
 
 ### Demo Presentation
 1. **Start server:** `python3 server.py`
-2. **Share URL:** `http://YOUR_IP:7777/sev1-warroom-dashboard.html`
+2. **Share URL:** `http://YOUR_IP:7777`
 3. **Walk through:** 7 rows of incident data
 4. **Highlight:** Real-time updates and correlation
 
