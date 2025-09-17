@@ -140,8 +140,13 @@ class DashboardDataLoader {
 
     // Update Queue Wait Chart (Row 1)
     updateQueueWaitChart() {
+        console.log('📈 Updating Queue Wait Chart...');
         const ctx = document.getElementById('queueWaitChart');
-        if (!ctx) return;
+        if (!ctx) {
+            console.error('❌ Canvas element "queueWaitChart" not found!');
+            return;
+        }
+        console.log('✅ Found queueWaitChart canvas element');
 
         const queueData = this.data.queue_wait_quantiles || this.generateFallbackData('queue_wait_quantiles.csv');
         
@@ -1211,12 +1216,19 @@ class DashboardDataLoader {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    const loader = new DashboardDataLoader();
-    await loader.initialize();
-    
-    // Set up auto-refresh
-    setInterval(() => {
-        loader.updateGPUStats();
-        loader.updateSLAStats();
-    }, 30000);
+    console.log('🚀 Data loader starting...');
+    try {
+        const loader = new DashboardDataLoader();
+        console.log('📊 Data loader created, initializing...');
+        await loader.initialize();
+        console.log('✅ Data loader initialization complete!');
+        
+        // Set up auto-refresh
+        setInterval(() => {
+            loader.updateGPUStats();
+            loader.updateSLAStats();
+        }, 30000);
+    } catch (error) {
+        console.error('❌ Data loader failed:', error);
+    }
 });
