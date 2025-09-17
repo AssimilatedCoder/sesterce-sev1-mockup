@@ -1,0 +1,6 @@
+tenant,class,gpu_allocations
+alpha,standard,64
+bravo,standard,48
+charlie,priority,32
+delta,standard,24
+omega-whale,whale,256

@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEV-1 War Room — Nvidia SuperPod (RoCEv2 + VAST NVMe-oF)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0b0c0e;
+            color: #d9d9d9;
+            overflow-x: auto;
+        }
+
+        /* Grafana Header */
+        .grafana-header {
+            background: #1f1f20;
+            border-bottom: 1px solid #2f2f32;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .grafana-logo {
+            color: #ff6b35;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .breadcrumb {
+            color: #8e8e93;
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .time-picker, .refresh-picker {
+            background: #262628;
+            border: 1px solid #404043;
+            color: #d9d9d9;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .refresh-picker {
+            background: #ff6b35;
+            border-color: #ff6b35;
+            color: white;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            padding: 16px 24px;
+            background: #111217;
+            border-bottom: 1px solid #2f2f32;
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: #8e8e93;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc2626;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Row Headers */
+        .row-header {
+            background: #1f1f20;
+            border: 1px solid #2f2f32;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .row-header:hover {
+            background: #262628;
+        }
+
+        /* Panel Grid */
+        .panel-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .panel-row.row-1 {
+            grid-template-columns: 1fr 300px 300px;
+            grid-template-rows: auto auto;
+        }
+
+        .panel-row.row-2 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+        }
+
+        .panel-row.row-3 {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: auto auto;
+        }
+
+        .panel-row.row-4 {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: auto auto;
+        }
+
+        .panel-row.row-5 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .panel-row.row-6 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .panel-row.row-7 {
+            grid-template-columns: 1fr;
+        }
+
+        /* Panel Styles */
+        .panel {
+            background: #1f1f20;
+            border: 1px solid #2f2f32;
+            border-radius: 4px;
+            padding: 16px;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .panel.span-2 {
+            grid-column: span 2;
+        }
+
+        .panel.span-3 {
+            grid-column: span 3;
+        }
+
+        .panel.tall {
+            min-height: 300px;
+        }
+
+        .panel.extra-tall {
+            min-height: 400px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2f2f32;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .panel-menu {
+            color: #8e8e93;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .panel-content {
+            height: calc(100% - 50px);
+            position: relative;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Stat Panel */
+        .stat-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.good { color: #73bf69; }
+        .stat-value.warning { color: #ff9830; }
+        .stat-value.critical { color: #e02f44; }
+
+        .stat-label {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 8px;
+        }
+
+        .stat-secondary {
+            font-size: 18px;
+            color: #d9d9d9;
+        }
+
+        /* Table Styles */
+        .panel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .panel-table th {
+            background: #262628;
+            color: #d9d9d9;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #404043;
+            font-weight: 500;
+        }
+
+        .panel-table td {
+            padding: 6px 12px;
+            border-bottom: 1px solid #2f2f32;
+        }
+
+        .panel-table tr:hover {
+            background: #262628;
+        }
+
+        /* Log Panel */
+        .log-panel {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 11px;
+            height: 100%;
+            overflow-y: auto;
+            background: #0d1117;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .log-entry {
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .log-timestamp {
+            color: #8e8e93;
+        }
+
+        .log-level-warn {
+            color: #ff9830;
+        }
+
+        .log-level-error {
+            color: #e02f44;
+        }
+
+        .log-message {
+            color: #d9d9d9;
+        }
+
+        /* Threshold Lines */
+        .threshold-line {
+            position: absolute;
+            width: 100%;
+            border-top: 2px dashed #e02f44;
+            z-index: 10;
+        }
+
+        /* Annotations */
+        .annotation {
+            position: absolute;
+            width: 2px;
+            background: #ff9830;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .annotation::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -4px;
+            width: 10px;
+            height: 10px;
+            background: #ff9830;
+            border-radius: 50%;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .panel-row {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #8e8e93;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #404043;
+            border-top: 2px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f1f20;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #404043;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #525252;
+        }
+    </style>
+</head>
+<body>
+    <!-- Grafana Header -->
+    <div class="grafana-header">
+        <div class="header-left">
+            <div class="grafana-logo">⬢ Grafana</div>
+            <div class="breadcrumb">Dashboards / SEV-1 War Room</div>
+        </div>
+        <div class="header-right">
+            <select class="time-picker">
+                <option>Last 6 hours</option>
+                <option>Last 12 hours</option>
+                <option>Last 24 hours</option>
+            </select>
+            <button class="refresh-picker">30s ↻</button>
+        </div>
+    </div>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-title">SEV-1 War Room — Nvidia SuperPod (RoCEv2 + VAST NVMe-oF)</div>
+        <div class="dashboard-meta">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>INCIDENT ACTIVE</span>
+            </div>
+            <span>EMEA Pod-2</span>
+            <span>Started: 2025-09-17 08:26 UTC</span>
+            <span>Duration: 2h 14m</span>
+            <span>Last updated: 30s ago</span>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Row 1: Exec / SLO -->
+        <div class="row-header">Row 1 — Exec / SLO (Business View)</div>
+        <div class="panel-row row-1">
+            <div class="panel tall">
+                <div class="panel-header">
+                    <div class="panel-title">Job Queue Wait — P50/P90/P99 (SLO ≤ 10m)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="queueWaitChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">GPU Allocated vs Busy (%)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="stat-panel">
+                        <div class="stat-label">Allocated</div>
+                        <div class="stat-value warning" id="gpuAllocated">91.2%</div>
+                        <div class="stat-label">Busy</div>
+                        <div class="stat-value critical" id="gpuBusy">54.1%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">SLA Penalty Exposure ($/h)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="stat-panel">
+                        <div class="stat-label">Penalty Rate</div>
+                        <div class="stat-value critical" id="slaPenalty">$2,847/h</div>
+                        <div class="stat-label">Emergency Budget</div>
+                        <div class="stat-secondary" id="emergencyBudget">$45,230</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel span-3">
+                <div class="panel-header">
+                    <div class="panel-title">Top-10 Customers / Whale Job Status</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>Running Jobs</th>
+                                <th>Queued Jobs</th>
+                                <th>GPU Hours</th>
+                                <th>Queue Wait (P90)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="whaleJobsTable">
+                            <tr>
+                                <td>omega-whale</td>
+                                <td>32</td>
+                                <td>18</td>
+                                <td>4,127</td>
+                                <td style="color: #e02f44;">34.8m</td>
+                                <td style="color: #e02f44;">CRITICAL</td>
+                            </tr>
+                            <tr>
+                                <td>alpha</td>
+                                <td>24</td>
+                                <td>15</td>
+                                <td>1,923</td>
+                                <td style="color: #e02f44;">28.7m</td>
+                                <td style="color: #e02f44;">DEGRADED</td>
+                            </tr>
+                            <tr>
+                                <td>bravo</td>
+                                <td>18</td>
+                                <td>12</td>
+                                <td>1,456</td>
+                                <td style="color: #ff9830;">15.3m</td>
+                                <td style="color: #ff9830;">IMPACTED</td>
+                            </tr>
+                            <tr>
+                                <td>charlie</td>
+                                <td>12</td>
+                                <td>8</td>
+                                <td>892</td>
+                                <td style="color: #ff9830;">12.1m</td>
+                                <td style="color: #ff9830;">IMPACTED</td>
+                            </tr>
+                            <tr>
+                                <td>delta</td>
+                                <td>8</td>
+                                <td>3</td>
+                                <td>734</td>
+                                <td style="color: #73bf69;">8.4m</td>
+                                <td style="color: #73bf69;">OK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: GPU / Compute -->
+        <div class="row-header">Row 2 — GPU / Compute</div>
+        <div class="panel-row row-2">
+            <div class="panel tall">
+                <div class="panel-header">
+                    <div class="panel-title">DCGM GPU Utilization (SM/Mem/Copy) — by Node</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="dcgmUtilChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel tall">
+                <div class="panel-header">
+                    <div class="panel-title">NCCL All-Reduce Latency (ms) — per Job</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="ncclLatencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel span-2 extra-tall">
+                <div class="panel-header">
+                    <div class="panel-title">NCCL WARN/ERROR Stream</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="log-panel" id="ncclLogs">
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:40:00Z</span>
+                            <span class="log-level-warn">whale-2 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:38:00Z</span>
+                            <span class="log-level-warn">job-101 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:33:00Z</span>
+                            <span class="log-level-warn">whale-2 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:32:00Z</span>
+                            <span class="log-level-warn">whale-2 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:29:00Z</span>
+                            <span class="log-level-warn">whale-3 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:25:00Z</span>
+                            <span class="log-level-error">job-107 NCCL ERROR</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:23:00Z</span>
+                            <span class="log-level-warn">job-108 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:22:00Z</span>
+                            <span class="log-level-warn">job-108 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:19:00Z</span>
+                            <span class="log-level-warn">job-109 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:09:00Z</span>
+                            <span class="log-level-warn">whale-3 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:05:00Z</span>
+                            <span class="log-level-error">whale-3 NCCL ERROR</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:03:00Z</span>
+                            <span class="log-level-warn">job-104 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:56:00Z</span>
+                            <span class="log-level-warn">whale-1 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:54:00Z</span>
+                            <span class="log-level-warn">whale-3 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:49:00Z</span>
+                            <span class="log-level-warn">whale-1 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:48:00Z</span>
+                            <span class="log-level-error">whale-3 NCCL ERROR</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:46:00Z</span>
+                            <span class="log-level-warn">job-110 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:44:00Z</span>
+                            <span class="log-level-warn">whale-3 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:42:00Z</span>
+                            <span class="log-level-error">whale-1 NCCL ERROR</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:42:00Z</span>
+                            <span class="log-level-warn">job-105 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:40:00Z</span>
+                            <span class="log-level-error">whale-1 NCCL ERROR</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T08:27:00Z</span>
+                            <span class="log-level-warn">job-104 NCCL WARN</span>
+                            <span class="log-message">NET/IB : connection stalled, latency spike</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Network Fabric -->
+        <div class="row-header">Row 3 — Network Fabric (RoCEv2 / EVPN)</div>
+        <div class="panel-row row-3">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">ECN Mark Rate (%) — per Class</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="ecnRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">PFC Pause Rx/Tx — per Priority</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="pfcPauseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Per-Link Utilization — Hotspot Hunt</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="linkUtilChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel span-3">
+                <div class="panel-header">
+                    <div class="panel-title">EVPN Events — Failover / MAC Moves / BUM</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Event Type</th>
+                                <th>Device</th>
+                                <th>Details</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>10:38:42</td>
+                                <td style="color: #e02f44;">MAC-MOVE</td>
+                                <td>leaf-03</td>
+                                <td>MAC 00:1b:21:8a:4f:2c moved from port 1/1 to 1/2</td>
+                                <td style="color: #ff9830;">Medium</td>
+                            </tr>
+                            <tr>
+                                <td>10:37:15</td>
+                                <td style="color: #ff9830;">BUM-FLOOD</td>
+                                <td>spine-01</td>
+                                <td>Broadcast storm detected on VXLAN 1001</td>
+                                <td style="color: #e02f44;">High</td>
+                            </tr>
+                            <tr>
+                                <td>10:35:28</td>
+                                <td style="color: #e02f44;">FAILOVER</td>
+                                <td>leaf-07</td>
+                                <td>EVPN multi-homing failover to backup path</td>
+                                <td style="color: #e02f44;">High</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 4: Storage -->
+        <div class="row-header">Row 4 — Storage (VAST NVMe-oF / NFS / S3)</div>
+        <div class="panel-row row-4">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">NVMe-oF Latency — P50/P90/P99 (ms)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="nvmeLatencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">NVMe-oF Queue Depth — per FE</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="queueDepthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Cache Hit % / Prefetch Stats</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="stat-panel">
+                        <div class="stat-label">Cache Hit Rate</div>
+                        <div class="stat-value warning">73.2%</div>
+                        <div class="stat-label">Prefetch Aggressive</div>
+                        <div class="stat-secondary" style="color: #e02f44;">ENABLED</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">IO Mix — Seq vs Rand / Small vs Large</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="ioMixChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">FE CPU/RAM/NIC Utilization</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="feUtilChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">NVMe-oF Transport Errors</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="transportErrorsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 5: Change & Event Timeline -->
+        <div class="row-header">Row 5 — Change & Event Timeline</div>
+        <div class="panel-row row-5">
+            <div class="panel extra-tall">
+                <div class="panel-header">
+                    <div class="panel-title">Change Timeline (Deploys, Rollbacks, Feature Flags)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="log-panel">
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T09:41:00Z</span>
+                            <span class="log-level-warn">change-mgmt rollback</span>
+                            <span class="log-message">VAST FE prefetch DISABLED on Pod-2</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T06:26:00Z</span>
+                            <span class="log-level-warn">change-mgmt feature</span>
+                            <span class="log-message">VAST FE rollout: aggressive prefetch ENABLED</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-16T16:26:00Z</span>
+                            <span class="log-message">change-mgmt maintenance Fabric A: replaced 2 spines</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel extra-tall">
+                <div class="panel-header">
+                    <div class="panel-title">NOC Event Overlay (Alarms, SNMP Traps, Syslogs)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="log-panel">
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T10:39:45Z</span>
+                            <span class="log-level-error">ALARM CRITICAL</span>
+                            <span class="log-message">GPU utilization dropped below 60% threshold</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T10:38:22Z</span>
+                            <span class="log-level-error">SNMP TRAP</span>
+                            <span class="log-message">NVMe-oF latency exceeded 2ms P99 threshold</span>
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-timestamp">2025-09-17T10:37:15Z</span>
+                            <span class="log-level-warn">SYSLOG WARNING</span>
+                            <span class="log-message">ECN mark rate increased to 4.8% on training class</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 6: Job Scheduler / Platform -->
+        <div class="row-header">Row 6 — Job Scheduler / Platform</div>
+        <div class="panel-row row-6">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Queue Backlog Growth Rate</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="backlogChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Tenant Allocation — Fair-Share vs Whale</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="tenantAllocChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Job Retry / Failure Rates</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="jobFailureChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 7: Cross-Domain Correlation -->
+        <div class="row-header">Row 7 — Cross-Domain Correlation (Summary Timeline)</div>
+        <div class="panel-row row-7">
+            <div class="panel extra-tall">
+                <div class="panel-header">
+                    <div class="panel-title">ECN↑ → NVMe-oF P99↑ → GPU Util↓ → Queue Wait↑ (Composite)</div>
+                    <div class="panel-menu">⋯</div>
+                </div>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="compositeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard-data-loader.js"></script>
+    <script>
+        // Chart.js default configuration
+        Chart.defaults.color = '#d9d9d9';
+        Chart.defaults.backgroundColor = '#1f1f20';
+        Chart.defaults.borderColor = '#404043';
+        Chart.defaults.plugins.legend.labels.color = '#d9d9d9';
+        Chart.defaults.scales.linear.grid.color = '#2f2f32';
+        Chart.defaults.scales.time.grid.color = '#2f2f32';
+
+        // Auto-refresh simulation
+        setInterval(() => {
+            const timestamp = new Date().toLocaleTimeString();
+            document.querySelector('.dashboard-meta span:last-child').textContent = `Last updated: ${timestamp}`;
+        }, 30000);
+
+        // Initialize placeholder charts for panels that don't have real data yet
+        document.addEventListener('DOMContentLoaded', () => {
+            const chartConfigs = [
+                { id: 'ncclLatencyChart', type: 'scatter' },
+                { id: 'pfcPauseChart', type: 'bar' },
+                { id: 'linkUtilChart', type: 'line' },
+                { id: 'queueDepthChart', type: 'line' },
+                { id: 'ioMixChart', type: 'doughnut' },
+                { id: 'feUtilChart', type: 'line' },
+                { id: 'transportErrorsChart', type: 'bar' },
+                { id: 'backlogChart', type: 'line' },
+                { id: 'tenantAllocChart', type: 'bar' },
+                { id: 'jobFailureChart', type: 'line' }
+            ];
+
+            chartConfigs.forEach(config => {
+                const ctx = document.getElementById(config.id);
+                if (ctx) {
+                    new Chart(ctx.getContext('2d'), {
+                        type: config.type,
+                        data: {
+                            labels: ['Loading...'],
+                            datasets: [{
+                                label: 'Data Loading',
+                                data: config.type === 'scatter' ? [{x: 0, y: 0}] : [0],
+                                backgroundColor: '#404043',
+                                borderColor: '#ff6b35'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#d9d9d9' } }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
