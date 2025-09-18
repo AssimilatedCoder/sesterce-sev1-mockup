@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Calculator } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 
 export const FormulasTabEnhanced: React.FC = () => {
   return (

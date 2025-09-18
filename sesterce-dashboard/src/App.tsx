@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Header } from './components/layout/Header';
 import { Container } from './components/layout/Container';
 import { TabNavigation } from './components/features/TabNavigation';
-import { GrafanaDashboard } from './components/features/GrafanaDashboard';
 import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboardOriginal';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Activity, Calculator } from 'lucide-react';

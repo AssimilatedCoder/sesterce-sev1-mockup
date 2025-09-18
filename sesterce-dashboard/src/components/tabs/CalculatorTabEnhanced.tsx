@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Zap, AlertTriangle, Network, HardDrive, Settings,
-  DollarSign, Cpu, CheckCircle2, Info, Building2
+  CheckCircle2
 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 

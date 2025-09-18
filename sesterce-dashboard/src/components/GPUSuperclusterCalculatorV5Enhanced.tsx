@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Cpu, HardDrive, Network, Thermometer,
-  Building2, FileText, BookOpen, DollarSign
+  FileText, BookOpen
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';

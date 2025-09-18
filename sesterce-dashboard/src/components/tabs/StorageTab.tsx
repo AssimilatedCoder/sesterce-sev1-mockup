@@ -1,5 +1,5 @@
 import React from 'react';
-import { HardDrive, Database, TrendingUp } from 'lucide-react';
+import { HardDrive, TrendingUp } from 'lucide-react';
 
 interface StorageTabProps {
   config: any;

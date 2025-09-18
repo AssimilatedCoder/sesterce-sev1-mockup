@@ -101,7 +101,6 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     
     // Calculate fabric requirements
     const railsPerGPU = isGB200 || isGB300 ? 9 : 8;
-    const totalPorts = numGPUs * railsPerGPU;
     
     // Clos fabric calculations - Pod-based architecture
     const gpusPerPod = 1024; // Standard pod size

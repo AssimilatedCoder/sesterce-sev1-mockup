@@ -1,5 +1,5 @@
 import React from 'react';
-import { Thermometer, Zap, Droplets, AlertTriangle, Building2 } from 'lucide-react';
+import { Thermometer, Zap, Droplets, Building2 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 
 interface CoolingPowerTabEnhancedProps {
@@ -58,7 +58,6 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
   const calculateCoolingDetails = () => {
     const isGB200 = gpuModel === 'gb200';
     const isGB300 = gpuModel === 'gb300';
-    const requiresLiquid = spec.coolingOptions.length === 1 && spec.coolingOptions[0] === 'liquid';
     
     // Calculate IT load
     const gpuPower = numGPUs * spec.powerPerGPU;
