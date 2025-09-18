@@ -12,6 +12,38 @@ class DashboardDataLoader {
   data: any = {};
   charts: any = {};
 
+  constructor() {
+    // IMMEDIATELY load fallback data in constructor
+    console.log('🔧 DashboardDataLoader constructor - loading fallback data immediately');
+    this.loadFallbackDataSync();
+  }
+
+  loadFallbackDataSync() {
+    console.log('📊 Loading fallback data synchronously...');
+    
+    // Load essential datasets immediately
+    this.data.queue_wait_quantiles = this.generateFallbackData('queue_wait_quantiles.csv');
+    this.data.gpu_utilization = this.generateFallbackData('gpu_utilization.csv');
+    this.data.sla_penalty_and_budget = this.generateFallbackData('sla_penalty_and_budget.csv');
+    this.data.composite_timeline = this.generateFallbackData('composite_timeline.csv');
+    this.data.dcgm_util_by_node = this.generateFallbackData('dcgm_util_by_node.csv');
+    this.data.network_ecn_rate = this.generateFallbackData('network_ecn_rate.csv');
+    this.data.vast_nvmeof_latency_quantiles = this.generateFallbackData('vast_nvmeof_latency_quantiles.csv');
+    this.data.pfc_pause_rx = this.generateFallbackData('pfc_pause_rx.csv');
+    this.data.per_link_utilization = this.generateFallbackData('per_link_utilization.csv');
+    this.data.vast_nvme_queue_depth = this.generateFallbackData('vast_nvme_queue_depth.csv');
+    this.data.vast_fe_util_and_cache = this.generateFallbackData('vast_fe_util_and_cache.csv');
+    this.data.nccl_allreduce_latency = this.generateFallbackData('nccl_allreduce_latency.csv');
+    
+    // Load log data
+    this.data.noc_events = this.generateFallbackLogData('noc_events.log');
+    this.data.nccl_logs = this.generateFallbackLogData('nccl_logs.log');
+    this.data.evpn_events = this.generateFallbackLogData('evpn_events.log');
+    this.data.change_timeline = this.generateFallbackLogData('change_timeline.log');
+    
+    console.log('✅ Fallback data loaded synchronously:', Object.keys(this.data));
+  }
+
   parseCSV(csvText: string) {
     const lines = csvText.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
@@ -328,11 +360,22 @@ class DashboardDataLoader {
   }
 
   updateQueueWaitChart() {
+    console.log('📊 Updating Queue Wait Chart...');
     const canvas = document.getElementById('queueWaitChart') as HTMLCanvasElement;
-    if (!canvas || !window.Chart) return;
+    if (!canvas) {
+      console.error('❌ queueWaitChart canvas not found!');
+      return;
+    }
+    if (!window.Chart) {
+      console.error('❌ Chart.js not loaded!');
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.error('❌ Could not get canvas context!');
+      return;
+    }
 
     // Destroy existing chart
     if (this.charts.queueWait) {
@@ -340,6 +383,8 @@ class DashboardDataLoader {
     }
 
     const queueData = this.data.queue_wait_quantiles || this.generateFallbackData('queue_wait_quantiles.csv');
+    console.log('📊 Queue data length:', queueData.length);
+    console.log('📊 Sample queue data:', queueData.slice(0, 3));
     
     // Use the correct field names from the original data structure
     this.charts.queueWait = new window.Chart(ctx, {
@@ -1000,18 +1045,69 @@ class DashboardDataLoader {
 
   async initialize() {
     console.log('🚀 Initializing SEV-1 Dashboard...');
+    console.log('📊 Data available:', Object.keys(this.data));
     
-    // Show loading indicator
-    this.showLoadingIndicator();
-    
-    // Load data (preload happens immediately, then try real data)
-    await this.loadAllData();
-    
-    // Hide loading indicator and render charts
-    this.hideLoadingIndicator();
+    // Data is already loaded in constructor, so render immediately
     this.renderAllCharts();
     
-    console.log('✅ SEV-1 Dashboard fully initialized with incident data!');
+    // Try to load real data in background (non-blocking)
+    this.loadRealDataInBackground();
+    
+    console.log('✅ SEV-1 Dashboard initialized with incident data!');
+  }
+
+  async loadRealDataInBackground() {
+    console.log('🔄 Loading real CSV data in background...');
+    
+    const csvFiles = [
+      'queue_wait_quantiles.csv',
+      'gpu_utilization.csv', 
+      'sla_penalty_and_budget.csv',
+      'composite_timeline.csv',
+      'network_ecn_rate.csv',
+      'vast_nvmeof_latency_quantiles.csv'
+    ];
+
+    // Try to load real data (but don't block if it fails)
+    for (const file of csvFiles) {
+      try {
+        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
+        if (response.ok) {
+          const csvText = await response.text();
+          const key = file.replace('.csv', '');
+          this.data[key] = this.parseCSV(csvText);
+          console.log(`✅ Loaded real ${key}: ${this.data[key].length} records`);
+          
+          // Re-render specific chart with real data
+          this.updateSpecificChart(key);
+        }
+      } catch (error) {
+        console.log(`📊 Using fallback for ${file}`);
+      }
+    }
+  }
+
+  updateSpecificChart(dataKey: string) {
+    switch (dataKey) {
+      case 'queue_wait_quantiles':
+        this.updateQueueWaitChart();
+        break;
+      case 'gpu_utilization':
+        this.updateGPUStats();
+        break;
+      case 'sla_penalty_and_budget':
+        this.updateSLAStats();
+        break;
+      case 'network_ecn_rate':
+        this.updateECNChart();
+        break;
+      case 'vast_nvmeof_latency_quantiles':
+        this.updateNVMeChart();
+        break;
+      case 'composite_timeline':
+        this.updateCompositeChart();
+        break;
+    }
   }
 
   showLoadingIndicator() {
@@ -1100,13 +1196,17 @@ export const GrafanaDashboard: React.FC = () => {
     };
 
     const initializeDashboard = async () => {
-      // Minimal wait for DOM elements to be ready
+      // Wait a bit longer for DOM elements to be ready
       setTimeout(async () => {
         try {
-          console.log('🚀 Initializing SEV-1 Dashboard with preloaded data...');
-          const loader = new DashboardDataLoader();
+          console.log('🚀 Initializing SEV-1 Dashboard...');
+          console.log('📊 Chart.js available:', !!window.Chart);
+          console.log('📊 Canvas elements found:', document.querySelectorAll('canvas[id*="Chart"]').length);
           
-          // Initialize immediately with preloaded fallback data
+          const loader = new DashboardDataLoader();
+          console.log('📊 Loader data keys:', Object.keys(loader.data));
+          
+          // Initialize with preloaded data
           await loader.initialize();
           
           // Set up auto-refresh for dynamic stats
@@ -1115,7 +1215,7 @@ export const GrafanaDashboard: React.FC = () => {
             loader.updateSLAStats();
             loader.updateChangeTimeline();
             loader.updateNOCEvents();
-          }, 15000); // Refresh every 15 seconds for more dynamic feel
+          }, 15000);
           
           console.log('✅ Dashboard fully operational with incident data!');
         } catch (error) {
@@ -1124,11 +1224,11 @@ export const GrafanaDashboard: React.FC = () => {
           // Show user-friendly error
           const errorEl = document.createElement('div');
           errorEl.className = 'fixed top-4 right-4 bg-red-600 text-white p-3 rounded shadow-lg z-50';
-          errorEl.innerHTML = '⚠️ Dashboard loading issue - using fallback data';
+          errorEl.innerHTML = `⚠️ Dashboard initialization failed`;
           document.body.appendChild(errorEl);
-          setTimeout(() => errorEl.remove(), 4000);
+          setTimeout(() => errorEl.remove(), 8000);
         }
-      }, 200); // Reduced from 1000ms to 200ms for faster loading
+      }, 1000); // Back to 1000ms to ensure DOM is ready
     };
 
     loadScripts();

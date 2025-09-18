@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test - Dashboard Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body style="background: #1a1a1a; color: white; font-family: monospace; padding: 20px;">
+    <h1>🔧 Dashboard Data Debug Test</h1>
+    
+    <div id="debug-output"></div>
+    
+    <canvas id="testChart" width="400" height="200" style="background: #333; margin: 20px 0;"></canvas>
+    
+    <script>
+        // Copy the exact DashboardDataLoader class
+        class DashboardDataLoader {
+            constructor() {
+                this.data = {};
+                this.charts = {};
+                console.log('🔧 DashboardDataLoader constructor - loading fallback data immediately');
+                this.loadFallbackDataSync();
+            }
+
+            loadFallbackDataSync() {
+                console.log('📊 Loading fallback data synchronously...');
+                this.data.queue_wait_quantiles = this.generateFallbackData('queue_wait_quantiles.csv');
+                console.log('✅ Fallback data loaded synchronously:', Object.keys(this.data));
+            }
+
+            generateFallbackData(filename) {
+                const now = new Date();
+                const data = [];
+                
+                // Generate 24 hours of data points (every minute) - EXACTLY like the original
+                for (let i = 0; i < 1440; i++) {
+                    const timestamp = new Date(now.getTime() - (1440 - i) * 60 * 1000);
+                    const timeStr = timestamp.toISOString();
+                    
+                    // Simulate the incident starting at 08:26 (around record 506) - THE KEY INCIDENT LOGIC!
+                    const isIncident = i > 506;
+                    
+                    if (filename === 'queue_wait_quantiles.csv') {
+                        data.push({
+                            timestamp: timeStr,
+                            tenant: 'alpha',
+                            p50_min: isIncident ? 15 + Math.random() * 10 : 4 + Math.random() * 2,
+                            p90_min: isIncident ? 25 + Math.random() * 15 : 7 + Math.random() * 3,
+                            p99_min: isIncident ? 31 + Math.random() * 8 : 9 + Math.random() * 2
+                        });
+                    }
+                }
+                
+                console.log(`🔄 Generated incident-aware fallback data for ${filename}: ${data.length} records (incident starts at record 506)`);
+                return data;
+            }
+
+            createTestChart() {
+                const canvas = document.getElementById('testChart');
+                const ctx = canvas.getContext('2d');
+                
+                const queueData = this.data.queue_wait_quantiles;
+                console.log('📊 Queue data for chart:', queueData.length, 'records');
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: queueData.slice(-50).map(d => new Date(d.timestamp).toLocaleTimeString()),
+                        datasets: [{
+                            label: 'P90 Queue Wait (min)',
+                            data: queueData.slice(-50).map(d => d.p90_min),
+                            borderColor: '#ff9830',
+                            backgroundColor: 'rgba(255, 152, 48, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'SEV-1 Incident: Queue Wait Spike at 08:26'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Minutes'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Test the data loader
+        const loader = new DashboardDataLoader();
+        
+        // Display debug info
+        const debugOutput = document.getElementById('debug-output');
+        debugOutput.innerHTML = `
+            <h2>📊 Data Status:</h2>
+            <p><strong>Data keys:</strong> ${Object.keys(loader.data).join(', ')}</p>
+            <p><strong>Queue data length:</strong> ${loader.data.queue_wait_quantiles ? loader.data.queue_wait_quantiles.length : 'undefined'}</p>
+            <p><strong>Sample data:</strong></p>
+            <pre>${JSON.stringify(loader.data.queue_wait_quantiles ? loader.data.queue_wait_quantiles.slice(500, 510) : 'No data', null, 2)}</pre>
+        `;
+
+        // Create test chart
+        setTimeout(() => {
+            loader.createTestChart();
+        }, 100);
+    </script>
+</body>
+</html>
