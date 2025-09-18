@@ -12,7 +12,12 @@ function App() {
   const tabs = [
     {
       id: 'dashboard',
-      label: 'SEV-1 War Room Dashboard',
+      label: 'SEV-1 War Room (React)',
+      icon: <Activity className="w-5 h-5" />
+    },
+    {
+      id: 'standalone',
+      label: 'SEV-1 War Room (Original)',
       icon: <Activity className="w-5 h-5" />
     },
     {
@@ -41,6 +46,13 @@ function App() {
         {/* Tab Content */}
         <div className="min-h-screen">
           {activeTab === 'dashboard' && <GrafanaDashboard />}
+          {activeTab === 'standalone' && (
+            <iframe 
+              src="/sev1-warroom-dashboard.html" 
+              className="w-full h-screen border-0"
+              title="Original SEV-1 Dashboard"
+            />
+          )}
           {activeTab === 'calculator' && <GPUCostCalculator />}
         </div>
       </main>

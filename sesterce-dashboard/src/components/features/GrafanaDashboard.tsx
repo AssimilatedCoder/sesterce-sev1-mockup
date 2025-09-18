@@ -277,29 +277,66 @@ class DashboardDataLoader {
     console.log('📊 Queue data length:', queueData.length);
     console.log('📊 Sample queue data:', queueData.slice(0, 3));
     
-    // Use the correct field names from the original data structure
+    // CRITICAL: Aggregate data across all tenants like the original!
+    const aggregatedData: any = {};
+    queueData.forEach((row: any) => {
+      const time = new Date(row.timestamp);
+      const key = time.toISOString();
+      if (!aggregatedData[key]) {
+        aggregatedData[key] = { p50: [], p90: [], p99: [], time };
+      }
+      aggregatedData[key].p50.push(row.p50_min);
+      aggregatedData[key].p90.push(row.p90_min);
+      aggregatedData[key].p99.push(row.p99_min);
+    });
+
+    // Calculate averages for aggregated data
+    const timePoints = Object.keys(aggregatedData).sort();
+    const p50Data = timePoints.map(key => ({
+      x: aggregatedData[key].time,
+      y: aggregatedData[key].p50.reduce((a: number, b: number) => a + b, 0) / aggregatedData[key].p50.length
+    }));
+    const p90Data = timePoints.map(key => ({
+      x: aggregatedData[key].time,
+      y: aggregatedData[key].p90.reduce((a: number, b: number) => a + b, 0) / aggregatedData[key].p90.length
+    }));
+    const p99Data = timePoints.map(key => ({
+      x: aggregatedData[key].time,
+      y: aggregatedData[key].p99.reduce((a: number, b: number) => a + b, 0) / aggregatedData[key].p99.length
+    }));
+    
+    // Show last 6 hours of data (360 points)
+    const recentP50 = p50Data.slice(-360);
+    const recentP90 = p90Data.slice(-360);
+    const recentP99 = p99Data.slice(-360);
+    
+    console.log('📊 Aggregated data points:', timePoints.length);
+    console.log('📊 Max P90 value:', Math.max(...p90Data.map(d => d.y)));
+    
     this.charts.queueWait = new window.Chart(ctx, {
       type: 'line',
       data: {
-        labels: queueData.slice(-50).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
         datasets: [{
           label: 'P50',
-          data: queueData.slice(-50).map((d: any) => d.p50_min || d.p50),
+          data: recentP50,
           borderColor: '#73bf69',
           backgroundColor: 'rgba(115, 191, 105, 0.1)',
-          tension: 0.4
+          tension: 0.4,
+          fill: false
         }, {
           label: 'P90',
-          data: queueData.slice(-50).map((d: any) => d.p90_min || d.p90),
+          data: recentP90,
           borderColor: '#ff9830',
           backgroundColor: 'rgba(255, 152, 48, 0.1)',
-          tension: 0.4
+          tension: 0.4,
+          fill: false
         }, {
           label: 'P99',
-          data: queueData.slice(-50).map((d: any) => d.p99_min || d.p99),
+          data: recentP99,
           borderColor: '#e02f44',
           backgroundColor: 'rgba(224, 47, 68, 0.1)',
-          tension: 0.4
+          tension: 0.4,
+          fill: false
         }]
       },
       options: {
@@ -308,9 +345,25 @@ class DashboardDataLoader {
         plugins: {
           legend: {
             labels: { color: '#d9d9d9' }
+          },
+          title: {
+            display: true,
+            text: 'Job Queue Wait Time - P50/P90/P99 (SLO ≤ 10m)',
+            color: '#d9d9d9'
           }
         },
         scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'hour',
+              displayFormats: {
+                hour: 'HH:mm'
+              }
+            },
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
           y: {
             beginAtZero: true,
             title: {
@@ -318,10 +371,6 @@ class DashboardDataLoader {
               text: 'Minutes',
               color: '#d9d9d9'
             },
-            grid: { color: '#2f2f32' },
-            ticks: { color: '#d9d9d9' }
-          },
-          x: {
             grid: { color: '#2f2f32' },
             ticks: { color: '#d9d9d9' }
           }
