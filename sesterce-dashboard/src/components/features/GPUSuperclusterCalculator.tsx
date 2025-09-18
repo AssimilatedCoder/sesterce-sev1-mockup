@@ -338,44 +338,49 @@ export const GPUSuperclusterCalculator: React.FC = () => {
   const coolingRequired = spec.coolingOptions.length === 1 && spec.coolingOptions[0] === 'liquid';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-4 md:p-8">
-      <div className="max-w-[1900px] mx-auto bg-white/98 rounded-3xl shadow-2xl p-6 md:p-10 relative overflow-hidden">
-        {/* Decorative corner elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-100/20 to-gpu-purple/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-gpu-purple/10 to-brand-100/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
-        
-        {/* Header */}
-        <div className="text-center mb-8 pb-6 border-b-2 border-gray-200 relative z-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-gradient-to-br from-brand-600 to-gpu-purple rounded-2xl shadow-xl transform rotate-3 hover:rotate-6 transition-transform">
-            <span className="text-4xl transform -rotate-3">🚀</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
-            GPU Supercluster Cost Calculator
-          </h1>
-          <p className="text-xl text-gray-600 mb-4">Complete Infrastructure & TCO Analysis Platform</p>
-          <div className="flex items-center justify-center gap-2">
-            <span className="inline-block bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-2 rounded-full font-semibold shadow-lg animate-pulse">
-              v4.0 - Full Stack Edition
-            </span>
-            <span className="inline-block bg-gradient-to-r from-brand-600 to-gpu-purple text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-              with Verified References
-            </span>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 md:p-8">
+      <div className="max-w-[1900px] mx-auto relative">
+        {/* Header Section with dark background like Sesterce */}
+        <div className="bg-gray-900/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 mb-8 relative overflow-hidden border border-gray-800">
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-purple-500/10"></div>
+          
+          {/* Content */}
+          <div className="relative z-10 text-center">
+            <div className="inline-flex items-center justify-center w-24 h-24 mb-6 bg-gradient-to-br from-green-500 to-purple-600 rounded-3xl shadow-2xl">
+              <span className="text-5xl">🚀</span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+              GPU Supercluster Cost Calculator
+            </h1>
+            <p className="text-xl text-gray-300 mb-6">Complete Infrastructure & TCO Analysis Platform</p>
+            <div className="flex items-center justify-center gap-3">
+              <span className="inline-block bg-green-500 text-gray-900 px-6 py-3 rounded-full font-bold text-sm">
+                v4.0 - Full Stack Edition
+              </span>
+              <span className="inline-block bg-purple-600 text-white px-6 py-3 rounded-full font-bold text-sm">
+                with Verified References
+              </span>
+            </div>
           </div>
         </div>
 
+        {/* Main Content Area */}
+        <div className="bg-white/98 rounded-3xl shadow-2xl p-6 md:p-10 relative overflow-hidden">
+
         {/* Tabs */}
-        <div className="flex flex-wrap gap-3 mb-8 p-2 bg-gray-100 rounded-2xl">
+        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-gray-100 rounded-2xl">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-lg transform scale-105'
-                  : 'bg-white text-gray-600 hover:bg-gray-50 hover:shadow-md'
+                  ? 'bg-gray-900 text-white shadow-lg'
+                  : 'bg-transparent text-gray-600 hover:bg-gray-200'
               }`}
             >
-              <span className={activeTab === tab.id ? 'animate-pulse' : ''}>{tab.icon}</span>
+              {tab.icon}
               {tab.label}
             </button>
           ))}
@@ -540,9 +545,9 @@ export const GPUSuperclusterCalculator: React.FC = () => {
             {/* Calculate Button */}
             <button
               onClick={calculateFull}
-              className="w-full md:w-auto mx-auto block bg-gradient-to-r from-green-600 to-green-500 text-white px-12 py-4 rounded-xl text-xl font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all"
+              className="w-full md:w-auto mx-auto block bg-green-500 hover:bg-green-600 text-gray-900 px-12 py-4 rounded-2xl text-lg font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all"
             >
-              🔄 Calculate Complete Analysis
+              Calculate Complete Analysis
             </button>
 
             {/* Results Section */}
@@ -550,52 +555,52 @@ export const GPUSuperclusterCalculator: React.FC = () => {
               <>
                 {/* Metric Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-700 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">Total CAPEX</div>
+                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
+                    <div className="text-sm text-gray-400 mb-2">Total CAPEX</div>
                     <div className="text-3xl font-bold mb-1">{formatNumber(results.totalCapex)}</div>
-                    <div className="text-xs opacity-75">USD</div>
+                    <div className="text-xs text-gray-500">USD</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-700 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">Annual OPEX</div>
+                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
+                    <div className="text-sm text-gray-400 mb-2">Annual OPEX</div>
                     <div className="text-3xl font-bold mb-1">{formatNumber(results.annualOpex)}</div>
-                    <div className="text-xs opacity-75">USD/Year</div>
+                    <div className="text-xs text-gray-500">USD/Year</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-600 to-green-500 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
                     <div className="text-sm opacity-90 mb-2">$/GPU-Hour</div>
                     <div className="text-3xl font-bold mb-1">${results.costPerHour.toFixed(2)}</div>
-                    <div className="text-xs opacity-75">At Selected Utilization</div>
+                    <div className="text-xs opacity-90">At Selected Utilization</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-700 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">Power Required</div>
+                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
+                    <div className="text-sm text-gray-400 mb-2">Power Required</div>
                     <div className="text-3xl font-bold mb-1">{results.totalPowerMW.toFixed(1)}</div>
-                    <div className="text-xs opacity-75">Megawatts</div>
+                    <div className="text-xs text-gray-500">Megawatts</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-700 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">PUE Factor</div>
+                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
+                    <div className="text-sm text-gray-400 mb-2">PUE Factor</div>
                     <div className="text-3xl font-bold mb-1">{results.pueValue.toFixed(2)}</div>
-                    <div className="text-xs opacity-75">Efficiency Ratio</div>
+                    <div className="text-xs text-gray-500">Efficiency Ratio</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-700 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">Storage $/GB/Mo</div>
+                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
+                    <div className="text-sm text-gray-400 mb-2">Storage $/GB/Mo</div>
                     <div className="text-3xl font-bold mb-1">${results.storageGbMonth.toFixed(4)}</div>
-                    <div className="text-xs opacity-75">Blended Rate</div>
+                    <div className="text-xs text-gray-500">Blended Rate</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-700 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">Network Bandwidth</div>
+                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
+                    <div className="text-sm text-gray-400 mb-2">Network Bandwidth</div>
                     <div className="text-3xl font-bold mb-1">{results.networkBandwidth.toFixed(1)}</div>
-                    <div className="text-xs opacity-75">Tbps Total</div>
+                    <div className="text-xs text-gray-500">Tbps Total</div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-600 to-green-500 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
                     <div className="text-sm opacity-90 mb-2">10-Year TCO</div>
                     <div className="text-3xl font-bold mb-1">{formatNumber(results.tco10year)}</div>
-                    <div className="text-xs opacity-75">Total Cost</div>
+                    <div className="text-xs opacity-90">Total Cost</div>
                   </div>
                 </div>
 
@@ -717,6 +722,7 @@ export const GPUSuperclusterCalculator: React.FC = () => {
             <p className="text-xl">References and documentation coming soon...</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

@@ -24,18 +24,18 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg relative overflow-hidden">
-      {/* Background decorative elements */}
+    <div className="min-h-screen bg-gray-900 relative overflow-hidden">
+      {/* Background decorative elements - subtle gradients */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-br from-brand-100 to-gpu-purple/20 rounded-full blur-3xl opacity-20"></div>
-        <div className="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-tr from-gpu-purple/20 to-brand-100 rounded-full blur-3xl opacity-20"></div>
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-green-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
       
       <Header />
       
-      <main className="pt-16 relative z-10">
-        {/* Tab Navigation */}
-        <div className="bg-white/90 dark:bg-dark-surface/90 backdrop-blur-md border-b border-gray-200 dark:border-dark-border sticky top-16 z-40 shadow-sm">
+      <main className="pt-20 relative z-10">
+        {/* Tab Navigation with dark theme */}
+        <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-20 z-40">
           <Container>
             <TabNavigation
               tabs={tabs}
