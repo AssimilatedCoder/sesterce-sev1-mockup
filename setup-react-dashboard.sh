@@ -99,6 +99,23 @@ if [ ! -d "$BUILD_DIR" ]; then
     exit 1
 fi
 
+# Ensure synthetic data is accessible in the build
+echo "📊 Copying synthetic telemetry data..."
+if [ -d "$SCRIPT_DIR/superpod_sev1_fake_telemetry" ]; then
+    cp -r "$SCRIPT_DIR/superpod_sev1_fake_telemetry" "$BUILD_DIR/"
+    echo "✅ Copied telemetry data to build directory"
+else
+    echo "⚠️ Warning: Synthetic data directory not found at $SCRIPT_DIR/superpod_sev1_fake_telemetry"
+fi
+
+# Copy dashboard data loader if it exists
+if [ -f "$SCRIPT_DIR/dashboard-data-loader.js" ]; then
+    cp "$SCRIPT_DIR/dashboard-data-loader.js" "$BUILD_DIR/"
+    echo "✅ Copied dashboard data loader"
+else
+    echo "⚠️ Warning: Dashboard data loader not found at $SCRIPT_DIR/dashboard-data-loader.js"
+fi
+
 echo "✅ React application built successfully"
 
 # Stop any existing nginx processes
