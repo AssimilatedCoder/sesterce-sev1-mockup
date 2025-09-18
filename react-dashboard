@@ -1,0 +1,129 @@
+#!/bin/bash
+
+# Sesterce React Dashboard Management Script
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD_DIR="$SCRIPT_DIR/sesterce-dashboard/build"
+
+case "$1" in
+    start)
+        echo "🚀 Starting Sesterce React Dashboard..."
+        
+        # Build if needed
+        if [ ! -d "$BUILD_DIR" ]; then
+            echo "📦 Building React app..."
+            cd "$SCRIPT_DIR/sesterce-dashboard"
+            npm run build
+        fi
+        
+        # Stop existing nginx
+        sudo pkill nginx 2>/dev/null || true
+        
+        # Update and install nginx config
+        sed "s|/Users/avanhuys/Projects/Grafana\\\\ Sesterce/sesterce-dashboard/build|$BUILD_DIR|g" \
+            "$SCRIPT_DIR/nginx-sesterce-dashboard.conf" > /tmp/nginx-sesterce-dashboard.conf
+        
+        sudo cp /tmp/nginx-sesterce-dashboard.conf /usr/local/etc/nginx/servers/ 2>/dev/null || \
+        sudo cp /tmp/nginx-sesterce-dashboard.conf /etc/nginx/sites-available/sesterce-dashboard
+        
+        if [ -d "/etc/nginx/sites-enabled" ]; then
+            sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/
+        fi
+        
+        # Start nginx
+        sudo nginx
+        
+        if pgrep nginx > /dev/null; then
+            LOCAL_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1)
+            echo "✅ Dashboard running at http://localhost:7777"
+            [ ! -z "$LOCAL_IP" ] && echo "🌐 Network: http://$LOCAL_IP:7777"
+        else
+            echo "❌ Failed to start nginx"
+        fi
+        ;;
+    
+    stop)
+        echo "🛑 Stopping Sesterce React Dashboard..."
+        sudo nginx -s stop 2>/dev/null || sudo pkill nginx 2>/dev/null || true
+        echo "✅ Dashboard stopped"
+        ;;
+    
+    restart)
+        echo "🔄 Restarting Sesterce React Dashboard..."
+        $0 stop
+        sleep 2
+        $0 start
+        ;;
+    
+    build)
+        echo "📦 Building React app..."
+        cd "$SCRIPT_DIR/sesterce-dashboard"
+        npm run build
+        echo "✅ Build complete"
+        ;;
+    
+    status)
+        if pgrep nginx > /dev/null; then
+            LOCAL_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1)
+            echo "✅ Dashboard is running"
+            echo "🌐 Local: http://localhost:7777"
+            [ ! -z "$LOCAL_IP" ] && echo "🌐 Network: http://$LOCAL_IP:7777"
+        else
+            echo "❌ Dashboard is not running"
+        fi
+        ;;
+    
+    logs)
+        echo "📋 nginx logs:"
+        sudo tail -f /usr/local/var/log/nginx/error.log 2>/dev/null || \
+        sudo tail -f /var/log/nginx/error.log 2>/dev/null || \
+        echo "❌ Could not find nginx logs"
+        ;;
+    
+    test)
+        echo "🧪 Testing dashboard accessibility..."
+        
+        # Test main page
+        if curl -s http://localhost:7777 > /dev/null; then
+            echo "✅ Main page accessible"
+        else
+            echo "❌ Main page not accessible"
+        fi
+        
+        # Test telemetry data
+        if curl -s http://localhost:7777/superpod_sev1_fake_telemetry/gpu_utilization.csv | head -1 > /dev/null; then
+            echo "✅ Telemetry data accessible"
+        else
+            echo "❌ Telemetry data not accessible"
+        fi
+        
+        # Test data loader
+        if curl -s http://localhost:7777/dashboard-data-loader.js > /dev/null; then
+            echo "✅ Dashboard data loader accessible"
+        else
+            echo "❌ Dashboard data loader not accessible"
+        fi
+        ;;
+    
+    *)
+        echo "Sesterce React Dashboard Control Script"
+        echo ""
+        echo "Usage: $0 {start|stop|restart|build|status|logs|test}"
+        echo ""
+        echo "Commands:"
+        echo "  start    - Build (if needed) and start the dashboard"
+        echo "  stop     - Stop the dashboard"
+        echo "  restart  - Restart the dashboard"
+        echo "  build    - Build the React app"
+        echo "  status   - Check dashboard status"
+        echo "  logs     - Show nginx logs"
+        echo "  test     - Test dashboard accessibility"
+        echo ""
+        echo "Examples:"
+        echo "  $0 start           # Start the dashboard"
+        echo "  $0 status          # Check if running"
+        echo "  $0 test            # Test all endpoints"
+        echo ""
+        exit 1
+        ;;
+esac
