@@ -160,39 +160,123 @@ class DashboardDataLoader {
     const now = new Date();
     const data = [];
     
-    // Generate 100 data points over the last 6 hours
-    for (let i = 0; i < 100; i++) {
-      const timestamp = new Date(now.getTime() - (6 * 60 * 60 * 1000) + (i * 3.6 * 60 * 1000));
+    // Generate 24 hours of data points (every minute) - EXACTLY like the original
+    for (let i = 0; i < 1440; i++) {
+      const timestamp = new Date(now.getTime() - (1440 - i) * 60 * 1000);
+      const timeStr = timestamp.toISOString();
       
-      if (filename.includes('queue_wait')) {
-        data.push({
-          timestamp: timestamp.toISOString(),
-          p50: 7 + Math.random() * 24,
-          p90: 15 + Math.random() * 40,
-          p99: 25 + Math.random() * 60
-        });
-      } else if (filename.includes('gpu_utilization')) {
-        data.push({
-          timestamp: timestamp.toISOString(),
-          allocated_percent: 86 - Math.random() * 32,
-          busy_percent: 54 - Math.random() * 20
-        });
-      } else if (filename.includes('sla_penalty')) {
-        data.push({
-          timestamp: timestamp.toISOString(),
-          penalty_dollars_per_hour: 47200 + Math.random() * 10000,
-          budget_burn_dollars: 156000 + Math.random() * 50000
-        });
-      } else {
-        // Generic fallback
-        data.push({
-          timestamp: timestamp.toISOString(),
-          value: Math.random() * 100
-        });
+      // Simulate the incident starting at 08:26 (around record 506) - THE KEY INCIDENT LOGIC!
+      const isIncident = i > 506;
+      
+      switch (filename) {
+        case 'queue_wait_quantiles.csv':
+          data.push({
+            timestamp: timeStr,
+            tenant: 'alpha',
+            p50_min: isIncident ? 15 + Math.random() * 10 : 4 + Math.random() * 2,
+            p90_min: isIncident ? 25 + Math.random() * 15 : 7 + Math.random() * 3,
+            p99_min: isIncident ? 31 + Math.random() * 8 : 9 + Math.random() * 2
+          });
+          break;
+          
+        case 'gpu_utilization.csv':
+          data.push({
+            timestamp: timeStr,
+            gpu_allocated_percent: 90 + Math.random() * 2,
+            gpu_busy_percent: isIncident ? 54 + Math.random() * 10 : 86 + Math.random() * 2
+          });
+          break;
+          
+        case 'network_ecn_rate.csv':
+          data.push({
+            timestamp: timeStr,
+            class: 'training',
+            ecn_mark_rate_percent: isIncident ? 4.8 + Math.random() * 2 : 0.2 + Math.random() * 0.1
+          });
+          break;
+          
+        case 'vast_nvmeof_latency_quantiles.csv':
+          data.push({
+            timestamp: timeStr,
+            namespace: 'ns-01',
+            p50_ms: isIncident ? 1.2 + Math.random() * 0.5 : 0.25 + Math.random() * 0.1,
+            p90_ms: isIncident ? 2.1 + Math.random() * 0.8 : 0.35 + Math.random() * 0.1,
+            p99_ms: isIncident ? 2.8 + Math.random() * 1.2 : 0.38 + Math.random() * 0.05
+          });
+          break;
+          
+        case 'composite_timeline.csv':
+          data.push({
+            timestamp: timeStr,
+            ecn_mark_rate_percent: isIncident ? 4.8 + Math.random() * 2 : 0.2 + Math.random() * 0.1,
+            nvmeof_p99_ms: isIncident ? 2.8 + Math.random() * 1.2 : 0.38 + Math.random() * 0.05,
+            gpu_util_percent: isIncident ? 54 + Math.random() * 10 : 86 + Math.random() * 2,
+            queue_p90_min: isIncident ? 31 + Math.random() * 8 : 7 + Math.random() * 3
+          });
+          break;
+          
+        case 'sla_penalty_and_budget.csv':
+          data.push({
+            timestamp: timeStr,
+            penalty_dollars_per_hour: isIncident ? 47200 + Math.random() * 10000 : 15000 + Math.random() * 5000,
+            budget_burn_dollars: isIncident ? 156000 + Math.random() * 50000 : 45000 + Math.random() * 10000
+          });
+          break;
+          
+        case 'dcgm_util_by_node.csv':
+          data.push({
+            timestamp: timeStr,
+            node: 'node-01',
+            sm_utilization_percent: isIncident ? 45 + Math.random() * 20 : 85 + Math.random() * 10,
+            mem_utilization_percent: isIncident ? 60 + Math.random() * 15 : 90 + Math.random() * 5
+          });
+          break;
+          
+        case 'pfc_pause_rx.csv':
+          data.push({
+            timestamp: timeStr,
+            port: 'leaf-01/1',
+            pause_rx_count: isIncident ? 500000 + Math.random() * 1000000 : Math.random() * 1000
+          });
+          break;
+          
+        case 'per_link_utilization.csv':
+          data.push({
+            timestamp: timeStr,
+            device: 'leaf-01',
+            port: '1',
+            utilization_percent: isIncident ? 85 + Math.random() * 10 : 45 + Math.random() * 20
+          });
+          break;
+          
+        case 'vast_nvme_queue_depth.csv':
+          data.push({
+            timestamp: timeStr,
+            fe: 'fe-01',
+            queue_depth: isIncident ? 45 + Math.random() * 25 : 15 + Math.random() * 10
+          });
+          break;
+          
+        case 'vast_fe_util_and_cache.csv':
+          data.push({
+            timestamp: timeStr,
+            fe: 'fe-01',
+            cache_hit_percent: isIncident ? 75 + Math.random() * 15 : 92 + Math.random() * 5,
+            fe_cpu_percent: isIncident ? 65 + Math.random() * 20 : 35 + Math.random() * 15,
+            fe_ram_percent: isIncident ? 75 + Math.random() * 15 : 45 + Math.random() * 20
+          });
+          break;
+          
+        default:
+          // Generic fallback
+          data.push({
+            timestamp: timeStr,
+            value: isIncident ? 75 + Math.random() * 25 : 25 + Math.random() * 25
+          });
       }
     }
     
-    console.log(`🔄 Generated fallback data for ${filename}: ${data.length} records`);
+    console.log(`🔄 Generated incident-aware fallback data for ${filename}: ${data.length} records (incident starts at record 506)`);
     return data;
   }
 
@@ -208,29 +292,30 @@ class DashboardDataLoader {
       this.charts.queueWait.destroy();
     }
 
-    const queueData = this.data.queue_wait_quantiles || [];
+    const queueData = this.data.queue_wait_quantiles || this.generateFallbackData('queue_wait_quantiles.csv');
     
+    // Use the correct field names from the original data structure
     this.charts.queueWait = new window.Chart(ctx, {
       type: 'line',
       data: {
         labels: queueData.slice(-50).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
         datasets: [{
           label: 'P50',
-          data: queueData.slice(-50).map((d: any) => d.p50),
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          data: queueData.slice(-50).map((d: any) => d.p50_min || d.p50),
+          borderColor: '#73bf69',
+          backgroundColor: 'rgba(115, 191, 105, 0.1)',
           tension: 0.4
         }, {
           label: 'P90',
-          data: queueData.slice(-50).map((d: any) => d.p90),
-          borderColor: '#F59E0B',
-          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          data: queueData.slice(-50).map((d: any) => d.p90_min || d.p90),
+          borderColor: '#ff9830',
+          backgroundColor: 'rgba(255, 152, 48, 0.1)',
           tension: 0.4
         }, {
           label: 'P99',
-          data: queueData.slice(-50).map((d: any) => d.p99),
-          borderColor: '#EF4444',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          data: queueData.slice(-50).map((d: any) => d.p99_min || d.p99),
+          borderColor: '#e02f44',
+          backgroundColor: 'rgba(224, 47, 68, 0.1)',
           tension: 0.4
         }]
       },
@@ -245,6 +330,11 @@ class DashboardDataLoader {
         scales: {
           y: {
             beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Minutes',
+              color: '#d9d9d9'
+            },
             grid: { color: '#2f2f32' },
             ticks: { color: '#d9d9d9' }
           },
@@ -258,7 +348,7 @@ class DashboardDataLoader {
   }
 
   updateGPUStats() {
-    const gpuData = this.data.gpu_utilization || [];
+    const gpuData = this.data.gpu_utilization || this.generateFallbackData('gpu_utilization.csv');
     if (gpuData.length === 0) return;
 
     const latest = gpuData[gpuData.length - 1];
@@ -266,12 +356,26 @@ class DashboardDataLoader {
     const allocatedEl = document.getElementById('gpuAllocated');
     const busyEl = document.getElementById('gpuBusy');
     
-    if (allocatedEl) allocatedEl.textContent = `${Math.round(latest.allocated_percent || 86)}%`;
-    if (busyEl) busyEl.textContent = `${Math.round(latest.busy_percent || 54)}%`;
+    if (allocatedEl) {
+      const allocated = latest.gpu_allocated_percent || latest.allocated_percent || 86;
+      allocatedEl.textContent = `${Math.round(allocated)}%`;
+    }
+    if (busyEl) {
+      const busy = latest.gpu_busy_percent || latest.busy_percent || 54;
+      busyEl.textContent = `${Math.round(busy)}%`;
+      // Color coding based on the incident
+      if (busy < 60) {
+        busyEl.className = 'metric-value text-red-400 font-semibold';
+      } else if (busy < 80) {
+        busyEl.className = 'metric-value text-yellow-400 font-semibold';
+      } else {
+        busyEl.className = 'metric-value text-green-400 font-semibold';
+      }
+    }
   }
 
   updateSLAStats() {
-    const slaData = this.data.sla_penalty_and_budget || [];
+    const slaData = this.data.sla_penalty_and_budget || this.generateFallbackData('sla_penalty_and_budget.csv');
     if (slaData.length === 0) return;
 
     const latest = slaData[slaData.length - 1];
@@ -279,8 +383,22 @@ class DashboardDataLoader {
     const riskEl = document.getElementById('slaRisk');
     const burnEl = document.getElementById('budgetBurn');
     
-    if (riskEl) riskEl.textContent = `$${(latest.penalty_dollars_per_hour || 47200).toLocaleString()}/hr`;
-    if (burnEl) burnEl.textContent = `$${(latest.budget_burn_dollars || 156000).toLocaleString()}`;
+    if (riskEl) {
+      const penalty = latest.penalty_dollars_per_hour || 47200;
+      riskEl.textContent = `$${Math.round(penalty).toLocaleString()}/hr`;
+      // Color coding for high penalties
+      if (penalty > 40000) {
+        riskEl.className = 'text-2xl font-bold text-red-400';
+      } else if (penalty > 20000) {
+        riskEl.className = 'text-2xl font-bold text-yellow-400';
+      } else {
+        riskEl.className = 'text-2xl font-bold text-green-400';
+      }
+    }
+    if (burnEl) {
+      const burn = latest.budget_burn_dollars || 156000;
+      burnEl.textContent = `$${Math.round(burn).toLocaleString()}`;
+    }
   }
 
   updateDCGMChart() {
@@ -347,17 +465,17 @@ class DashboardDataLoader {
       this.charts.ecn.destroy();
     }
 
-    const ecnData = this.data.network_ecn_rate || [];
+    const ecnData = this.data.network_ecn_rate || this.generateFallbackData('network_ecn_rate.csv');
     
     this.charts.ecn = new window.Chart(ctx, {
       type: 'line',
       data: {
-        labels: ecnData.slice(-30).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        labels: ecnData.slice(-60).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
         datasets: [{
           label: 'ECN Mark Rate (%)',
-          data: ecnData.slice(-30).map((d: any) => d.ecn_mark_rate_percent || (0.2 + Math.random() * 4.6)),
-          borderColor: '#EF4444',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          data: ecnData.slice(-60).map((d: any) => d.ecn_mark_rate_percent),
+          borderColor: '#e02f44',
+          backgroundColor: 'rgba(224, 47, 68, 0.1)',
           tension: 0.4,
           fill: true
         }]
@@ -371,7 +489,12 @@ class DashboardDataLoader {
         scales: {
           y: {
             beginAtZero: true,
-            max: 5,
+            max: 8,
+            title: {
+              display: true,
+              text: 'ECN Mark Rate (%)',
+              color: '#d9d9d9'
+            },
             grid: { color: '#2f2f32' },
             ticks: { color: '#d9d9d9' }
           },
@@ -395,26 +518,26 @@ class DashboardDataLoader {
       this.charts.nvme.destroy();
     }
 
-    const nvmeData = this.data.vast_nvmeof_latency_quantiles || [];
+    const nvmeData = this.data.vast_nvmeof_latency_quantiles || this.generateFallbackData('vast_nvmeof_latency_quantiles.csv');
     
     this.charts.nvme = new window.Chart(ctx, {
       type: 'line',
       data: {
-        labels: nvmeData.slice(-30).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        labels: nvmeData.slice(-60).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
         datasets: [{
           label: 'P50',
-          data: nvmeData.slice(-30).map((d: any) => d.p50 || (0.3 + Math.random() * 0.2)),
-          borderColor: '#10B981',
+          data: nvmeData.slice(-60).map((d: any) => d.p50_ms || d.p50),
+          borderColor: '#73bf69',
           tension: 0.4
         }, {
           label: 'P90',
-          data: nvmeData.slice(-30).map((d: any) => d.p90 || (0.5 + Math.random() * 0.5)),
-          borderColor: '#F59E0B',
+          data: nvmeData.slice(-60).map((d: any) => d.p90_ms || d.p90),
+          borderColor: '#ff9830',
           tension: 0.4
         }, {
           label: 'P99',
-          data: nvmeData.slice(-30).map((d: any) => d.p99 || (0.8 + Math.random() * 2.0)),
-          borderColor: '#EF4444',
+          data: nvmeData.slice(-60).map((d: any) => d.p99_ms || d.p99),
+          borderColor: '#e02f44',
           tension: 0.4
         }]
       },
@@ -427,6 +550,11 @@ class DashboardDataLoader {
         scales: {
           y: {
             beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Latency (ms)',
+              color: '#d9d9d9'
+            },
             grid: { color: '#2f2f32' },
             ticks: { color: '#d9d9d9' }
           },
@@ -697,32 +825,36 @@ class DashboardDataLoader {
       this.charts.composite.destroy();
     }
 
-    const compositeData = this.data.composite_timeline || [];
+    const compositeData = this.data.composite_timeline || this.generateFallbackData('composite_timeline.csv');
     
     this.charts.composite = new window.Chart(ctx, {
       type: 'line',
       data: {
-        labels: compositeData.slice(-50).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        labels: compositeData.slice(-100).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
         datasets: [{
           label: 'ECN Mark Rate (%)',
-          data: compositeData.slice(-50).map((d: any) => d.ecn_mark_rate || (0.2 + Math.random() * 4.6)),
-          borderColor: '#EF4444',
-          yAxisID: 'y'
+          data: compositeData.slice(-100).map((d: any) => d.ecn_mark_rate_percent),
+          borderColor: '#e02f44',
+          backgroundColor: 'rgba(224, 47, 68, 0.1)',
+          tension: 0.4
         }, {
           label: 'NVMe-oF P99 (ms)',
-          data: compositeData.slice(-50).map((d: any) => d.nvme_p99_latency || (0.38 + Math.random() * 2.42)),
-          borderColor: '#F59E0B',
-          yAxisID: 'y1'
+          data: compositeData.slice(-100).map((d: any) => d.nvmeof_p99_ms),
+          borderColor: '#ff9830',
+          backgroundColor: 'rgba(255, 152, 48, 0.1)',
+          tension: 0.4
         }, {
           label: 'GPU Util (%)',
-          data: compositeData.slice(-50).map((d: any) => d.gpu_utilization || (86 - Math.random() * 32)),
-          borderColor: '#76B900',
-          yAxisID: 'y2'
+          data: compositeData.slice(-100).map((d: any) => d.gpu_util_percent),
+          borderColor: '#73bf69',
+          backgroundColor: 'rgba(115, 191, 105, 0.1)',
+          tension: 0.4
         }, {
           label: 'Queue P90 (min)',
-          data: compositeData.slice(-50).map((d: any) => d.queue_wait_p90 || (7 + Math.random() * 24)),
+          data: compositeData.slice(-100).map((d: any) => d.queue_p90_min),
           borderColor: '#8e32e9',
-          yAxisID: 'y3'
+          backgroundColor: 'rgba(142, 50, 233, 0.1)',
+          tension: 0.4
         }]
       },
       options: {
@@ -733,7 +865,15 @@ class DashboardDataLoader {
           intersect: false,
         },
         plugins: {
-          legend: { labels: { color: '#d9d9d9' } }
+          legend: { 
+            labels: { color: '#d9d9d9' },
+            position: 'top'
+          },
+          title: {
+            display: true,
+            text: 'Cross-Domain Impact: ECN↑ → NVMe-oF↑ → GPU↓ → Queue↑',
+            color: '#d9d9d9'
+          }
         },
         scales: {
           x: {
@@ -741,26 +881,14 @@ class DashboardDataLoader {
             ticks: { color: '#d9d9d9' }
           },
           y: {
-            type: 'linear',
-            display: true,
-            position: 'left',
+            beginAtZero: true,
             grid: { color: '#2f2f32' },
-            ticks: { color: '#d9d9d9' }
-          },
-          y1: {
-            type: 'linear',
-            display: false,
-            position: 'right',
-          },
-          y2: {
-            type: 'linear',
-            display: false,
-            position: 'right',
-          },
-          y3: {
-            type: 'linear',
-            display: false,
-            position: 'right',
+            ticks: { color: '#d9d9d9' },
+            title: {
+              display: true,
+              text: 'Normalized Values',
+              color: '#d9d9d9'
+            }
           }
         }
       }
