@@ -1,0 +1,342 @@
+import React from 'react';
+import { Network, Cpu, Activity } from 'lucide-react';
+
+interface NetworkingTabEnhancedProps {
+  config: any;
+  results: any;
+}
+
+// Enhanced networking equipment costs based on research
+const networkingEquipment = {
+  infiniband: {
+    switches: {
+      quantum2_qm9700: { 
+        name: 'Quantum-2 QM9700',
+        ports: 64,
+        speed: 400,
+        price: 250000,
+        power: 2000,
+        reference: 'NVIDIA Quantum-2 Switch'
+      },
+      quantumX800_q3400: {
+        name: 'Quantum-X800 Q3400',
+        ports: 144,
+        speed: 800,
+        price: 400000,
+        power: 3500,
+        reference: 'NVIDIA Quantum-X800'
+      }
+    },
+    cables: {
+      osfp_400g: { price: 1500, power: 3.5 },
+      osfp224_800g: { price: 2500, power: 4 }
+    },
+    transceivers: {
+      dr4_400g: { price: 6000, power: 12 },
+      dr4_800g: { price: 10000, power: 15 }
+    }
+  },
+  ethernet: {
+    switches: {
+      spectrum4_sn5600: {
+        name: 'Spectrum-4 SN5600',
+        ports: 64,
+        speed: 800,
+        price: 150000,
+        power: 1800,
+        reference: 'NVIDIA Spectrum-4'
+      },
+      spectrum3_sn4600: {
+        name: 'Spectrum-3 SN4600',
+        ports: 64,
+        speed: 400,
+        price: 80000,
+        power: 1200,
+        reference: 'NVIDIA Spectrum-3'
+      }
+    },
+    cables: {
+      dac_400g: { price: 800, power: 2 },
+      aoc_800g: { price: 1200, power: 3 }
+    },
+    transceivers: {
+      qsfp_400g: { price: 4000, power: 10 },
+      osfp_800g: { price: 8000, power: 14 }
+    }
+  }
+};
+
+export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ config, results }) => {
+  const { numGPUs, gpuModel, fabricType, enableBluefield } = config;
+  
+  const calculateNetworkingDetails = () => {
+    const isGB200 = gpuModel === 'gb200';
+    const isGB300 = gpuModel === 'gb300';
+    const isInfiniband = fabricType === 'infiniband';
+    
+    // Determine switch type and configuration
+    let switchSpec, cableSpec, transceiverSpec;
+    
+    if (isInfiniband) {
+      if (isGB300) {
+        switchSpec = networkingEquipment.infiniband.switches.quantumX800_q3400;
+        cableSpec = networkingEquipment.infiniband.cables.osfp224_800g;
+        transceiverSpec = networkingEquipment.infiniband.transceivers.dr4_800g;
+      } else {
+        switchSpec = networkingEquipment.infiniband.switches.quantum2_qm9700;
+        cableSpec = networkingEquipment.infiniband.cables.osfp_400g;
+        transceiverSpec = networkingEquipment.infiniband.transceivers.dr4_400g;
+      }
+    } else {
+      if (isGB300 || isGB200) {
+        switchSpec = networkingEquipment.ethernet.switches.spectrum4_sn5600;
+        cableSpec = networkingEquipment.ethernet.cables.aoc_800g;
+        transceiverSpec = networkingEquipment.ethernet.transceivers.osfp_800g;
+      } else {
+        switchSpec = networkingEquipment.ethernet.switches.spectrum3_sn4600;
+        cableSpec = networkingEquipment.ethernet.cables.dac_400g;
+        transceiverSpec = networkingEquipment.ethernet.transceivers.qsfp_400g;
+      }
+    }
+    
+    // Calculate fabric requirements
+    const railsPerGPU = isGB200 || isGB300 ? 9 : 8;
+    const totalPorts = numGPUs * railsPerGPU;
+    
+    // Clos fabric calculations - Pod-based architecture
+    const gpusPerPod = 1024; // Standard pod size
+    const numPods = Math.ceil(numGPUs / gpusPerPod);
+    
+    // Leaf switches (ToR)
+    const gpusPerLeaf = 64; // Typical for high-radix switches
+    const leafSwitchesPerPod = Math.ceil(gpusPerPod / gpusPerLeaf);
+    const totalLeafSwitches = leafSwitchesPerPod * numPods;
+    
+    // Spine switches (aggregation)
+    const spineRadix = switchSpec.ports;
+    const spineSwitchesPerPod = Math.ceil(leafSwitchesPerPod * railsPerGPU / spineRadix);
+    const totalSpineSwitches = spineSwitchesPerPod * numPods;
+    
+    // Core switches (for inter-pod connectivity)
+    const coreSwitches = numGPUs > 50000 ? 64 : (numGPUs > 25000 ? 32 : 16);
+    
+    // Cable calculations
+    const intraPodCables = totalLeafSwitches * railsPerGPU * gpusPerLeaf;
+    const interPodCables = coreSwitches * spineRadix * numPods;
+    const totalCables = intraPodCables + interPodCables;
+    const totalTransceivers = totalCables * 2; // Both ends
+    
+    // BlueField-3 DPU calculations
+    let dpuCount = 0;
+    let dpuCost = 0;
+    let dpuPower = 0;
+    
+    if (enableBluefield) {
+      // One BlueField-3 per compute node (8 GPUs for H100, 2 per tray for GB200/300)
+      if (isGB200 || isGB300) {
+        dpuCount = Math.ceil(numGPUs / 2); // One per compute tray (2 GPUs)
+      } else {
+        dpuCount = Math.ceil(numGPUs / 8); // One per DGX node
+      }
+      dpuCost = dpuCount * 2500; // BlueField-3 SuperNIC price
+      dpuPower = dpuCount * 75; // 75W per DPU
+    }
+    
+    // Cost calculations
+    const switchCost = (totalLeafSwitches + totalSpineSwitches + coreSwitches) * switchSpec.price;
+    const cableCost = totalCables * cableSpec.price;
+    const transceiverCost = totalTransceivers * transceiverSpec.price;
+    
+    // Power calculations
+    const switchPower = (totalLeafSwitches + totalSpineSwitches + coreSwitches) * switchSpec.power;
+    const cablePower = totalCables * cableSpec.power;
+    const transceiverPower = totalTransceivers * transceiverSpec.power;
+    
+    // Total bandwidth calculations
+    const bisectionBandwidth = (coreSwitches * switchSpec.ports * switchSpec.speed) / 8; // Gbps to GBps
+    const totalBandwidth = numGPUs * switchSpec.speed * railsPerGPU / 8; // Theoretical max
+    
+    return {
+      switchSpec,
+      topology: {
+        leafSwitches: totalLeafSwitches,
+        spineSwitches: totalSpineSwitches,
+        coreSwitches,
+        totalSwitches: totalLeafSwitches + totalSpineSwitches + coreSwitches,
+        pods: numPods,
+        railsPerGPU
+      },
+      cables: {
+        total: totalCables,
+        intraPod: intraPodCables,
+        interPod: interPodCables
+      },
+      transceivers: totalTransceivers,
+      dpus: {
+        count: dpuCount,
+        cost: dpuCost,
+        power: dpuPower
+      },
+      costs: {
+        switches: switchCost,
+        cables: cableCost,
+        transceivers: transceiverCost,
+        dpus: dpuCost,
+        total: switchCost + cableCost + transceiverCost + dpuCost
+      },
+      power: {
+        switches: switchPower,
+        cables: cablePower,
+        transceivers: transceiverPower,
+        dpus: dpuPower,
+        total: switchPower + cablePower + transceiverPower + dpuPower
+      },
+      bandwidth: {
+        bisection: bisectionBandwidth,
+        theoretical: totalBandwidth,
+        perGPU: switchSpec.speed * railsPerGPU
+      }
+    };
+  };
+  
+  const networkDetails = calculateNetworkingDetails();
+  
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-200 pb-3">
+        Network Architecture Analysis
+      </h2>
+      
+      {/* Fabric Overview */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+        <h3 className="flex items-center gap-2 text-lg font-bold text-blue-800 mb-2">
+          <Network className="w-5 h-5" />
+          Clos Fabric Architecture - Pod-Based Design
+        </h3>
+        <p className="text-gray-700 mb-3">
+          {networkDetails.topology.pods} pods × {1024} GPUs each, {networkDetails.topology.railsPerGPU} rails per GPU
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+          <div className="bg-white p-3 rounded-lg">
+            <div className="text-xs text-gray-500">Leaf Switches (ToR)</div>
+            <div className="text-xl font-bold">{networkDetails.topology.leafSwitches}</div>
+            <div className="text-xs text-gray-500">{networkDetails.switchSpec.name}</div>
+          </div>
+          <div className="bg-white p-3 rounded-lg">
+            <div className="text-xs text-gray-500">Spine Switches</div>
+            <div className="text-xl font-bold">{networkDetails.topology.spineSwitches}</div>
+            <div className="text-xs text-gray-500">{networkDetails.switchSpec.ports} ports @ {networkDetails.switchSpec.speed}G</div>
+          </div>
+          <div className="bg-white p-3 rounded-lg">
+            <div className="text-xs text-gray-500">Core Switches</div>
+            <div className="text-xl font-bold">{networkDetails.topology.coreSwitches}</div>
+            <div className="text-xs text-gray-500">Inter-pod routing</div>
+          </div>
+        </div>
+      </div>
+      
+      {/* BlueField-3 DPU Integration */}
+      {config.enableBluefield && (
+        <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-lg">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-purple-800 mb-2">
+            <Cpu className="w-5 h-5" />
+            BlueField-3 DPU Integration
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-xs text-gray-500">DPU Count</div>
+              <div className="text-xl font-bold">{networkDetails.dpus.count.toLocaleString()}</div>
+              <div className="text-xs text-gray-500">SuperNICs deployed</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-xs text-gray-500">DPU Power</div>
+              <div className="text-xl font-bold">{(networkDetails.dpus.power / 1000).toFixed(1)} kW</div>
+              <div className="text-xs text-gray-500">75W per DPU</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-xs text-gray-500">DPU Cost</div>
+              <div className="text-xl font-bold">${(networkDetails.dpus.cost / 1000000).toFixed(2)}M</div>
+              <div className="text-xs text-gray-500">$2,500 per unit</div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Cost Breakdown */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <h3 className="text-lg font-bold text-gray-800 p-4 border-b border-gray-200">
+          Networking Infrastructure Costs
+        </h3>
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Component</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Unit Cost</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Total Cost</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Power (kW)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-gray-200">
+              <td className="px-4 py-3">Switches (All Tiers)</td>
+              <td className="px-4 py-3">{networkDetails.topology.totalSwitches.toLocaleString()}</td>
+              <td className="px-4 py-3">${networkDetails.switchSpec.price.toLocaleString()}</td>
+              <td className="px-4 py-3">${(networkDetails.costs.switches / 1000000).toFixed(2)}M</td>
+              <td className="px-4 py-3">{(networkDetails.power.switches / 1000).toFixed(1)}</td>
+            </tr>
+            <tr className="border-b border-gray-200">
+              <td className="px-4 py-3">Cables</td>
+              <td className="px-4 py-3">{networkDetails.cables.total.toLocaleString()}</td>
+              <td className="px-4 py-3">${fabricType === 'infiniband' ? '1,500-2,500' : '800-1,200'}</td>
+              <td className="px-4 py-3">${(networkDetails.costs.cables / 1000000).toFixed(2)}M</td>
+              <td className="px-4 py-3">{(networkDetails.power.cables / 1000).toFixed(1)}</td>
+            </tr>
+            <tr className="border-b border-gray-200">
+              <td className="px-4 py-3">Transceivers</td>
+              <td className="px-4 py-3">{networkDetails.transceivers.toLocaleString()}</td>
+              <td className="px-4 py-3">${fabricType === 'infiniband' ? '6,000-10,000' : '4,000-8,000'}</td>
+              <td className="px-4 py-3">${(networkDetails.costs.transceivers / 1000000).toFixed(2)}M</td>
+              <td className="px-4 py-3">{(networkDetails.power.transceivers / 1000).toFixed(1)}</td>
+            </tr>
+            {config.enableBluefield && (
+              <tr className="border-b border-gray-200">
+                <td className="px-4 py-3">BlueField-3 DPUs</td>
+                <td className="px-4 py-3">{networkDetails.dpus.count.toLocaleString()}</td>
+                <td className="px-4 py-3">$2,500</td>
+                <td className="px-4 py-3">${(networkDetails.dpus.cost / 1000000).toFixed(2)}M</td>
+                <td className="px-4 py-3">{(networkDetails.dpus.power / 1000).toFixed(1)}</td>
+              </tr>
+            )}
+            <tr className="bg-yellow-50 font-bold">
+              <td className="px-4 py-3">TOTAL</td>
+              <td className="px-4 py-3"></td>
+              <td className="px-4 py-3"></td>
+              <td className="px-4 py-3">${(networkDetails.costs.total / 1000000).toFixed(2)}M</td>
+              <td className="px-4 py-3">{(networkDetails.power.total / 1000).toFixed(1)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      {/* Bandwidth Analysis */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow p-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Bisection Bandwidth</h4>
+          <div className="text-2xl font-bold text-gray-900">{(networkDetails.bandwidth.bisection / 1000).toFixed(1)} TB/s</div>
+          <div className="text-xs text-gray-500">Full bisection @ 1:1</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Per-GPU Bandwidth</h4>
+          <div className="text-2xl font-bold text-gray-900">{networkDetails.bandwidth.perGPU} Gbps</div>
+          <div className="text-xs text-gray-500">{networkDetails.topology.railsPerGPU} rails × {networkDetails.switchSpec.speed}G</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Aggregate Bandwidth</h4>
+          <div className="text-2xl font-bold text-gray-900">{(networkDetails.bandwidth.theoretical / 1000).toFixed(1)} TB/s</div>
+          <div className="text-xs text-gray-500">Theoretical maximum</div>
+        </div>
+      </div>
+    </div>
+  );
+};

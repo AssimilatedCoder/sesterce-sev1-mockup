@@ -6,10 +6,10 @@ import {
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
 import { CalculatorTabEnhanced } from './tabs/CalculatorTabEnhanced';
-import { NetworkingTab } from './tabs/NetworkingTab';
+import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
 import { StorageTab } from './tabs/StorageTab';
-import { CoolingPowerTab } from './tabs/CoolingPowerTab';
-import { FormulasTab } from './tabs/FormulasTab';
+import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
+import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { formatNumber } from '../utils/formatters';
 
@@ -450,7 +450,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             )}
             
             {activeTab === 'networking' && (
-              <NetworkingTab config={config} results={results} />
+              <NetworkingTabEnhanced config={config} results={results} />
             )}
             
             {activeTab === 'storage' && (
@@ -458,11 +458,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             )}
             
             {activeTab === 'cooling' && (
-              <CoolingPowerTab config={config} results={results} />
+              <CoolingPowerTabEnhanced config={config} results={results} />
             )}
             
             {activeTab === 'formulas' && (
-              <FormulasTab />
+              <FormulasTabEnhanced />
             )}
             
             {activeTab === 'references' && (
