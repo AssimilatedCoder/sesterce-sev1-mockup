@@ -4,7 +4,7 @@ import { Container } from './components/layout/Container';
 import { TabNavigation } from './components/features/TabNavigation';
 import { GrafanaDashboard } from './components/features/GrafanaDashboard';
 import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboardOriginal';
-import GPUSuperclusterCalculatorV5 from './components/GPUSuperclusterCalculatorV5';
+import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Activity, Calculator } from 'lucide-react';
 
 function App() {
@@ -48,7 +48,7 @@ function App() {
         {/* Tab Content */}
         <div className="min-h-screen">
           {activeTab === 'dashboard' && <GrafanaDashboardOriginal />}
-          {activeTab === 'calculator' && <GPUSuperclusterCalculatorV5 />}
+          {activeTab === 'calculator' && <GPUSuperclusterCalculatorV5Enhanced />}
         </div>
       </main>
     </div>

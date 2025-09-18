@@ -557,7 +557,7 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
         Calculate Complete Infrastructure TCO
       </button>
       
-      {/* Results Section - keeping existing results display */}
+      {/* Results Section */}
       {results && (
         <>
           {/* Key Metrics */}
@@ -587,7 +587,97 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
             </div>
           </div>
           
-          {/* Additional metrics and breakdown tables would follow here... */}
+          {/* Power and Infrastructure Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-xs text-gray-500 mb-1">Total Power</div>
+              <div className="text-2xl font-bold text-gray-900">{results.totalPowerMW.toFixed(1)} MW</div>
+              <div className="text-xs text-gray-500">With PUE {results.pueValue.toFixed(2)}</div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-xs text-gray-500 mb-1">Network Bandwidth</div>
+              <div className="text-2xl font-bold text-gray-900">{results.networkBandwidth.toFixed(1)} Tbps</div>
+              <div className="text-xs text-gray-500">{config.fabricType === 'infiniband' ? 'InfiniBand' : 'Ethernet'}</div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-xs text-gray-500 mb-1">Storage $/GB/mo</div>
+              <div className="text-2xl font-bold text-gray-900">${results.storageGbMonth.toFixed(4)}</div>
+              <div className="text-xs text-gray-500">Blended rate</div>
+            </div>
+          </div>
+
+          {/* CAPEX Breakdown Table */}
+          {results.capexBreakdown && (
+            <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <h3 className="text-lg font-semibold text-gray-800 p-4 bg-gray-50">CAPEX Breakdown</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b">
+                      <th className="text-left px-4 py-2 font-semibold text-gray-700">Component</th>
+                      <th className="text-left px-4 py-2 font-semibold text-gray-700">Unit Cost</th>
+                      <th className="text-right px-4 py-2 font-semibold text-gray-700">Quantity</th>
+                      <th className="text-right px-4 py-2 font-semibold text-gray-700">Total Cost</th>
+                      <th className="text-right px-4 py-2 font-semibold text-gray-700">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.capexBreakdown.map((item: any, index: number) => (
+                      <tr key={index} className={`border-b ${item.name.startsWith('├') || item.name.startsWith('└') ? 'bg-gray-50' : ''}`}>
+                        <td className="px-4 py-2">{item.name}</td>
+                        <td className="px-4 py-2">{item.unit}</td>
+                        <td className="text-right px-4 py-2">{item.qty}</td>
+                        <td className="text-right px-4 py-2 font-medium">{formatNumber(item.total)}</td>
+                        <td className="text-right px-4 py-2 text-gray-600">{item.pct}%</td>
+                      </tr>
+                    ))}
+                    <tr className="font-bold bg-gray-100">
+                      <td colSpan={3} className="px-4 py-2">Total CAPEX</td>
+                      <td className="text-right px-4 py-2">{formatNumber(results.totalCapex)}</td>
+                      <td className="text-right px-4 py-2">100%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* OPEX Breakdown Table */}
+          {results.opexBreakdown && (
+            <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <h3 className="text-lg font-semibold text-gray-800 p-4 bg-gray-50">Annual OPEX Breakdown</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b">
+                      <th className="text-left px-4 py-2 font-semibold text-gray-700">Category</th>
+                      <th className="text-right px-4 py-2 font-semibold text-gray-700">Annual Cost</th>
+                      <th className="text-right px-4 py-2 font-semibold text-gray-700">%</th>
+                      <th className="text-left px-4 py-2 font-semibold text-gray-700">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.opexBreakdown.map((item: any, index: number) => (
+                      <tr key={index} className="border-b">
+                        <td className="px-4 py-2">{item.name}</td>
+                        <td className="text-right px-4 py-2 font-medium">{formatNumber(item.amount)}</td>
+                        <td className="text-right px-4 py-2 text-gray-600">{item.pct}%</td>
+                        <td className="px-4 py-2 text-gray-600 text-xs">{item.notes}</td>
+                      </tr>
+                    ))}
+                    <tr className="font-bold bg-gray-100">
+                      <td className="px-4 py-2">Total Annual OPEX</td>
+                      <td className="text-right px-4 py-2">{formatNumber(results.annualOpex)}</td>
+                      <td className="text-right px-4 py-2">100%</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

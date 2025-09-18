@@ -4,6 +4,7 @@ import {
   Building2, FileText, BookOpen, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
+import { storageVendors } from '../data/storageVendors';
 import { CalculatorTabEnhanced } from './tabs/CalculatorTabEnhanced';
 import { NetworkingTab } from './tabs/NetworkingTab';
 import { StorageTab } from './tabs/StorageTab';
