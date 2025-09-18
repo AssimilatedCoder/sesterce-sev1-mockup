@@ -337,6 +337,98 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
           <div className="text-xs text-gray-500">Theoretical maximum</div>
         </div>
       </div>
+
+      {/* Network Architecture Details */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-gray-200">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Network className="w-5 h-5 text-blue-600" />
+          Network Architecture Details
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-gray-700 mb-3">Fabric Specifications</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Switch Model:</span>
+                <span className="font-medium">{networkDetails.switchSpec.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Port Count:</span>
+                <span className="font-medium">{networkDetails.switchSpec.ports} ports</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Port Speed:</span>
+                <span className="font-medium">{networkDetails.switchSpec.speed}G</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Switch Power:</span>
+                <span className="font-medium">{(networkDetails.switchSpec.power / 1000).toFixed(1)}kW</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-700 mb-3">Topology Configuration</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Architecture:</span>
+                <span className="font-medium">3-Tier Clos (Fat-Tree)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Oversubscription:</span>
+                <span className="font-medium">1:1 (Non-blocking)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Rails per GPU:</span>
+                <span className="font-medium">{networkDetails.topology.railsPerGPU}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Pod Size:</span>
+                <span className="font-medium">1,024 GPUs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Performance Characteristics */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Activity className="w-5 h-5 text-green-600" />
+          Network Performance Characteristics
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-2">Latency</h4>
+            <p className="text-2xl font-bold text-green-600">{'< 2 μs'}</p>
+            <p className="text-sm text-gray-600">End-to-end within pod</p>
+            <div className="mt-2 text-xs text-gray-500">
+              • Switch latency: ~300ns
+              <br />• Cable latency: ~5ns/m
+              <br />• RDMA/RoCEv2 optimized
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-2">Throughput</h4>
+            <p className="text-2xl font-bold text-blue-600">{networkDetails.bandwidth.perGPU} Gbps</p>
+            <p className="text-sm text-gray-600">Per GPU sustained</p>
+            <div className="mt-2 text-xs text-gray-500">
+              • Line rate performance
+              <br />• Zero packet loss
+              <br />• Adaptive routing
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-2">Scalability</h4>
+            <p className="text-2xl font-bold text-purple-600">{networkDetails.topology.pods}</p>
+            <p className="text-sm text-gray-600">Pods deployed</p>
+            <div className="mt-2 text-xs text-gray-500">
+              • Linear scaling
+              <br />• Pod-to-pod routing
+              <br />• Hierarchical QoS
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

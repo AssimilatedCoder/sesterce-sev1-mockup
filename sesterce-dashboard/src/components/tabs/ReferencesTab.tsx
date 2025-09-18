@@ -95,35 +95,115 @@ export const ReferencesTab: React.FC = () => {
           Technical Documentation & Resources
         </h3>
         
-        {/* NVIDIA Reference Architectures */}
-        <div className="mb-6">
-          <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <Server className="w-4 h-4" />
-            NVIDIA DGX SuperPOD Reference Architectures
-          </h4>
-          <div className="space-y-2 pl-6">
-            <div className="text-sm">
-              <span className="font-medium text-gray-700">RA-11338-001:</span>
-              <span className="text-gray-600"> NVIDIA DGX SuperPOD GB200 Reference Architecture</span>
-            </div>
-            <div className="text-sm">
-              <span className="font-medium text-gray-700">RA-11337-001:</span>
-              <span className="text-gray-600"> NVIDIA DGX SuperPOD B300 Reference Architecture</span>
-            </div>
-            <div className="text-sm">
-              <span className="font-medium text-gray-700">RA-11339-001:</span>
-              <span className="text-gray-600"> NVIDIA SuperPOD B300 XDR Reference Architecture</span>
-            </div>
-            <div className="text-sm">
-              <span className="font-medium text-gray-700">RA-11334-001:</span>
-              <span className="text-gray-600"> NVIDIA DGX SuperPOD B200 Reference Architecture</span>
-            </div>
-            <div className="text-sm">
-              <span className="font-medium text-gray-700">RA-11336-001:</span>
-              <span className="text-gray-600"> NVIDIA DGX SuperPOD H200 Reference Architecture</span>
-            </div>
-          </div>
-        </div>
+              {/* NVIDIA Official Documentation */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Server className="w-4 h-4" />
+                    NVIDIA Official Documentation
+                  </h4>
+                  <div className="space-y-3 pl-6">
+                    <div className="border-l-4 border-blue-200 pl-4 hover:border-blue-400 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-800">
+                            <a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                              GB200 NVL72 Datasheet <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">120kW rack power, 1200W per GPU</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border-l-4 border-blue-200 pl-4 hover:border-blue-400 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-800">
+                            <a href="https://www.nvidia.com/en-us/data-center/gb300-nvl72/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                              GB300 Specifications <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">135-140kW rack, 1400W per GPU</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border-l-4 border-blue-200 pl-4 hover:border-blue-400 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-800">
+                            <a href="https://www.nvidia.com/en-us/data-center/h100/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                              H100 Technical Brief <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">700W SXM5, 350W PCIe variants</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border-l-4 border-blue-200 pl-4 hover:border-blue-400 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-800">
+                            <a href="https://www.nvidia.com/en-us/data-center/dgx-superpod/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                              DGX SuperPOD Architecture <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">Reference architecture for scale</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Networking Architecture */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Cpu className="w-4 h-4" />
+                    Networking Architecture
+                  </h4>
+                  <div className="space-y-2 pl-6">
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">Quantum-2 QM9700 Switch:</span>
+                      <span className="text-gray-600"> 64 ports @ 400G InfiniBand</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">Spectrum-4 SN5600:</span>
+                      <span className="text-gray-600"> 64 ports @ 800G Ethernet, 51.2 Tbps</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">BlueField-3 DPU:</span>
+                      <span className="text-gray-600"> 75W power, RDMA offload, $2,500 per unit</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">ConnectX-7/8 SuperNIC:</span>
+                      <span className="text-gray-600"> 400G/800G connectivity, 25W/35W power</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cooling Systems */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Zap className="w-4 h-4" />
+                    Cooling Systems
+                  </h4>
+                  <div className="space-y-2 pl-6">
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">CoolIT CHx2000 CDU:</span>
+                      <span className="text-gray-600"> 2MW capacity, supports 12 GB200 racks</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">Motivair 2.3MW CDU:</span>
+                      <span className="text-gray-600"> Supports 15 GB200 racks, N+1 redundancy</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">Google PUE Achievement:</span>
+                      <span className="text-gray-600"> 1.09 PUE with liquid cooling</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">Liquid Cooling Specs:</span>
+                      <span className="text-gray-600"> 25°C inlet, 2L/s flow, 30% glycol</span>
+                    </div>
+                  </div>
+                </div>
 
         {/* Software & Management */}
         <div className="mb-6">
@@ -261,6 +341,63 @@ export const ReferencesTab: React.FC = () => {
           regional factors, and specific deployment requirements. This calculator provides estimates for planning 
           purposes only.
         </p>
+      </div>
+
+      {/* Production Deployments */}
+      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-purple-600" />
+          Production Deployments
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border-l-4 border-purple-200 pl-4 hover:border-purple-400 transition-colors">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800">xAI Colossus</div>
+                <div className="text-sm text-gray-600 mt-1">230,000 GPUs, 250MW facility, Spectrum-X</div>
+              </div>
+            </div>
+          </div>
+          <div className="border-l-4 border-purple-200 pl-4 hover:border-purple-400 transition-colors">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800">Meta RSC Evolution</div>
+                <div className="text-sm text-gray-600 mt-1">350,000 H100-equivalent by 2024</div>
+              </div>
+            </div>
+          </div>
+          <div className="border-l-4 border-purple-200 pl-4 hover:border-purple-400 transition-colors">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800">Microsoft Orders</div>
+                <div className="text-sm text-gray-600 mt-1">1,400-1,500 GB200 racks (70% NVL72)</div>
+              </div>
+            </div>
+          </div>
+          <div className="border-l-4 border-purple-200 pl-4 hover:border-purple-400 transition-colors">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800">Amazon Deployment</div>
+                <div className="text-sm text-gray-600 mt-1">300-400 NVL36 transitioning to GB300</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Important Notes */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <h3 className="flex items-center gap-2 text-lg font-bold text-yellow-800 mb-2">
+          <FileText className="w-5 h-5" />
+          Important Notes
+        </h3>
+        <ul className="space-y-1 text-sm text-gray-700">
+          <li>• All power specifications verified from vendor documentation</li>
+          <li>• Pricing based on Q4 2024/Q1 2025 market rates</li>
+          <li>• GB300 specifications based on announced features (GTC 2025)</li>
+          <li>• PUE values from production deployments</li>
+          <li>• Add 12.5% GPU overhead for hot spares (recommended by NVIDIA)</li>
+        </ul>
       </div>
     </div>
   );

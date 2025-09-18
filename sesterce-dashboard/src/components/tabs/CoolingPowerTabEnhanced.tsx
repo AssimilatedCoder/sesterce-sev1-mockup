@@ -1,5 +1,5 @@
 import React from 'react';
-import { Thermometer, Zap, Droplets, AlertTriangle } from 'lucide-react';
+import { Thermometer, Zap, Droplets, AlertTriangle, Building2 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 
 interface CoolingPowerTabEnhancedProps {
@@ -398,6 +398,143 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
             <div className="border-t pt-2 flex justify-between">
               <span className="text-sm font-bold">Total Annual OPEX</span>
               <span className="text-sm font-bold">${(coolingDetails.costs.operating.total / 1000000).toFixed(2)}M</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Liquid Cooling System Architecture */}
+      {coolingType === 'liquid' && (
+        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Droplets className="w-5 h-5 text-blue-600" />
+            Liquid Cooling System Architecture
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold text-gray-700 mb-3">Primary Loop (Facility)</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  Cooling towers or dry coolers
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  15°C supply / 25°C return typical
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  N+1 redundancy required
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  Variable speed pumps for efficiency
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-700 mb-3">Secondary Loop (IT)</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">•</span>
+                  CDU per 2-4 racks
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">•</span>
+                  Direct-to-chip cold plates
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">•</span>
+                  25°C supply / 35°C return
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">•</span>
+                  Leak detection mandatory
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Power Infrastructure Requirements */}
+      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg border border-gray-200">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Zap className="w-5 h-5 text-yellow-600" />
+          Power Infrastructure Requirements
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <h4 className="font-semibold text-gray-700 mb-2">Electrical Distribution</h4>
+            <div className="space-y-1 text-sm">
+              <p>• {Math.ceil((coolingDetails.power.totalFacility / 1000000) / 2.5)} × 2.5MW feeds</p>
+              <p>• 2N UPS configuration</p>
+              <p>• 480V 3-phase distribution</p>
+              <p>• {coolingDetails.powerDistribution.totalPDUs} PDUs total</p>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-700 mb-2">Backup Systems</h4>
+            <div className="space-y-1 text-sm">
+              <p>• N+1 generator redundancy</p>
+              <p>• 15-minute UPS runtime</p>
+              <p>• Automatic transfer switches</p>
+              <p>• Load bank testing monthly</p>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-700 mb-2">Monitoring & Control</h4>
+            <div className="space-y-1 text-sm">
+              <p>• Real-time power monitoring</p>
+              <p>• Automated load balancing</p>
+              <p>• PUE tracking & optimization</p>
+              <p>• Predictive maintenance</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Facility Space Requirements */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-gray-600" />
+          Facility Space Requirements
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-2">IT Space</h4>
+            <p className="text-2xl font-bold text-blue-600">
+              {((coolingDetails.powerDistribution.racksTotal) * 10).toFixed(0)} sq ft
+            </p>
+            <p className="text-sm text-gray-600">White space for racks</p>
+            <div className="mt-2 text-xs text-gray-500">
+              • 10 sq ft per rack
+              <br />• Hot/cold aisle containment
+              <br />• 12-15 ft ceiling minimum
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-2">Mechanical Space</h4>
+            <p className="text-2xl font-bold text-green-600">
+              {((coolingDetails.powerDistribution.racksTotal) * 5).toFixed(0)} sq ft
+            </p>
+            <p className="text-sm text-gray-600">Cooling & power equipment</p>
+            <div className="mt-2 text-xs text-gray-500">
+              • CDUs and pumps
+              <br />• Electrical switchgear
+              <br />• Monitoring systems
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-2">Total Footprint</h4>
+            <p className="text-2xl font-bold text-purple-600">
+              {((coolingDetails.powerDistribution.racksTotal) * 15).toFixed(0)} sq ft
+            </p>
+            <p className="text-sm text-gray-600">Complete facility</p>
+            <div className="mt-2 text-xs text-gray-500">
+              • Including support areas
+              <br />• Office & staging space
+              <br />• Emergency egress paths
             </div>
           </div>
         </div>
