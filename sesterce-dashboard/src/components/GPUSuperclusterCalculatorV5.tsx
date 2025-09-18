@@ -13,7 +13,7 @@ import { ReferencesTab } from './tabs/ReferencesTab';
 import { formatNumber } from '../utils/formatters';
 
 // Region rates with more comprehensive data
-const regionRates = {
+const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
   'us-texas': { rate: 0.047, name: 'US Texas', pue: 1.15 },
   'us-virginia': { rate: 0.085, name: 'US Virginia', pue: 1.2 },
   'us-california': { rate: 0.150, name: 'US California', pue: 1.25 },
@@ -22,7 +22,13 @@ const regionRates = {
 };
 
 // Network fabric specifications
-const networkFabrics = {
+const networkFabrics: Record<string, {
+  name: string;
+  switchPrice: number;
+  cablePrice: number;
+  transceiverPrice: number;
+  bandwidthPerGpu: number;
+}> = {
   'infiniband': {
     name: 'InfiniBand',
     switchPrice: 120000,

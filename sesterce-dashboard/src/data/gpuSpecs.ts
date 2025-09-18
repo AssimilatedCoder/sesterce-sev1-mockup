@@ -1,4 +1,15 @@
-export const gpuSpecs: any = {
+interface GPUSpec {
+  name: string;
+  powerPerGPU: number;
+  memoryPerGPU: number;
+  unitPrice: number;
+  rackSize: number;
+  coolingOptions: string[];
+  pue: Record<string, number>;
+  reference: string;
+}
+
+export const gpuSpecs: Record<string, GPUSpec> = {
   'gb200': {
     name: 'GB200 NVL72',
     powerPerGPU: 1200,
