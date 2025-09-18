@@ -9,37 +9,152 @@ case "$1" in
     start)
         echo "🚀 Starting Sesterce React Dashboard..."
         
+        # Detect OS
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            IS_UBUNTU=true
+        else
+            IS_UBUNTU=false
+        fi
+        
+        # Check if React app exists
+        if [ ! -d "$SCRIPT_DIR/sesterce-dashboard" ]; then
+            echo "❌ React app directory not found. Run setup first:"
+            echo "   ./setup-react-dashboard.sh"
+            exit 1
+        fi
+        
         # Build if needed
         if [ ! -d "$BUILD_DIR" ]; then
             echo "📦 Building React app..."
             cd "$SCRIPT_DIR/sesterce-dashboard"
+            
+            # Install dependencies if needed
+            if [ ! -d "node_modules" ]; then
+                echo "📦 Installing dependencies..."
+                npm install
+            fi
+            
             npm run build
+            if [ $? -ne 0 ]; then
+                echo "❌ Build failed. Check Node.js installation:"
+                echo "   node --version && npm --version"
+                exit 1
+            fi
         fi
         
         # Stop existing nginx
+        if [ "$IS_UBUNTU" = true ]; then
+            sudo systemctl stop nginx 2>/dev/null || true
+        else
+            sudo nginx -s stop 2>/dev/null || true
+        fi
         sudo pkill nginx 2>/dev/null || true
         
-        # Update and install nginx config
-        sed "s|/Users/avanhuys/Projects/Grafana\\\\ Sesterce/sesterce-dashboard/build|$BUILD_DIR|g" \
-            "$SCRIPT_DIR/nginx-sesterce-dashboard.conf" > /tmp/nginx-sesterce-dashboard.conf
+        # Create nginx config with correct paths
+        cat > /tmp/nginx-sesterce-dashboard.conf << EOF
+server {
+    listen 7777;
+    listen [::]:7777;
+    
+    server_name _;
+    root $BUILD_DIR;
+    index index.html;
+    
+    # Enable CORS for all requests
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+    add_header Access-Control-Allow-Headers "Content-Type";
+    
+    # Serve the React app
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+    
+    # Serve static files with caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Access-Control-Allow-Origin *;
+    }
+    
+    # Handle CSV and log files from the telemetry data
+    location /superpod_sev1_fake_telemetry/ {
+        add_header Access-Control-Allow-Origin *;
+        add_header Content-Type "text/plain";
+    }
+    
+    # Handle the dashboard data loader
+    location /dashboard-data-loader.js {
+        add_header Access-Control-Allow-Origin *;
+        add_header Content-Type "application/javascript";
+    }
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/xml+rss
+        application/json;
+}
+EOF
         
-        sudo cp /tmp/nginx-sesterce-dashboard.conf /usr/local/etc/nginx/servers/ 2>/dev/null || \
-        sudo cp /tmp/nginx-sesterce-dashboard.conf /etc/nginx/sites-available/sesterce-dashboard
-        
-        if [ -d "/etc/nginx/sites-enabled" ]; then
+        # Install nginx config
+        if [ "$IS_UBUNTU" = true ]; then
+            sudo cp /tmp/nginx-sesterce-dashboard.conf /etc/nginx/sites-available/sesterce-dashboard
             sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/
+            sudo rm -f /etc/nginx/sites-enabled/default
+        else
+            sudo mkdir -p /usr/local/etc/nginx/servers
+            sudo cp /tmp/nginx-sesterce-dashboard.conf /usr/local/etc/nginx/servers/sesterce-dashboard.conf
         fi
         
-        # Start nginx
-        sudo nginx
+        # Fix permissions
+        if [ "$IS_UBUNTU" = true ]; then
+            chmod 755 "$HOME" 2>/dev/null || true
+            chmod 755 "$HOME/Projects" 2>/dev/null || true
+            chmod 755 "$SCRIPT_DIR"
+            chmod 755 "$SCRIPT_DIR/sesterce-dashboard"
+            chmod -R 755 "$BUILD_DIR"
+        else
+            chmod -R 755 "$BUILD_DIR"
+        fi
         
+        # Test and start nginx
+        sudo nginx -t
+        if [ $? -ne 0 ]; then
+            echo "❌ nginx configuration test failed"
+            exit 1
+        fi
+        
+        if [ "$IS_UBUNTU" = true ]; then
+            sudo systemctl start nginx
+        else
+            sudo nginx
+        fi
+        
+        # Check if nginx started
+        sleep 2
         if pgrep nginx > /dev/null; then
-            LOCAL_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1)
+            if [ "$IS_UBUNTU" = true ]; then
+                LOCAL_IP=$(ip route get 1.1.1.1 | grep -oP 'src \K\S+' 2>/dev/null || hostname -I | awk '{print $1}')
+            else
+                LOCAL_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1)
+            fi
             echo "✅ Dashboard running at http://localhost:7777"
             [ ! -z "$LOCAL_IP" ] && echo "🌐 Network: http://$LOCAL_IP:7777"
         else
             echo "❌ Failed to start nginx"
+            echo "📋 Check logs: sudo tail -20 /var/log/nginx/error.log"
         fi
+        
+        # Clean up
+        rm -f /tmp/nginx-sesterce-dashboard.conf
         ;;
     
     stop)
