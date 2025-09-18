@@ -936,17 +936,88 @@ class DashboardDataLoader {
 
   async initialize() {
     console.log('🚀 Initializing SEV-1 Dashboard...');
-    console.log('📊 Data available:', Object.keys(this.data));
+    console.log('📊 Fallback data available:', Object.keys(this.data));
     
-    // Data is already loaded in constructor, so render immediately
+    // Render charts with fallback data first (immediate display)
     this.renderAllCharts();
     
-    // DISABLED: Don't load real CSV data - use ONLY your synthetic incident data
-    // this.loadRealDataInBackground();
+    // Load YOUR REAL synthetic CSV files and replace fallback data
+    await this.loadRealSyntheticData();
     
-    console.log('🎯 Using ONLY synthetic incident data - no CSV override!');
+    console.log('✅ SEV-1 Dashboard initialized with YOUR synthetic data files!');
+  }
+
+  async loadRealSyntheticData() {
+    console.log('🔄 Loading YOUR real synthetic CSV files...');
     
-    console.log('✅ SEV-1 Dashboard initialized with incident data!');
+    const csvFiles = [
+      'queue_wait_quantiles.csv',
+      'gpu_utilization.csv', 
+      'sla_penalty_and_budget.csv',
+      'composite_timeline.csv',
+      'dcgm_util_by_node.csv',
+      'network_ecn_rate.csv',
+      'vast_nvmeof_latency_quantiles.csv',
+      'pfc_pause_rx.csv',
+      'per_link_utilization.csv',
+      'vast_nvme_queue_depth.csv',
+      'vast_fe_util_and_cache.csv',
+      'nccl_allreduce_latency.csv',
+      'vast_io_mix.csv',
+      'vast_nvme_transport_errors.csv',
+      'scheduler_metrics.csv',
+      'tenant_allocation_snapshot.csv'
+    ];
+
+    const logFiles = [
+      'noc_events.log',
+      'nccl_logs.log', 
+      'evpn_events.log',
+      'change_timeline.log'
+    ];
+
+    // Load CSV files
+    for (const file of csvFiles) {
+      try {
+        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
+        if (response.ok) {
+          const csvText = await response.text();
+          const key = file.replace('.csv', '');
+          this.data[key] = this.parseCSV(csvText);
+          console.log(`✅ Loaded YOUR real ${key}: ${this.data[key].length} records`);
+          
+          // Re-render specific chart with YOUR real data
+          this.updateSpecificChart(key);
+        } else {
+          console.warn(`⚠️ Could not load ${file}: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn(`⚠️ Failed to load ${file}:`, error);
+      }
+    }
+
+    // Load log files  
+    for (const file of logFiles) {
+      try {
+        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
+        if (response.ok) {
+          const logText = await response.text();
+          const key = file.replace('.log', '');
+          this.data[key] = this.parseLogFile(logText);
+          console.log(`✅ Loaded YOUR real ${key}: ${this.data[key].length} log entries`);
+          
+          // Update log displays
+          if (key === 'change_timeline') this.updateChangeTimeline();
+          if (key === 'noc_events') this.updateNOCEvents();
+        } else {
+          console.warn(`⚠️ Could not load ${file}: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn(`⚠️ Failed to load ${file}:`, error);
+      }
+    }
+    
+    console.log('🎯 Finished loading YOUR synthetic data files!');
   }
 
   async loadRealDataInBackground() {
