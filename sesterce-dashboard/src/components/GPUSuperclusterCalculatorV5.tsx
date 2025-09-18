@@ -31,7 +31,7 @@ const networkFabrics: Record<string, {
   bandwidthPerGpu: number;
 }> = {
   'infiniband': {
-    name: 'InfiniBand',
+    name: 'InfiniBand NDR',
     switchPrice: 120000,
     cablePrice: 500,
     transceiverPrice: 1500,
@@ -43,6 +43,13 @@ const networkFabrics: Record<string, {
     cablePrice: 200,
     transceiverPrice: 800,
     bandwidthPerGpu: 400
+  },
+  'infiniband-xdr': {
+    name: 'InfiniBand XDR',
+    switchPrice: 180000,
+    cablePrice: 800,
+    transceiverPrice: 2500,
+    bandwidthPerGpu: 800
   }
 };
 
