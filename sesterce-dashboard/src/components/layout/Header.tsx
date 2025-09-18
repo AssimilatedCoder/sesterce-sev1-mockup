@@ -12,7 +12,12 @@ export const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <a href="/" className="flex items-center">
+            <a href="/" className="flex items-center gap-3">
+              <img 
+                src="/sesterce.jpg" 
+                alt="Sesterce" 
+                className="h-10 w-auto object-contain"
+              />
               <span className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-gpu-purple bg-clip-text text-transparent">
                 Sesterce
               </span>

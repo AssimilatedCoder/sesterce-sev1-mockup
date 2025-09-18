@@ -339,31 +339,43 @@ export const GPUSuperclusterCalculator: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-4 md:p-8">
-      <div className="max-w-[1900px] mx-auto bg-white/98 rounded-3xl shadow-2xl p-6 md:p-10">
+      <div className="max-w-[1900px] mx-auto bg-white/98 rounded-3xl shadow-2xl p-6 md:p-10 relative overflow-hidden">
+        {/* Decorative corner elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-100/20 to-gpu-purple/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-gpu-purple/10 to-brand-100/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+        
         {/* Header */}
-        <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
+        <div className="text-center mb-8 pb-6 border-b-2 border-gray-200 relative z-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-gradient-to-br from-brand-600 to-gpu-purple rounded-2xl shadow-xl transform rotate-3 hover:rotate-6 transition-transform">
+            <span className="text-4xl transform -rotate-3">🚀</span>
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
-            🚀 GPU Supercluster Cost Calculator
+            GPU Supercluster Cost Calculator
           </h1>
           <p className="text-xl text-gray-600 mb-4">Complete Infrastructure & TCO Analysis Platform</p>
-          <span className="inline-block bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-2 rounded-full font-semibold shadow-lg">
-            v4.0 - Full Stack Edition with Verified References
-          </span>
+          <div className="flex items-center justify-center gap-2">
+            <span className="inline-block bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-2 rounded-full font-semibold shadow-lg animate-pulse">
+              v4.0 - Full Stack Edition
+            </span>
+            <span className="inline-block bg-gradient-to-r from-brand-600 to-gpu-purple text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+              with Verified References
+            </span>
+          </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-200 pb-3">
+        <div className="flex flex-wrap gap-3 mb-8 p-2 bg-gray-100 rounded-2xl">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-semibold transition-all ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-lg transform scale-105'
+                  : 'bg-white text-gray-600 hover:bg-gray-50 hover:shadow-md'
               }`}
             >
-              {tab.icon}
+              <span className={activeTab === tab.id ? 'animate-pulse' : ''}>{tab.icon}</span>
               {tab.label}
             </button>
           ))}
