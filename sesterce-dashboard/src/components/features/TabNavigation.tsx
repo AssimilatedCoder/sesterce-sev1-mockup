@@ -18,7 +18,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   onTabChange,
 }) => {
   return (
-    <div className="py-4">
+    <div className="py-3">
       <nav className="flex space-x-4" aria-label="Tabs">
         {tabs.map((tab) => (
           <button
@@ -27,19 +27,15 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             className={`
               ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105'
-                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-gray-200 hover:shadow-md'
+                  ? 'bg-green-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }
-              px-8 py-4 rounded-2xl font-semibold text-sm
-              flex items-center space-x-3 transition-all duration-300
-              border border-gray-700/50
+              px-6 py-3 rounded-xl font-semibold text-sm
+              flex items-center space-x-2 transition-all duration-200
             `}
           >
-            {tab.icon && <span className={`w-5 h-5 ${activeTab === tab.id ? '' : ''}`}>{tab.icon}</span>}
+            {tab.icon && <span className="w-5 h-5">{tab.icon}</span>}
             <span>{tab.label}</span>
-            {activeTab === tab.id && (
-              <span className="ml-2 w-2 h-2 bg-white rounded-full animate-pulse"></span>
-            )}
           </button>
         ))}
       </nav>

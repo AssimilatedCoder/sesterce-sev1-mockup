@@ -338,46 +338,40 @@ export const GPUSuperclusterCalculator: React.FC = () => {
   const coolingRequired = spec.coolingOptions.length === 1 && spec.coolingOptions[0] === 'liquid';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 md:p-8">
-      <div className="max-w-[1900px] mx-auto relative">
-        {/* Header Section with dark background like Sesterce */}
-        <div className="bg-gray-900/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 mb-8 relative overflow-hidden border border-gray-800">
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-purple-500/10"></div>
-          
-          {/* Content */}
-          <div className="relative z-10 text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 mb-6 bg-gradient-to-br from-green-500 to-purple-600 rounded-3xl shadow-2xl">
-              <span className="text-5xl">🚀</span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
-              GPU Supercluster Cost Calculator
-            </h1>
-            <p className="text-xl text-gray-300 mb-6">Complete Infrastructure & TCO Analysis Platform</p>
-            <div className="flex items-center justify-center gap-3">
-              <span className="inline-block bg-green-500 text-gray-900 px-6 py-3 rounded-full font-bold text-sm">
-                v4.0 - Full Stack Edition
-              </span>
-              <span className="inline-block bg-purple-600 text-white px-6 py-3 rounded-full font-bold text-sm">
-                with Verified References
-              </span>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-4 md:p-8">
+      <div className="max-w-[1900px] mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-8 pb-6 border-b border-gray-200">
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg">
+            <span className="text-4xl">🚀</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            GPU Supercluster Cost Calculator
+          </h1>
+          <p className="text-xl text-gray-600 mb-4">Complete Infrastructure & TCO Analysis Platform</p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="inline-block bg-green-500 text-white px-5 py-2 rounded-full font-semibold text-sm">
+              v4.0 - Full Stack Edition
+            </span>
+            <span className="inline-block bg-gray-800 text-white px-5 py-2 rounded-full font-semibold text-sm">
+              with Verified References
+            </span>
           </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="bg-white/98 rounded-3xl shadow-2xl p-6 md:p-10 relative overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-gray-100 rounded-2xl">
+        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-gray-100 rounded-xl">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'bg-gray-900 text-white shadow-lg'
-                  : 'bg-transparent text-gray-600 hover:bg-gray-200'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'bg-transparent text-gray-600 hover:bg-gray-50'
               }`}
             >
               {tab.icon}
@@ -555,52 +549,52 @@ export const GPUSuperclusterCalculator: React.FC = () => {
               <>
                 {/* Metric Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm text-gray-400 mb-2">Total CAPEX</div>
-                    <div className="text-3xl font-bold mb-1">{formatNumber(results.totalCapex)}</div>
+                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="text-sm text-gray-500 mb-2">Total CAPEX</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">{formatNumber(results.totalCapex)}</div>
                     <div className="text-xs text-gray-500">USD</div>
                   </div>
 
-                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm text-gray-400 mb-2">Annual OPEX</div>
-                    <div className="text-3xl font-bold mb-1">{formatNumber(results.annualOpex)}</div>
+                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="text-sm text-gray-500 mb-2">Annual OPEX</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">{formatNumber(results.annualOpex)}</div>
                     <div className="text-xs text-gray-500">USD/Year</div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">$/GPU-Hour</div>
+                  <div className="bg-green-500 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div className="text-sm mb-2">$/GPU-Hour</div>
                     <div className="text-3xl font-bold mb-1">${results.costPerHour.toFixed(2)}</div>
-                    <div className="text-xs opacity-90">At Selected Utilization</div>
+                    <div className="text-xs">At Selected Utilization</div>
                   </div>
 
-                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm text-gray-400 mb-2">Power Required</div>
-                    <div className="text-3xl font-bold mb-1">{results.totalPowerMW.toFixed(1)}</div>
+                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="text-sm text-gray-500 mb-2">Power Required</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">{results.totalPowerMW.toFixed(1)}</div>
                     <div className="text-xs text-gray-500">Megawatts</div>
                   </div>
 
-                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm text-gray-400 mb-2">PUE Factor</div>
-                    <div className="text-3xl font-bold mb-1">{results.pueValue.toFixed(2)}</div>
+                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="text-sm text-gray-500 mb-2">PUE Factor</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">{results.pueValue.toFixed(2)}</div>
                     <div className="text-xs text-gray-500">Efficiency Ratio</div>
                   </div>
 
-                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm text-gray-400 mb-2">Storage $/GB/Mo</div>
-                    <div className="text-3xl font-bold mb-1">${results.storageGbMonth.toFixed(4)}</div>
+                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="text-sm text-gray-500 mb-2">Storage $/GB/Mo</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">${results.storageGbMonth.toFixed(4)}</div>
                     <div className="text-xs text-gray-500">Blended Rate</div>
                   </div>
 
-                  <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800 transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm text-gray-400 mb-2">Network Bandwidth</div>
-                    <div className="text-3xl font-bold mb-1">{results.networkBandwidth.toFixed(1)}</div>
+                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="text-sm text-gray-500 mb-2">Network Bandwidth</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">{results.networkBandwidth.toFixed(1)}</div>
                     <div className="text-xs text-gray-500">Tbps Total</div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-xl transform hover:-translate-y-1 transition-transform">
-                    <div className="text-sm opacity-90 mb-2">10-Year TCO</div>
+                  <div className="bg-green-500 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div className="text-sm mb-2">10-Year TCO</div>
                     <div className="text-3xl font-bold mb-1">{formatNumber(results.tco10year)}</div>
-                    <div className="text-xs opacity-90">Total Cost</div>
+                    <div className="text-xs">Total Cost</div>
                   </div>
                 </div>
 
@@ -609,13 +603,13 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Detailed Cost Breakdown</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gradient-to-r from-gray-900 to-gray-700 text-white">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-4 text-left">Component</th>
-                          <th className="px-6 py-4 text-left">Unit Cost</th>
-                          <th className="px-6 py-4 text-left">Quantity</th>
-                          <th className="px-6 py-4 text-left">Total Cost</th>
-                          <th className="px-6 py-4 text-left">% of CAPEX</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Component</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Unit Cost</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Quantity</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Total Cost</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">% of CAPEX</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -645,12 +639,12 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Annual OPEX Breakdown</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gradient-to-r from-gray-900 to-gray-700 text-white">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-4 text-left">Operating Expense</th>
-                          <th className="px-6 py-4 text-left">Annual Cost</th>
-                          <th className="px-6 py-4 text-left">% of OPEX</th>
-                          <th className="px-6 py-4 text-left">Notes</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Operating Expense</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Annual Cost</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">% of OPEX</th>
+                          <th className="px-6 py-4 text-left font-semibold text-gray-700">Notes</th>
                         </tr>
                       </thead>
                       <tbody>
