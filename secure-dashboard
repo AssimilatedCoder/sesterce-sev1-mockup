@@ -188,14 +188,24 @@ rebuild_app() {
     echo -e "${GREEN}🏗️  Rebuilding React app...${NC}"
     
     cd "$REACT_DIR"
+    
+    # Check if package.json has changed and run npm install if needed
+    if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules" ]; then
+        echo "📦 Installing/updating npm dependencies..."
+        npm install
+    fi
+    
+    # Build the app
+    echo "🔨 Building production version..."
     npm run build
     
     # Copy additional assets
+    echo "📁 Copying additional assets..."
     cp -r "$SCRIPT_DIR/superpod_sev1_fake_telemetry" "$BUILD_DIR/" 2>/dev/null || true
     cp "$SCRIPT_DIR/sev1-warroom-dashboard.html" "$BUILD_DIR/" 2>/dev/null || true
     cp "$SCRIPT_DIR/dashboard-data-loader.js" "$BUILD_DIR/" 2>/dev/null || true
     
-    echo -e "${GREEN}✅ React app rebuilt${NC}"
+    echo -e "${GREEN}✅ React app rebuilt successfully${NC}"
 }
 
 # Function to test API
@@ -228,6 +238,28 @@ test_api() {
     fi
 }
 
+# Function to update from git
+update_from_git() {
+    echo -e "${GREEN}🔄 Updating from git...${NC}"
+    
+    cd "$SCRIPT_DIR"
+    
+    # Check for uncommitted changes
+    if ! git diff-index --quiet HEAD --; then
+        echo -e "${YELLOW}⚠️  You have uncommitted changes. Please commit or stash them first.${NC}"
+        exit 1
+    fi
+    
+    # Pull latest changes
+    echo "📥 Pulling latest changes..."
+    git pull origin main
+    
+    # Rebuild the app
+    rebuild_app
+    
+    echo -e "${GREEN}✅ Update complete${NC}"
+}
+
 # Main command handler
 case "$1" in
     start)
@@ -250,11 +282,14 @@ case "$1" in
     build)
         rebuild_app
         ;;
+    update)
+        update_from_git
+        ;;
     test)
         test_api
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs|build|test}"
+        echo "Usage: $0 {start|stop|restart|status|logs|build|update|test}"
         echo ""
         echo "Commands:"
         echo "  start    - Start all services"
@@ -262,7 +297,8 @@ case "$1" in
         echo "  restart  - Restart all services"
         echo "  status   - Show service status"
         echo "  logs     - View recent logs"
-        echo "  build    - Rebuild React app"
+        echo "  build    - Rebuild React app (after manual git pull)"
+        echo "  update   - Git pull and rebuild"
         echo "  test     - Test API endpoints"
         exit 1
         ;;
