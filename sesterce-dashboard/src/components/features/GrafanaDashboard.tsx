@@ -65,116 +65,7 @@ class DashboardDataLoader {
     return data;
   }
 
-  async loadAllData() {
-    console.log('🚀 Starting data loading...');
-    
-    // PRELOAD all fallback data immediately for instant display
-    this.preloadFallbackData();
-    
-    const csvFiles = [
-      'queue_wait_quantiles.csv',
-      'gpu_utilization.csv',
-      'sla_penalty_and_budget.csv',
-      'composite_timeline.csv',
-      'dcgm_util_by_node.csv',
-      'network_ecn_rate.csv',
-      'vast_nvmeof_latency_quantiles.csv',
-      'tenant_allocation_snapshot.csv',
-      'nccl_allreduce_latency.csv',
-      'pfc_pause_rx.csv',
-      'per_link_utilization.csv',
-      'vast_fe_util_and_cache.csv',
-      'vast_io_mix.csv',
-      'vast_nvme_queue_depth.csv',
-      'vast_nvme_transport_errors.csv',
-      'scheduler_metrics.csv'
-    ];
-
-    const logFiles = [
-      'noc_events.log',
-      'nccl_logs.log',
-      'evpn_events.log',
-      'change_timeline.log'
-    ];
-
-    // Try to load CSV files in parallel (but don't wait if they fail)
-    const csvPromises = csvFiles.map(async (file) => {
-      try {
-        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`, {
-          cache: 'force-cache'
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const csvText = await response.text();
-        const key = file.replace('.csv', '');
-        this.data[key] = this.parseCSV(csvText);
-        console.log(`✅ Loaded real ${key}: ${this.data[key].length} records`);
-        return { key, success: true };
-      } catch (error) {
-        console.log(`📊 Using fallback data for ${file}`);
-        return { key: file.replace('.csv', ''), success: false };
-      }
-    });
-
-    // Try to load log files in parallel
-    const logPromises = logFiles.map(async (file) => {
-      try {
-        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`, {
-          cache: 'force-cache'
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const logText = await response.text();
-        const key = file.replace('.log', '');
-        this.data[key] = this.parseLogFile(logText);
-        console.log(`✅ Loaded real ${key}: ${this.data[key].length} log entries`);
-        return { key, success: true };
-      } catch (error) {
-        console.log(`📝 Using fallback logs for ${file}`);
-        return { key: file.replace('.log', ''), success: false };
-      }
-    });
-
-    // Wait for all attempts to complete (but don't block on failures)
-    await Promise.allSettled([...csvPromises, ...logPromises]);
-    
-    console.log('✅ Data loading complete (using fallback where needed)');
-  }
-
-  preloadFallbackData() {
-    console.log('📊 Preloading fallback incident data...');
-    
-    // Preload all essential datasets with incident patterns
-    const essentialFiles = [
-      'queue_wait_quantiles.csv',
-      'gpu_utilization.csv', 
-      'sla_penalty_and_budget.csv',
-      'composite_timeline.csv',
-      'dcgm_util_by_node.csv',
-      'network_ecn_rate.csv',
-      'vast_nvmeof_latency_quantiles.csv',
-      'pfc_pause_rx.csv',
-      'per_link_utilization.csv',
-      'vast_nvme_queue_depth.csv',
-      'vast_fe_util_and_cache.csv'
-    ];
-
-    essentialFiles.forEach(file => {
-      const key = file.replace('.csv', '');
-      this.data[key] = this.generateFallbackData(file);
-    });
-
-    // Preload log data
-    const logFiles = ['noc_events.log', 'nccl_logs.log', 'evpn_events.log', 'change_timeline.log'];
-    logFiles.forEach(file => {
-      const key = file.replace('.log', '');
-      this.data[key] = this.generateFallbackLogData(file);
-    });
-
-    console.log('✅ Fallback data preloaded - dashboard ready for immediate display');
-  }
+  // REMOVED: Old async loading - now using only synchronous synthetic data
 
   parseLogFile(logText: string) {
     const lines = logText.trim().split('\n');
@@ -1050,8 +941,10 @@ class DashboardDataLoader {
     // Data is already loaded in constructor, so render immediately
     this.renderAllCharts();
     
-    // Try to load real data in background (non-blocking)
-    this.loadRealDataInBackground();
+    // DISABLED: Don't load real CSV data - use ONLY your synthetic incident data
+    // this.loadRealDataInBackground();
+    
+    console.log('🎯 Using ONLY synthetic incident data - no CSV override!');
     
     console.log('✅ SEV-1 Dashboard initialized with incident data!');
   }
@@ -1174,14 +1067,24 @@ export const GrafanaDashboard: React.FC = () => {
           const adapterScript = document.createElement('script');
           adapterScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js';
           adapterScript.onload = () => {
-            // Configure Chart.js defaults
-            if (window.Chart) {
-              window.Chart.defaults.color = '#d9d9d9';
-              window.Chart.defaults.backgroundColor = '#1f1f20';
-              window.Chart.defaults.borderColor = '#404043';
-              window.Chart.defaults.plugins.legend.labels.color = '#d9d9d9';
-              window.Chart.defaults.scales.linear.grid.color = '#2f2f32';
-              window.Chart.defaults.scales.time.grid.color = '#2f2f32';
+            // Configure Chart.js defaults safely
+            if (window.Chart && window.Chart.defaults) {
+              try {
+                window.Chart.defaults.color = '#d9d9d9';
+                window.Chart.defaults.backgroundColor = '#1f1f20';
+                window.Chart.defaults.borderColor = '#404043';
+                if (window.Chart.defaults.plugins?.legend?.labels) {
+                  window.Chart.defaults.plugins.legend.labels.color = '#d9d9d9';
+                }
+                if (window.Chart.defaults.scales?.linear?.grid) {
+                  window.Chart.defaults.scales.linear.grid.color = '#2f2f32';
+                }
+                if (window.Chart.defaults.scales?.time?.grid) {
+                  window.Chart.defaults.scales.time.grid.color = '#2f2f32';
+                }
+              } catch (error) {
+                console.warn('⚠️ Chart.js defaults configuration failed:', error);
+              }
             }
             
             // Initialize dashboard
