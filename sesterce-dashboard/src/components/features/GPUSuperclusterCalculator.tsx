@@ -341,40 +341,40 @@ export const GPUSuperclusterCalculator: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-4 md:p-8">
       <div className="max-w-[1900px] mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-8 pb-6 border-b border-gray-200">
-          <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg">
-            <span className="text-4xl">🚀</span>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-md">
+            <span className="text-3xl">🚀</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            GPU Supercluster Cost Calculator
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            GPU SuperCluster Cost Calculator
           </h1>
-          <p className="text-xl text-gray-600 mb-4">Complete Infrastructure & TCO Analysis Platform</p>
+          <p className="text-base text-gray-600 mb-3">Complete Infrastructure & TCO Analysis Platform</p>
           <div className="flex items-center justify-center gap-2">
-            <span className="inline-block bg-green-500 text-white px-5 py-2 rounded-full font-semibold text-sm">
+            <span className="inline-block bg-green-500 text-white px-4 py-1.5 rounded-full font-medium text-xs">
               v4.0 - Full Stack Edition
             </span>
-            <span className="inline-block bg-gray-800 text-white px-5 py-2 rounded-full font-semibold text-sm">
+            <span className="inline-block bg-gray-800 text-white px-4 py-1.5 rounded-full font-medium text-xs">
               with Verified References
             </span>
           </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <div className="bg-white rounded-xl shadow-md p-6">
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-gray-100 rounded-xl">
+        <div className="flex flex-wrap gap-1 mb-6 p-0.5 bg-gray-100 rounded-lg">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-md font-medium text-xs transition-all duration-200 ${
                 activeTab === tab.id
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'bg-transparent text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {tab.icon}
+              <span className="w-4 h-4">{tab.icon}</span>
               {tab.label}
             </button>
           ))}
@@ -382,20 +382,20 @@ export const GPUSuperclusterCalculator: React.FC = () => {
 
         {/* Calculator Tab */}
         {activeTab === 'calculator' && (
-          <div className="space-y-8">
+          <div className="space-y-5">
             {/* GPU Configuration */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <Zap className="w-6 h-6 text-yellow-500" />
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-yellow-500" />
                 GPU Configuration
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-white p-5 rounded-lg border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">GPU Model</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">GPU Model</label>
                   <select 
                     value={gpuModel} 
                     onChange={(e) => setGpuModel(e.target.value)}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none bg-gray-50"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   >
                     <option value="gb200">GB200 NVL72 (1,200W)</option>
                     <option value="gb300">GB300 NVL72 (1,400W - 2025)</option>
@@ -403,20 +403,20 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                     <option value="h100-pcie">H100 PCIe (350W)</option>
                   </select>
                   {coolingRequired && (
-                    <div className="mt-2 px-3 py-2 bg-red-100 text-red-700 rounded-md text-sm font-semibold flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4" />
+                    <div className="mt-2 px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
                       Liquid cooling required
                     </div>
                   )}
                 </div>
 
-                <div className="bg-white p-5 rounded-lg border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Number of GPUs</label>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">Number of GPUs</label>
                   <input 
                     type="number" 
                     value={numGPUs}
                     onChange={(e) => setNumGPUs(parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none bg-gray-50"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     min="1000"
                     max="200000"
                     step="1000"
@@ -424,12 +424,12 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                   <span className="text-xs text-gray-500 mt-1 block">1,000 - 200,000 GPUs</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-lg border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Cooling Type</label>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">Cooling Type</label>
                   <select 
                     value={coolingType}
                     onChange={(e) => setCoolingType(e.target.value)}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none bg-gray-50"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     disabled={spec.coolingOptions.length === 1}
                   >
                     {spec.coolingOptions.map((option: string) => (
@@ -441,12 +441,12 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                   <span className="text-xs text-gray-500 mt-1 block">Auto-selected based on GPU</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-lg border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Region</label>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">Region</label>
                   <select 
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none bg-gray-50"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   >
                     {Object.entries(regionRates).map(([key, value]: [string, any]) => (
                       <option key={key} value={key}>
@@ -456,29 +456,29 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="bg-white p-5 rounded-lg border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Utilization Rate</label>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">Utilization Rate</label>
                   <div className="flex items-center gap-2">
                     <input 
                       type="number" 
                       value={utilization}
                       onChange={(e) => setUtilization(parseInt(e.target.value) || 0)}
-                      className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none bg-gray-50"
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                       min="50"
                       max="100"
                       step="5"
                     />
-                    <span className="text-gray-700 font-semibold">%</span>
+                    <span className="text-gray-700 text-sm">%</span>
                   </div>
                   <span className="text-xs text-gray-500 mt-1 block">Typical: 85-95%</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-lg border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Depreciation (Years)</label>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">Depreciation (Years)</label>
                   <select 
                     value={depreciation}
                     onChange={(e) => setDepreciation(parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none bg-gray-50"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   >
                     <option value={3}>3 Years (Aggressive)</option>
                     <option value={4}>4 Years (Standard)</option>
@@ -539,7 +539,7 @@ export const GPUSuperclusterCalculator: React.FC = () => {
             {/* Calculate Button */}
             <button
               onClick={calculateFull}
-              className="w-full md:w-auto mx-auto block bg-green-500 hover:bg-green-600 text-gray-900 px-12 py-4 rounded-2xl text-lg font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all"
+              className="w-full md:w-auto mx-auto block bg-green-500 hover:bg-green-600 text-white px-8 py-2.5 rounded-md text-sm font-semibold shadow-sm hover:shadow-md transition-all"
             >
               Calculate Complete Analysis
             </button>
@@ -548,59 +548,59 @@ export const GPUSuperclusterCalculator: React.FC = () => {
             {results && (
               <>
                 {/* Metric Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div className="text-sm text-gray-500 mb-2">Total CAPEX</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">{formatNumber(results.totalCapex)}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="text-xs text-gray-500 mb-1">Total CAPEX</div>
+                    <div className="text-2xl font-bold text-gray-900">{formatNumber(results.totalCapex)}</div>
                     <div className="text-xs text-gray-500">USD</div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div className="text-sm text-gray-500 mb-2">Annual OPEX</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">{formatNumber(results.annualOpex)}</div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="text-xs text-gray-500 mb-1">Annual OPEX</div>
+                    <div className="text-2xl font-bold text-gray-900">{formatNumber(results.annualOpex)}</div>
                     <div className="text-xs text-gray-500">USD/Year</div>
                   </div>
 
-                  <div className="bg-green-500 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                    <div className="text-sm mb-2">$/GPU-Hour</div>
-                    <div className="text-3xl font-bold mb-1">${results.costPerHour.toFixed(2)}</div>
-                    <div className="text-xs">At Selected Utilization</div>
+                  <div className="bg-green-500 text-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-xs mb-1">$/GPU-Hour</div>
+                    <div className="text-2xl font-bold">${results.costPerHour.toFixed(2)}</div>
+                    <div className="text-xs opacity-90">At Selected Utilization</div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div className="text-sm text-gray-500 mb-2">Power Required</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">{results.totalPowerMW.toFixed(1)}</div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="text-xs text-gray-500 mb-1">Power Required</div>
+                    <div className="text-2xl font-bold text-gray-900">{results.totalPowerMW.toFixed(1)}</div>
                     <div className="text-xs text-gray-500">Megawatts</div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div className="text-sm text-gray-500 mb-2">PUE Factor</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">{results.pueValue.toFixed(2)}</div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="text-xs text-gray-500 mb-1">PUE Factor</div>
+                    <div className="text-2xl font-bold text-gray-900">{results.pueValue.toFixed(2)}</div>
                     <div className="text-xs text-gray-500">Efficiency Ratio</div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div className="text-sm text-gray-500 mb-2">Storage $/GB/Mo</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">${results.storageGbMonth.toFixed(4)}</div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="text-xs text-gray-500 mb-1">Storage $/GB/Mo</div>
+                    <div className="text-2xl font-bold text-gray-900">${results.storageGbMonth.toFixed(4)}</div>
                     <div className="text-xs text-gray-500">Blended Rate</div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div className="text-sm text-gray-500 mb-2">Network Bandwidth</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">{results.networkBandwidth.toFixed(1)}</div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="text-xs text-gray-500 mb-1">Network Bandwidth</div>
+                    <div className="text-2xl font-bold text-gray-900">{results.networkBandwidth.toFixed(1)}</div>
                     <div className="text-xs text-gray-500">Tbps Total</div>
                   </div>
 
-                  <div className="bg-green-500 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                    <div className="text-sm mb-2">10-Year TCO</div>
-                    <div className="text-3xl font-bold mb-1">{formatNumber(results.tco10year)}</div>
-                    <div className="text-xs">Total Cost</div>
+                  <div className="bg-green-500 text-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-xs mb-1">10-Year TCO</div>
+                    <div className="text-2xl font-bold">{formatNumber(results.tco10year)}</div>
+                    <div className="text-xs opacity-90">Total Cost</div>
                   </div>
                 </div>
 
                 {/* CAPEX Breakdown Table */}
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <h2 className="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Detailed Cost Breakdown</h2>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <h2 className="text-lg font-semibold text-gray-800 p-4 border-b border-gray-200">Detailed Cost Breakdown</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-gray-50">
@@ -635,8 +635,8 @@ export const GPUSuperclusterCalculator: React.FC = () => {
                 </div>
 
                 {/* OPEX Breakdown Table */}
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <h2 className="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Annual OPEX Breakdown</h2>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <h2 className="text-lg font-semibold text-gray-800 p-4 border-b border-gray-200">Annual OPEX Breakdown</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-gray-50">

@@ -18,7 +18,7 @@ function App() {
     },
     {
       id: 'calculator',
-      label: 'GPU Supercluster Calculator',
+      label: 'GPU SuperCluster Calculator',
       icon: <Calculator className="w-5 h-5" />
     }
   ];
