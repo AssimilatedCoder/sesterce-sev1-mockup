@@ -34,7 +34,7 @@ class DashboardDataLoader {
   }
 
   async loadAllData() {
-    const files = [
+    const csvFiles = [
       'queue_wait_quantiles.csv',
       'gpu_utilization.csv',
       'sla_penalty_and_budget.csv',
@@ -53,7 +53,15 @@ class DashboardDataLoader {
       'scheduler_metrics.csv'
     ];
 
-    for (const file of files) {
+    const logFiles = [
+      'noc_events.log',
+      'nccl_logs.log',
+      'evpn_events.log',
+      'change_timeline.log'
+    ];
+
+    // Load CSV files
+    for (const file of csvFiles) {
       try {
         const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
         if (!response.ok) {
@@ -69,6 +77,83 @@ class DashboardDataLoader {
         this.data[file.replace('.csv', '')] = this.generateFallbackData(file);
       }
     }
+
+    // Load log files
+    for (const file of logFiles) {
+      try {
+        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const logText = await response.text();
+        const key = file.replace('.log', '');
+        this.data[key] = this.parseLogFile(logText);
+        console.log(`✅ Loaded ${key}: ${this.data[key].length} log entries`);
+      } catch (error) {
+        console.warn(`⚠️ Failed to load ${file}:`, error);
+        // Generate fallback log data
+        this.data[file.replace('.log', '')] = this.generateFallbackLogData(file);
+      }
+    }
+  }
+
+  parseLogFile(logText: string) {
+    const lines = logText.trim().split('\n');
+    const entries = [];
+    
+    for (const line of lines) {
+      if (line.trim()) {
+        // Try to extract timestamp and message from log line
+        const timestampMatch = line.match(/(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/);
+        const timestamp = timestampMatch ? timestampMatch[1] : new Date().toISOString();
+        
+        entries.push({
+          timestamp,
+          message: line.trim(),
+          level: line.includes('ERROR') ? 'error' : line.includes('WARN') ? 'warning' : 'info'
+        });
+      }
+    }
+    
+    return entries;
+  }
+
+  generateFallbackLogData(filename: string) {
+    const entries = [];
+    const now = new Date();
+    
+    for (let i = 0; i < 10; i++) {
+      const timestamp = new Date(now.getTime() - (i * 30 * 60 * 1000)); // 30 min intervals
+      
+      if (filename.includes('noc_events')) {
+        entries.push({
+          timestamp: timestamp.toISOString(),
+          message: `ALARM: PFC pause storm detected on leaf-${Math.floor(Math.random() * 20)}`,
+          level: 'error'
+        });
+      } else if (filename.includes('change_timeline')) {
+        entries.push({
+          timestamp: timestamp.toISOString(),
+          message: `DEPLOY: Storage FE rollout completed (aggressive prefetch enabled)`,
+          level: 'info'
+        });
+      } else if (filename.includes('evpn_events')) {
+        entries.push({
+          timestamp: timestamp.toISOString(),
+          message: `EVPN: MAC move detected on VXLAN ${Math.floor(Math.random() * 1000)}`,
+          level: 'warning'
+        });
+      } else {
+        entries.push({
+          timestamp: timestamp.toISOString(),
+          message: `INFO: System event ${i}`,
+          level: 'info'
+        });
+      }
+    }
+    
+    console.log(`🔄 Generated fallback log data for ${filename}: ${entries.length} entries`);
+    return entries;
   }
 
   generateFallbackData(filename: string) {
@@ -354,17 +439,420 @@ class DashboardDataLoader {
     });
   }
 
+  updateNCCLChart() {
+    const canvas = document.getElementById('ncclLatencyChart') as HTMLCanvasElement;
+    if (!canvas || !window.Chart) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (this.charts.nccl) {
+      this.charts.nccl.destroy();
+    }
+
+    const ncclData = this.data.nccl_allreduce_latency || [];
+    
+    // Create heatmap-style visualization using scatter plot
+    this.charts.nccl = new window.Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'NCCL Latency (ms)',
+          data: ncclData.slice(-50).map((d: any, i: number) => ({
+            x: i,
+            y: d.job_id || Math.floor(Math.random() * 10),
+            r: (d.latency_ms || (5 + Math.random() * 15)) / 2
+          })),
+          backgroundColor: 'rgba(255, 107, 53, 0.6)',
+          borderColor: '#FF6B35'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#d9d9d9' } }
+        },
+        scales: {
+          y: {
+            title: { display: true, text: 'Job ID', color: '#d9d9d9' },
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          x: {
+            title: { display: true, text: 'Time', color: '#d9d9d9' },
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          }
+        }
+      }
+    });
+  }
+
+  updatePFCChart() {
+    const canvas = document.getElementById('pfcPauseChart') as HTMLCanvasElement;
+    if (!canvas || !window.Chart) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (this.charts.pfc) {
+      this.charts.pfc.destroy();
+    }
+
+    const pfcData = this.data.pfc_pause_rx || [];
+    
+    this.charts.pfc = new window.Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: pfcData.slice(-20).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        datasets: [{
+          label: 'PFC Pause Rx',
+          data: pfcData.slice(-20).map((d: any) => d.pause_rx_count || Math.random() * 1000000),
+          backgroundColor: 'rgba(239, 68, 68, 0.6)',
+          borderColor: '#EF4444',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#d9d9d9' } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          x: {
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          }
+        }
+      }
+    });
+  }
+
+  updateLinkUtilChart() {
+    const canvas = document.getElementById('linkUtilChart') as HTMLCanvasElement;
+    if (!canvas || !window.Chart) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (this.charts.linkUtil) {
+      this.charts.linkUtil.destroy();
+    }
+
+    const linkData = this.data.per_link_utilization || [];
+    
+    this.charts.linkUtil = new window.Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: linkData.slice(-30).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        datasets: [{
+          label: 'Link Utilization (%)',
+          data: linkData.slice(-30).map((d: any) => d.utilization_percent || Math.random() * 100),
+          borderColor: '#8e32e9',
+          backgroundColor: 'rgba(142, 50, 233, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#d9d9d9' } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          x: {
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          }
+        }
+      }
+    });
+  }
+
+  updateQueueDepthChart() {
+    const canvas = document.getElementById('queueDepthChart') as HTMLCanvasElement;
+    if (!canvas || !window.Chart) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (this.charts.queueDepth) {
+      this.charts.queueDepth.destroy();
+    }
+
+    const queueDepthData = this.data.vast_nvme_queue_depth || [];
+    
+    this.charts.queueDepth = new window.Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: queueDepthData.slice(-30).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        datasets: [{
+          label: 'Queue Depth',
+          data: queueDepthData.slice(-30).map((d: any) => d.queue_depth || (10 + Math.random() * 50)),
+          borderColor: '#14B8A6',
+          backgroundColor: 'rgba(20, 184, 166, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#d9d9d9' } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          x: {
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          }
+        }
+      }
+    });
+  }
+
+  updateCacheStatsChart() {
+    const canvas = document.getElementById('cacheStatsChart') as HTMLCanvasElement;
+    if (!canvas || !window.Chart) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (this.charts.cacheStats) {
+      this.charts.cacheStats.destroy();
+    }
+
+    const cacheData = this.data.vast_fe_util_and_cache || [];
+    
+    this.charts.cacheStats = new window.Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: cacheData.slice(-30).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        datasets: [{
+          label: 'Cache Hit %',
+          data: cacheData.slice(-30).map((d: any) => d.cache_hit_percent || (85 + Math.random() * 10)),
+          borderColor: '#10B981',
+          tension: 0.4
+        }, {
+          label: 'FE CPU %',
+          data: cacheData.slice(-30).map((d: any) => d.fe_cpu_percent || (20 + Math.random() * 60)),
+          borderColor: '#F59E0B',
+          tension: 0.4
+        }, {
+          label: 'FE RAM %',
+          data: cacheData.slice(-30).map((d: any) => d.fe_ram_percent || (40 + Math.random() * 40)),
+          borderColor: '#EF4444',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#d9d9d9' } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          x: {
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          }
+        }
+      }
+    });
+  }
+
+  updateCompositeChart() {
+    const canvas = document.getElementById('compositeChart') as HTMLCanvasElement;
+    if (!canvas || !window.Chart) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (this.charts.composite) {
+      this.charts.composite.destroy();
+    }
+
+    const compositeData = this.data.composite_timeline || [];
+    
+    this.charts.composite = new window.Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: compositeData.slice(-50).map((d: any) => new Date(d.timestamp).toLocaleTimeString()),
+        datasets: [{
+          label: 'ECN Mark Rate (%)',
+          data: compositeData.slice(-50).map((d: any) => d.ecn_mark_rate || (0.2 + Math.random() * 4.6)),
+          borderColor: '#EF4444',
+          yAxisID: 'y'
+        }, {
+          label: 'NVMe-oF P99 (ms)',
+          data: compositeData.slice(-50).map((d: any) => d.nvme_p99_latency || (0.38 + Math.random() * 2.42)),
+          borderColor: '#F59E0B',
+          yAxisID: 'y1'
+        }, {
+          label: 'GPU Util (%)',
+          data: compositeData.slice(-50).map((d: any) => d.gpu_utilization || (86 - Math.random() * 32)),
+          borderColor: '#76B900',
+          yAxisID: 'y2'
+        }, {
+          label: 'Queue P90 (min)',
+          data: compositeData.slice(-50).map((d: any) => d.queue_wait_p90 || (7 + Math.random() * 24)),
+          borderColor: '#8e32e9',
+          yAxisID: 'y3'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: { labels: { color: '#d9d9d9' } }
+        },
+        scales: {
+          x: {
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            grid: { color: '#2f2f32' },
+            ticks: { color: '#d9d9d9' }
+          },
+          y1: {
+            type: 'linear',
+            display: false,
+            position: 'right',
+          },
+          y2: {
+            type: 'linear',
+            display: false,
+            position: 'right',
+          },
+          y3: {
+            type: 'linear',
+            display: false,
+            position: 'right',
+          }
+        }
+      }
+    });
+  }
+
+  updateChangeTimeline() {
+    const changeTimelineEl = document.querySelector('.change-timeline-content');
+    if (!changeTimelineEl) return;
+
+    const changeData = this.data.change_timeline || [];
+    
+    const timelineHTML = changeData.slice(-5).map((entry: any) => {
+      const time = new Date(entry.timestamp).toLocaleTimeString();
+      const isError = entry.level === 'error';
+      const isWarning = entry.level === 'warning';
+      
+      return `
+        <div class="flex items-center space-x-2 mb-2">
+          <span class="w-2 h-2 ${isError ? 'bg-red-500' : isWarning ? 'bg-orange-500' : 'bg-blue-500'} rounded-full"></span>
+          <span class="text-gray-400 text-xs">${time}:</span>
+          <span class="text-white text-sm">${entry.message}</span>
+        </div>
+      `;
+    }).join('');
+
+    changeTimelineEl.innerHTML = timelineHTML || `
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+        <span class="text-gray-400">18h ago:</span>
+        <span class="text-white">Fabric A spine replacement</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+        <span class="text-gray-400">4h ago:</span>
+        <span class="text-white">Storage FE rollout (aggressive prefetch)</span>
+      </div>
+    `;
+  }
+
+  updateNOCEvents() {
+    const nocEventsEl = document.querySelector('.noc-events-content');
+    if (!nocEventsEl) return;
+
+    const nocData = this.data.noc_events || [];
+    
+    const eventsHTML = nocData.slice(-5).map((entry: any) => {
+      const levelClass = entry.level === 'error' ? 'text-red-400' : 
+                        entry.level === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+      const levelText = entry.level === 'error' ? 'ALARM' : 
+                       entry.level === 'warning' ? 'WARN' : 'INFO';
+      
+      return `<div class="${levelClass} text-xs font-mono">${levelText}: ${entry.message}</div>`;
+    }).join('');
+
+    nocEventsEl.innerHTML = eventsHTML || `
+      <div class="text-red-400 text-xs font-mono">ALARM: PFC pause storm detected</div>
+      <div class="text-yellow-400 text-xs font-mono">WARN: ECN mark rate threshold exceeded</div>
+      <div class="text-blue-400 text-xs font-mono">INFO: Failover completed on EVPN instance</div>
+    `;
+  }
+
   async initialize() {
     console.log('🚀 Loading dashboard data...');
     await this.loadAllData();
     
     console.log('📊 Updating charts...');
+    // Row 1: EXEC / SLO
     this.updateQueueWaitChart();
     this.updateGPUStats();
     this.updateSLAStats();
+    
+    // Row 2: GPU / Compute
     this.updateDCGMChart();
+    this.updateNCCLChart();
+    
+    // Row 3: Network Fabric
     this.updateECNChart();
+    this.updatePFCChart();
+    this.updateLinkUtilChart();
+    
+    // Row 4: Storage
     this.updateNVMeChart();
+    this.updateQueueDepthChart();
+    this.updateCacheStatsChart();
+    
+    // Row 5: Change & Event Timeline
+    this.updateChangeTimeline();
+    this.updateNOCEvents();
+    
+    // Row 6: Cross-Domain Correlation
+    this.updateCompositeChart();
     
     console.log('✅ Dashboard data loaded successfully!');
   }
@@ -617,7 +1105,7 @@ export const GrafanaDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="panel bg-gray-800 border border-gray-700 rounded p-4">
               <h3 className="panel-title text-sm font-medium text-gray-300 mb-3">Change Timeline</h3>
-              <div className="space-y-2 text-sm">
+              <div className="change-timeline-content space-y-2 text-sm">
                 <div className="flex items-center space-x-2">
                   <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
                   <span className="text-gray-400">18h ago:</span>
@@ -633,7 +1121,7 @@ export const GrafanaDashboard: React.FC = () => {
             
             <div className="panel bg-gray-800 border border-gray-700 rounded p-4">
               <h3 className="panel-title text-sm font-medium text-gray-300 mb-3">NOC Events</h3>
-              <div className="space-y-1 text-xs font-mono">
+              <div className="noc-events-content space-y-1 text-xs font-mono">
                 <div className="text-red-400">ALARM: PFC pause storm detected</div>
                 <div className="text-yellow-400">WARN: ECN mark rate threshold exceeded</div>
                 <div className="text-blue-400">INFO: Failover completed on EVPN instance</div>
