@@ -3,6 +3,7 @@ import { Header } from './components/layout/Header';
 import { Container } from './components/layout/Container';
 import { TabNavigation } from './components/features/TabNavigation';
 import { GrafanaDashboard } from './components/features/GrafanaDashboard';
+import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboardOriginal';
 import { GPUCostCalculator } from './components/features/GPUCostCalculator';
 import { Activity, Calculator } from 'lucide-react';
 
@@ -45,14 +46,8 @@ function App() {
 
         {/* Tab Content */}
         <div className="min-h-screen">
-          {activeTab === 'dashboard' && <GrafanaDashboard />}
-          {activeTab === 'standalone' && (
-            <iframe 
-              src="/sev1-warroom-dashboard.html" 
-              className="w-full h-screen border-0"
-              title="Original SEV-1 Dashboard"
-            />
-          )}
+          {activeTab === 'dashboard' && <GrafanaDashboardOriginal />}
+          {activeTab === 'standalone' && <GrafanaDashboardOriginal />}
           {activeTab === 'calculator' && <GPUCostCalculator />}
         </div>
       </main>
