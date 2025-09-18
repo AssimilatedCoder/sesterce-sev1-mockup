@@ -4,7 +4,7 @@ import {
   Building2, FileText, BookOpen, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
-import { CalculatorTab } from './tabs/CalculatorTab';
+import { CalculatorTabEnhanced } from './tabs/CalculatorTabEnhanced';
 import { NetworkingTab } from './tabs/NetworkingTab';
 import { StorageTab } from './tabs/StorageTab';
 import { CoolingPowerTab } from './tabs/CoolingPowerTab';
@@ -56,9 +56,31 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
   const [region, setRegion] = useState('us-texas');
   const [utilization, setUtilization] = useState(90);
   const [depreciation, setDepreciation] = useState(4);
+  
+  // Storage configuration
   const [totalStorage, setTotalStorage] = useState(50);
+  const [storageArchitecture, setStorageArchitecture] = useState('mixed');
+  const [hotPercent, setHotPercent] = useState(20);
+  const [warmPercent, setWarmPercent] = useState(35);
+  const [coldPercent, setColdPercent] = useState(35);
+  const [archivePercent, setArchivePercent] = useState(10);
+  const [hotVendor, setHotVendor] = useState('vast');
+  const [warmVendor, setWarmVendor] = useState('pure-e');
+  const [coldVendor, setColdVendor] = useState('ceph');
+  const [archiveVendor, setArchiveVendor] = useState('glacier');
+  
+  // Networking configuration
   const [fabricType, setFabricType] = useState('infiniband');
+  const [topology, setTopology] = useState('fat-tree');
+  const [oversubscription, setOversubscription] = useState('1:1');
+  const [railsPerGPU, setRailsPerGPU] = useState(8);
   const [enableBluefield, setEnableBluefield] = useState(true);
+  
+  // Advanced options
+  const [pueOverride, setPueOverride] = useState('');
+  const [gpuPriceOverride, setGpuPriceOverride] = useState('');
+  const [maintenancePercent, setMaintenancePercent] = useState(3);
+  const [staffMultiplier, setStaffMultiplier] = useState(1);
   
   // Results state
   const [results, setResults] = useState<any>(null);
@@ -67,10 +89,16 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
   const spec = gpuSpecs[gpuModel];
   const coolingRequired = spec.coolingOptions.length === 1 && spec.coolingOptions[0] === 'liquid';
 
-  // Update cooling type when GPU model changes
+  // Update cooling type and rails when GPU model changes
   useEffect(() => {
     if (spec.coolingOptions.length === 1) {
       setCoolingType(spec.coolingOptions[0]);
+    }
+    // Set default rails per GPU based on model
+    if (gpuModel.startsWith('gb')) {
+      setRailsPerGPU(9);
+    } else {
+      setRailsPerGPU(8);
     }
   }, [gpuModel, spec.coolingOptions]);
 
@@ -79,12 +107,13 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
     const regionData = regionRates[region];
     const fabric = networkFabrics[fabricType];
     
-    // GPU costs
-    const gpuCapex = spec.unitPrice * numGPUs;
+    // GPU costs - use override if provided
+    const gpuUnitPrice = gpuPriceOverride ? parseFloat(gpuPriceOverride) : spec.unitPrice;
+    const gpuCapex = gpuUnitPrice * numGPUs;
     
     // Power calculations
     const basePowerMW = (spec.powerPerGPU * numGPUs) / 1000000;
-    const pueValue = spec.pue[coolingType] || regionData.pue;
+    const pueValue = pueOverride ? parseFloat(pueOverride) : (spec.pue[coolingType] || regionData.pue);
     const totalPowerMW = basePowerMW * pueValue;
     const annualPowerCost = totalPowerMW * 1000 * regionData.rate * 8760;
     
@@ -126,7 +155,7 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
     const annualOpex = annualPowerCost +
                       storageOpex +
                       networkCapex * 0.05 + // 5% network maintenance
-                      totalCapex * 0.03; // 3% general maintenance
+                      totalCapex * (maintenancePercent / 100); // configurable maintenance
     
     // Cost per GPU hour
     const annualGpuHours = numGPUs * 8760 * (utilization / 100);
@@ -206,8 +235,24 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
     utilization,
     depreciation,
     totalStorage,
+    storageArchitecture,
+    hotPercent,
+    warmPercent,
+    coldPercent,
+    archivePercent,
+    hotVendor,
+    warmVendor,
+    coldVendor,
+    archiveVendor,
     fabricType,
-    enableBluefield
+    topology,
+    oversubscription,
+    railsPerGPU,
+    enableBluefield,
+    pueOverride,
+    gpuPriceOverride,
+    maintenancePercent,
+    staffMultiplier
   };
 
   return (
@@ -257,7 +302,7 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
           {/* Tab Content */}
           <div className="min-h-[600px]">
             {activeTab === 'calculator' && (
-              <CalculatorTab
+              <CalculatorTabEnhanced
                 config={config}
                 setGpuModel={setGpuModel}
                 setNumGPUs={setNumGPUs}
@@ -266,8 +311,24 @@ const GPUSuperclusterCalculatorV5: React.FC = () => {
                 setUtilization={setUtilization}
                 setDepreciation={setDepreciation}
                 setTotalStorage={setTotalStorage}
+                setStorageArchitecture={setStorageArchitecture}
+                setHotPercent={setHotPercent}
+                setWarmPercent={setWarmPercent}
+                setColdPercent={setColdPercent}
+                setArchivePercent={setArchivePercent}
+                setHotVendor={setHotVendor}
+                setWarmVendor={setWarmVendor}
+                setColdVendor={setColdVendor}
+                setArchiveVendor={setArchiveVendor}
                 setFabricType={setFabricType}
+                setTopology={setTopology}
+                setOversubscription={setOversubscription}
+                setRailsPerGPU={setRailsPerGPU}
                 setEnableBluefield={setEnableBluefield}
+                setPueOverride={setPueOverride}
+                setGpuPriceOverride={setGpuPriceOverride}
+                setMaintenancePercent={setMaintenancePercent}
+                setStaffMultiplier={setStaffMultiplier}
                 coolingRequired={coolingRequired}
                 calculate={calculate}
                 results={results}
