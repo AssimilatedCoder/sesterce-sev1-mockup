@@ -34,6 +34,11 @@ class DashboardDataLoader {
   }
 
   async loadAllData() {
+    console.log('🚀 Starting data loading...');
+    
+    // PRELOAD all fallback data immediately for instant display
+    this.preloadFallbackData();
+    
     const csvFiles = [
       'queue_wait_quantiles.csv',
       'gpu_utilization.csv',
@@ -60,41 +65,83 @@ class DashboardDataLoader {
       'change_timeline.log'
     ];
 
-    // Load CSV files
-    for (const file of csvFiles) {
+    // Try to load CSV files in parallel (but don't wait if they fail)
+    const csvPromises = csvFiles.map(async (file) => {
       try {
-        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
+        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`, {
+          cache: 'force-cache'
+        });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
         const csvText = await response.text();
         const key = file.replace('.csv', '');
         this.data[key] = this.parseCSV(csvText);
-        console.log(`✅ Loaded ${key}: ${this.data[key].length} records`);
+        console.log(`✅ Loaded real ${key}: ${this.data[key].length} records`);
+        return { key, success: true };
       } catch (error) {
-        console.warn(`⚠️ Failed to load ${file}:`, error);
-        // Generate fallback data for missing files
-        this.data[file.replace('.csv', '')] = this.generateFallbackData(file);
+        console.log(`📊 Using fallback data for ${file}`);
+        return { key: file.replace('.csv', ''), success: false };
       }
-    }
+    });
 
-    // Load log files
-    for (const file of logFiles) {
+    // Try to load log files in parallel
+    const logPromises = logFiles.map(async (file) => {
       try {
-        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`);
+        const response = await fetch(`/superpod_sev1_fake_telemetry/${file}`, {
+          cache: 'force-cache'
+        });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
         const logText = await response.text();
         const key = file.replace('.log', '');
         this.data[key] = this.parseLogFile(logText);
-        console.log(`✅ Loaded ${key}: ${this.data[key].length} log entries`);
+        console.log(`✅ Loaded real ${key}: ${this.data[key].length} log entries`);
+        return { key, success: true };
       } catch (error) {
-        console.warn(`⚠️ Failed to load ${file}:`, error);
-        // Generate fallback log data
-        this.data[file.replace('.log', '')] = this.generateFallbackLogData(file);
+        console.log(`📝 Using fallback logs for ${file}`);
+        return { key: file.replace('.log', ''), success: false };
       }
-    }
+    });
+
+    // Wait for all attempts to complete (but don't block on failures)
+    await Promise.allSettled([...csvPromises, ...logPromises]);
+    
+    console.log('✅ Data loading complete (using fallback where needed)');
+  }
+
+  preloadFallbackData() {
+    console.log('📊 Preloading fallback incident data...');
+    
+    // Preload all essential datasets with incident patterns
+    const essentialFiles = [
+      'queue_wait_quantiles.csv',
+      'gpu_utilization.csv', 
+      'sla_penalty_and_budget.csv',
+      'composite_timeline.csv',
+      'dcgm_util_by_node.csv',
+      'network_ecn_rate.csv',
+      'vast_nvmeof_latency_quantiles.csv',
+      'pfc_pause_rx.csv',
+      'per_link_utilization.csv',
+      'vast_nvme_queue_depth.csv',
+      'vast_fe_util_and_cache.csv'
+    ];
+
+    essentialFiles.forEach(file => {
+      const key = file.replace('.csv', '');
+      this.data[key] = this.generateFallbackData(file);
+    });
+
+    // Preload log data
+    const logFiles = ['noc_events.log', 'nccl_logs.log', 'evpn_events.log', 'change_timeline.log'];
+    logFiles.forEach(file => {
+      const key = file.replace('.log', '');
+      this.data[key] = this.generateFallbackLogData(file);
+    });
+
+    console.log('✅ Fallback data preloaded - dashboard ready for immediate display');
   }
 
   parseLogFile(logText: string) {
@@ -952,10 +999,40 @@ class DashboardDataLoader {
   }
 
   async initialize() {
-    console.log('🚀 Loading dashboard data...');
+    console.log('🚀 Initializing SEV-1 Dashboard...');
+    
+    // Show loading indicator
+    this.showLoadingIndicator();
+    
+    // Load data (preload happens immediately, then try real data)
     await this.loadAllData();
     
-    console.log('📊 Updating charts...');
+    // Hide loading indicator and render charts
+    this.hideLoadingIndicator();
+    this.renderAllCharts();
+    
+    console.log('✅ SEV-1 Dashboard fully initialized with incident data!');
+  }
+
+  showLoadingIndicator() {
+    const indicators = document.querySelectorAll('.chart-container, .panel');
+    indicators.forEach(el => {
+      const htmlEl = el as HTMLElement;
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'loading-indicator absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center';
+      loadingDiv.innerHTML = '<div class="text-blue-400 animate-pulse">Loading incident data...</div>';
+      htmlEl.style.position = 'relative';
+      htmlEl.appendChild(loadingDiv);
+    });
+  }
+
+  hideLoadingIndicator() {
+    document.querySelectorAll('.loading-indicator').forEach(el => el.remove());
+  }
+
+  renderAllCharts() {
+    console.log('📊 Rendering all charts with incident data...');
+    
     // Row 1: EXEC / SLO
     this.updateQueueWaitChart();
     this.updateGPUStats();
@@ -982,7 +1059,7 @@ class DashboardDataLoader {
     // Row 6: Cross-Domain Correlation
     this.updateCompositeChart();
     
-    console.log('✅ Dashboard data loaded successfully!');
+    console.log('✅ All charts rendered with SEV-1 incident patterns!');
   }
 }
 
@@ -1023,22 +1100,35 @@ export const GrafanaDashboard: React.FC = () => {
     };
 
     const initializeDashboard = async () => {
-      // Wait for DOM elements to be ready
+      // Minimal wait for DOM elements to be ready
       setTimeout(async () => {
         try {
-          console.log('🚀 Initializing dashboard...');
+          console.log('🚀 Initializing SEV-1 Dashboard with preloaded data...');
           const loader = new DashboardDataLoader();
+          
+          // Initialize immediately with preloaded fallback data
           await loader.initialize();
           
-          // Set up auto-refresh
+          // Set up auto-refresh for dynamic stats
           setInterval(() => {
             loader.updateGPUStats();
             loader.updateSLAStats();
-          }, 30000);
+            loader.updateChangeTimeline();
+            loader.updateNOCEvents();
+          }, 15000); // Refresh every 15 seconds for more dynamic feel
+          
+          console.log('✅ Dashboard fully operational with incident data!');
         } catch (error) {
           console.error('❌ Failed to initialize dashboard:', error);
+          
+          // Show user-friendly error
+          const errorEl = document.createElement('div');
+          errorEl.className = 'fixed top-4 right-4 bg-red-600 text-white p-3 rounded shadow-lg z-50';
+          errorEl.innerHTML = '⚠️ Dashboard loading issue - using fallback data';
+          document.body.appendChild(errorEl);
+          setTimeout(() => errorEl.remove(), 4000);
         }
-      }, 1000);
+      }, 200); // Reduced from 1000ms to 200ms for faster loading
     };
 
     loadScripts();
