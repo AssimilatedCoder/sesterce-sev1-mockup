@@ -199,8 +199,8 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
           <div>
             <h4 className="text-sm font-semibold text-yellow-800 mb-1">Important Notice</h4>
             <p className="text-sm text-yellow-700">
-              This TCO calculator does not yet include Software Support and/or Licensing costs. 
-              Functionality arriving soon.
+              This TCO calculator does not yet include accurate, customer specific, Software Support and/or Licensing costs. 
+              Assumptions used are based on Nvidia references per GPU and can be optimized using alternative SW stacks - e.g. OMNIA, Palette, etc.
             </p>
           </div>
         </div>
