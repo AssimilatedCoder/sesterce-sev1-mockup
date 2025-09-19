@@ -99,14 +99,14 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
   return (
     <div className="space-y-5">
       {/* Software Licensing Warning Banner */}
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+          <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-red-800 mb-1">Important Notice</h4>
-            <p className="text-sm text-red-700">
+            <h4 className="text-sm font-semibold text-yellow-800 mb-1">Important Notice</h4>
+            <p className="text-sm text-yellow-700">
               This TCO calculator does not yet include Software Support and/or Licensing costs. 
-              These costs can be significant and should be factored into your total budget planning.
+              Functionality arriving soon.
             </p>
           </div>
         </div>
