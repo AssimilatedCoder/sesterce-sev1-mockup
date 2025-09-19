@@ -161,6 +161,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Calculate network costs based on topology and oversubscription
   const calculateNetworkCosts = () => {
     const fabric = networkFabrics[fabricType];
+    const isGB200 = gpuModel === 'gb200';
+    const isGB300 = gpuModel === 'gb300';
+    
+    // Pod-based architecture (from design document)
+    const gpusPerPod = isGB200 ? 1008 : 1024;
+    const numPods = Math.ceil(numGPUs / gpusPerPod);
+    const railsPerGPU = isGB200 || isGB300 ? 9 : 8;
     
     // Adjust switch counts based on topology and oversubscription
     const oversubRatio = parseFloat(oversubscription.split(':')[0]);
@@ -169,8 +176,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     let leafSwitches, spineSwitches, coreSwitches;
     
     if (topology === 'fat-tree') {
-      leafSwitches = Math.ceil(numGPUs / 128);
-      spineSwitches = Math.ceil(leafSwitches / 8);
+      // Pod-based calculations (4 leaf + 4 spine per pod from design doc)
+      leafSwitches = numPods * 4;
+      spineSwitches = numPods * 4;
       coreSwitches = numGPUs > 50000 ? 50 : (numGPUs > 25000 ? 10 : 2);
     } else if (topology === 'dragonfly') {
       leafSwitches = Math.ceil(numGPUs / 96);
@@ -187,15 +195,31 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const cables = totalPorts;
     const transceivers = totalPorts * 2; // Both ends
     
+    // DPU calculations (per design doc: 4 DPUs per NVL72 system)
+    let dpuCount = 0;
+    let dpuCost = 0;
+    let dpuPower = 0;
+    
+    if (enableBluefield) {
+      if (isGB200 || isGB300) {
+        dpuCount = Math.ceil(numGPUs / 72) * 4; // 4 dual-port BlueField-3 per NVL72
+      } else {
+        dpuCount = Math.ceil(numGPUs / 8); // One per DGX node
+      }
+      dpuCost = dpuCount * 2500; // BlueField-3 SuperNIC price
+      dpuPower = dpuCount * 150; // 150W per DPU (from design doc)
+    }
+    
     const switchCost = totalSwitches * fabric.switchPrice;
     const cableCost = cables * fabric.cablePrice;
     const transceiverCost = transceivers * fabric.transceiverPrice;
     
+    // Return structure compatible with NetworkingTabEnhanced
     return {
-      total: switchCost + cableCost + transceiverCost,
+      total: switchCost + cableCost + transceiverCost + dpuCost,
       switches: switchCost,
-      cables: cableCost,
-      transceivers: transceiverCost,
+      cableCost: cableCost,
+      transceiverCost: transceiverCost,
       counts: {
         totalSwitches,
         leafSwitches,
@@ -203,6 +227,45 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         coreSwitches,
         cables,
         transceivers
+      },
+      // Additional structure for NetworkingTabEnhanced compatibility
+      topology: {
+        leafSwitches,
+        spineSwitches,
+        coreSwitches,
+        totalSwitches,
+        pods: numPods,
+        railsPerGPU
+      },
+      cables: {
+        total: cables,
+        intraPod: Math.floor(cables * 0.7), // Estimate
+        interPod: Math.floor(cables * 0.3)
+      },
+      transceivers: transceivers,
+      dpus: {
+        count: dpuCount,
+        cost: dpuCost,
+        power: dpuPower
+      },
+      costs: {
+        switches: switchCost,
+        cables: cableCost,
+        transceivers: transceiverCost,
+        dpus: dpuCost,
+        total: switchCost + cableCost + transceiverCost + dpuCost
+      },
+      power: {
+        switches: totalSwitches * 1800, // Estimated switch power
+        cables: cables * 3, // Estimated cable power
+        transceivers: transceivers * 12, // Estimated transceiver power
+        dpus: dpuPower,
+        total: (totalSwitches * 1800) + (cables * 3) + (transceivers * 12) + dpuPower
+      },
+      bandwidth: {
+        bisection: (coreSwitches * 64 * fabric.bandwidthPerGpu) / 8, // Gbps to GBps
+        theoretical: numGPUs * fabric.bandwidthPerGpu * railsPerGPU / 8,
+        perGPU: fabric.bandwidthPerGpu * railsPerGPU
       }
     };
   };
@@ -293,8 +356,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       { name: '└─ Archive', unit: storage.breakdown.archive.vendor, qty: `${storage.breakdown.archive.capacity.toFixed(1)} PB`, total: storage.archive, pct: (storage.archive/totalCapex*100).toFixed(1) },
       { name: 'Networking Infrastructure', unit: 'Switches + Cables', qty: `${network.counts.totalSwitches} switches`, total: network.total, pct: (network.total/totalCapex*100).toFixed(1) },
       { name: '├─ Switches', unit: 'Leaf/Spine/Core', qty: `${network.counts.totalSwitches}`, total: network.switches, pct: (network.switches/totalCapex*100).toFixed(1) },
-      { name: '├─ Cables', unit: `$${networkFabrics[fabricType].cablePrice}/cable`, qty: network.counts.cables.toLocaleString(), total: network.cables, pct: (network.cables/totalCapex*100).toFixed(1) },
-      { name: '└─ Transceivers', unit: `$${networkFabrics[fabricType].transceiverPrice}/unit`, qty: network.counts.transceivers.toLocaleString(), total: network.transceivers, pct: (network.transceivers/totalCapex*100).toFixed(1) },
+      { name: '├─ Cables', unit: `$${networkFabrics[fabricType].cablePrice}/cable`, qty: network.counts.cables.toLocaleString(), total: network.costs.cables, pct: (network.costs.cables/totalCapex*100).toFixed(1) },
+      { name: '└─ Transceivers', unit: `$${networkFabrics[fabricType].transceiverPrice}/unit`, qty: network.counts.transceivers.toLocaleString(), total: network.costs.transceivers, pct: (network.costs.transceivers/totalCapex*100).toFixed(1) },
       { name: 'Data Center Infrastructure', unit: '$10M/MW', qty: `${totalPowerMW.toFixed(1)} MW`, total: datacenterCapex, pct: (datacenterCapex/totalCapex*100).toFixed(1) },
       { name: 'Cooling Infrastructure', unit: `$${coolingType === 'liquid' ? '400' : '300'}/kW`, qty: `${(gpuPowerMW*1000).toFixed(0)} kW`, total: coolingCapex, pct: (coolingCapex/totalCapex*100).toFixed(1) },
       { name: 'Software & Licensing', unit: '$6,500/GPU', qty: numGPUs.toLocaleString(), total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
