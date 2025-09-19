@@ -11,6 +11,7 @@ import { StorageTab } from './tabs/StorageTab';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
+import { DesignTab } from './tabs/DesignTab';
 import { formatNumber } from '../utils/formatters';
 
 // Region rates with more comprehensive data
@@ -22,34 +23,38 @@ const regionRates: Record<string, { rate: number; name: string; pue: number }> =
   'asia': { rate: 0.100, name: 'Asia Pacific', pue: 1.3 }
 };
 
-// Network fabric specifications
+// Network fabric specifications (updated per design document)
 const networkFabrics: Record<string, {
   name: string;
   switchPrice: number;
   cablePrice: number;
   transceiverPrice: number;
   bandwidthPerGpu: number;
+  portsPerSwitch: number;
 }> = {
   'infiniband': {
     name: 'InfiniBand NDR',
     switchPrice: 120000,
     cablePrice: 500,
     transceiverPrice: 1500,
-    bandwidthPerGpu: 400
+    bandwidthPerGpu: 400,
+    portsPerSwitch: 64 // Design doc specifies 64-port switches
   },
   'ethernet': {
     name: 'Ethernet RoCEv2',
-    switchPrice: 80000,
+    switchPrice: 85000, // Spectrum-X or Nexus pricing
     cablePrice: 200,
     transceiverPrice: 800,
-    bandwidthPerGpu: 400
+    bandwidthPerGpu: 400,
+    portsPerSwitch: 64 // Design doc specifies 64-port switches
   },
   'infiniband-xdr': {
     name: 'InfiniBand XDR',
     switchPrice: 180000,
     cablePrice: 800,
     transceiverPrice: 2500,
-    bandwidthPerGpu: 800
+    bandwidthPerGpu: 800,
+    portsPerSwitch: 64
   }
 };
 
@@ -206,14 +211,16 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     // Calculate detailed networking
     const network = calculateNetworkCosts();
     
-    // Power calculations
-    const gpuPowerMW = (spec.powerPerGPU * numGPUs) / 1000000;
+    // Power calculations using design document specifications
+    const systemsTotal = Math.ceil(numGPUs / spec.rackSize);
+    const rackPowerTotal = systemsTotal * (spec.rackPower || spec.powerPerGPU * spec.rackSize);
+    const gpuPowerMW = rackPowerTotal / 1000000; // Use actual rack power from design doc
     const pueValue = pueOverride ? parseFloat(pueOverride) : (spec.pue[coolingType] || regionData.pue);
     
-    // DPU power if enabled
+    // DPU power if enabled (updated per design doc: 150W per BlueField-3)
     const dpuCount = enableBluefield ? 
       (gpuModel.startsWith('gb') ? numGPUs / 2 : numGPUs / 8) : 0;
-    const dpuPowerMW = dpuCount * 75 / 1000000;
+    const dpuPowerMW = dpuCount * 150 / 1000000; // Updated to 150W per BlueField-3
     const dpuCapex = dpuCount * 2500;
     
     // Total IT power including storage and DPUs
@@ -333,7 +340,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
-    { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> }
+    { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'design', label: 'Design', icon: <FileText className="w-4 h-4" /> }
   ];
 
   const config = {
@@ -467,6 +475,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'references' && (
               <ReferencesTab />
+            )}
+            
+            {activeTab === 'design' && (
+              <DesignTab config={config} results={results} />
             )}
           </div>
         </div>

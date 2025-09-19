@@ -558,6 +558,102 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
         Calculate Complete Infrastructure TCO
       </button>
       
+      {/* Architecture Breakdown Callout */}
+      {results && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+          <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            Cluster Architecture Breakdown
+          </h4>
+          
+          {(() => {
+            const spec = gpuSpecs[config.gpuModel];
+            const isGB200 = config.gpuModel === 'gb200' || config.gpuModel === 'gb300';
+            
+            // Architecture calculations based on design document
+            const gpusPerSystem = spec.rackSize;
+            const systemsTotal = Math.ceil(config.numGPUs / gpusPerSystem);
+            const racksTotal = systemsTotal;
+            
+            // Pod architecture (1,008 GPUs per pod for GB200, 1024 for others)
+            const gpusPerPod = isGB200 ? 1008 : 1024;
+            const systemsPerPod = isGB200 ? 14 : Math.ceil(1024 / gpusPerSystem);
+            const podsTotal = Math.ceil(config.numGPUs / gpusPerPod);
+            
+            // Network architecture per design doc
+            const dpusPerSystem = isGB200 ? 4 : 1; // 4 dual-port BlueField-3 per NVL72
+            const portsPerSystem = isGB200 ? 8 : 8; // 8x 400GbE per system
+            const totalDPUs = systemsTotal * dpusPerSystem;
+            const total400GLinks = systemsTotal * portsPerSystem;
+            
+            // Switch calculations per pod (from design doc)
+            const leafSwitchesPerPod = 4; // 64-port switches
+            const spineSwitchesPerPod = 4; // 64-port switches
+            const totalLeafSwitches = podsTotal * leafSwitchesPerPod;
+            const totalSpineSwitches = podsTotal * spineSwitchesPerPod;
+            
+            return (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <div className="text-2xl font-bold text-blue-600">{gpusPerSystem}</div>
+                    <div className="text-xs text-gray-600">GPUs per {isGB200 ? 'NVL72' : 'Node'}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <div className="text-2xl font-bold text-green-600">{systemsTotal.toLocaleString()}</div>
+                    <div className="text-xs text-gray-600">{isGB200 ? 'NVL72 Systems' : 'Nodes'} Total</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <div className="text-2xl font-bold text-purple-600">{racksTotal.toLocaleString()}</div>
+                    <div className="text-xs text-gray-600">Racks Required</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border text-center">
+                    <div className="text-2xl font-bold text-orange-600">{podsTotal}</div>
+                    <div className="text-xs text-gray-600">Pods ({gpusPerPod} GPUs each)</div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h5 className="font-semibold text-gray-700 mb-3">Network Infrastructure</h5>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>BlueField-3 DPUs:</span>
+                        <span className="font-medium">{totalDPUs.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>400GbE Links:</span>
+                        <span className="font-medium">{total400GLinks.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Leaf Switches:</span>
+                        <span className="font-medium">{totalLeafSwitches}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Spine Switches:</span>
+                        <span className="font-medium">{totalSpineSwitches}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h5 className="font-semibold text-gray-700 mb-3">Pod Architecture</h5>
+                    <div className="bg-gray-50 p-3 rounded text-xs font-mono leading-relaxed">
+                      <div>Pod Topology ({gpusPerPod} GPUs):</div>
+                      <div>├── {systemsPerPod}× {isGB200 ? 'NVL72' : 'DGX'} Systems</div>
+                      <div>├── {systemsPerPod * portsPerSystem}× 400GbE Ports</div>
+                      <div>├── 4× Leaf Switches (64-port)</div>
+                      <div>├── 4× Spine Switches (64-port)</div>
+                      <div>└── {((systemsPerPod * (spec.rackPower || 0)) / 1000).toFixed(1)} MW Power</div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
+      
       {/* Results Section */}
       {results && (
         <>
