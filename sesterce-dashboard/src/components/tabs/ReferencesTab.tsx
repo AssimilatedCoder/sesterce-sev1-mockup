@@ -283,7 +283,7 @@ export const ReferencesTab: React.FC = () => {
 
       {/* Deployment Case Studies */}
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Real-World Deployments</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Comparable Clusters</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 border border-gray-200 rounded-lg">
             <h4 className="font-semibold text-gray-800 mb-2">xAI Colossus (100,000 H100s)</h4>

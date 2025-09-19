@@ -63,7 +63,9 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
     const gpuPower = numGPUs * spec.powerPerGPU;
     const gracePower = isGB200 || isGB300 ? (numGPUs / 2) * (isGB200 ? 300 : 350) : 0;
     const nvlinkPower = isGB200 || isGB300 ? Math.ceil(numGPUs / 8) * (isGB200 ? 400 : 500) : 0;
-    const dpuPower = config.enableBluefield ? Math.ceil(numGPUs / (isGB200 || isGB300 ? 2 : 8)) * 75 : 0;
+    // DPU power: 4 DPUs per NVL72 system (72 GPUs) at 150W each = 600W per system
+    const dpuPower = config.enableBluefield ? 
+      (isGB200 || isGB300 ? Math.ceil(numGPUs / 72) * 4 * 150 : Math.ceil(numGPUs / 8) * 150) : 0;
     const networkingPower = results?.networking?.power || 500000; // 500kW default
     const storagePower = results?.storage?.power || 200000; // 200kW default
     
@@ -503,19 +505,19 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold text-gray-800 mb-2">IT Space</h4>
             <p className="text-2xl font-bold text-blue-600">
-              {((coolingDetails.powerDistribution.racksTotal) * 10).toFixed(0)} sq ft
+              {((coolingDetails.powerDistribution.racksTotal) * 0.93).toFixed(1)} m²
             </p>
             <p className="text-sm text-gray-600">White space for racks</p>
             <div className="mt-2 text-xs text-gray-500">
-              • 10 sq ft per rack
+              • 0.93 m² per rack
               <br />• Hot/cold aisle containment
-              <br />• 12-15 ft ceiling minimum
+              <br />• 3.7-4.6 m ceiling minimum
             </div>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold text-gray-800 mb-2">Mechanical Space</h4>
             <p className="text-2xl font-bold text-green-600">
-              {((coolingDetails.powerDistribution.racksTotal) * 5).toFixed(0)} sq ft
+              {((coolingDetails.powerDistribution.racksTotal) * 0.46).toFixed(1)} m²
             </p>
             <p className="text-sm text-gray-600">Cooling & power equipment</p>
             <div className="mt-2 text-xs text-gray-500">
@@ -527,7 +529,7 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold text-gray-800 mb-2">Total Footprint</h4>
             <p className="text-2xl font-bold text-purple-600">
-              {((coolingDetails.powerDistribution.racksTotal) * 15).toFixed(0)} sq ft
+              {((coolingDetails.powerDistribution.racksTotal) * 1.39).toFixed(1)} m²
             </p>
             <p className="text-sm text-gray-600">Complete facility</p>
             <div className="mt-2 text-xs text-gray-500">

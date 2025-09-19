@@ -12,6 +12,7 @@ import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
+import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { formatNumber } from '../utils/formatters';
 
 // Region rates with more comprehensive data
@@ -122,10 +123,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const coldCapacityPB = totalStorage * (coldPercent / 100);
     const archiveCapacityPB = totalStorage * (archivePercent / 100);
     
-    const hotCost = hotCapacityPB * 1000 * storageVendors[hotVendor].pricePerGB * 1000;
-    const warmCost = warmCapacityPB * 1000 * storageVendors[warmVendor].pricePerGB * 1000;
-    const coldCost = coldCapacityPB * 1000 * storageVendors[coldVendor].pricePerGB * 1000;
-    const archiveCost = archiveCapacityPB * 1000 * storageVendors[archiveVendor].pricePerGB * 1000;
+    const hotCost = hotCapacityPB * 1000 * 1000 * storageVendors[hotVendor].pricePerGB; // PB -> GB conversion
+    const warmCost = warmCapacityPB * 1000 * 1000 * storageVendors[warmVendor].pricePerGB;
+    const coldCost = coldCapacityPB * 1000 * 1000 * storageVendors[coldVendor].pricePerGB;
+    const archiveCost = archiveCapacityPB * 1000 * 1000 * storageVendors[archiveVendor].pricePerGB;
     
     const hotPower = hotCapacityPB * 1000 * storageVendors[hotVendor].powerPerTB / 1000;
     const warmPower = warmCapacityPB * 1000 * storageVendors[warmVendor].powerPerTB / 1000;
@@ -217,10 +218,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const gpuPowerMW = rackPowerTotal / 1000000; // Use actual rack power from design doc
     const pueValue = pueOverride ? parseFloat(pueOverride) : (spec.pue[coolingType] || regionData.pue);
     
-    // DPU power if enabled (updated per design doc: 150W per BlueField-3)
+    // DPU power if enabled (per design doc: 4 DPUs per NVL72 system at 150W each)
     const dpuCount = enableBluefield ? 
-      (gpuModel.startsWith('gb') ? numGPUs / 2 : numGPUs / 8) : 0;
-    const dpuPowerMW = dpuCount * 150 / 1000000; // Updated to 150W per BlueField-3
+      (gpuModel.startsWith('gb') ? Math.ceil(numGPUs / 72) * 4 : numGPUs / 8) : 0;
+    const dpuPowerMW = dpuCount * 150 / 1000000; // 150W per BlueField-3
     const dpuCapex = dpuCount * 2500;
     
     // Total IT power including storage and DPUs
@@ -341,7 +342,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
     { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'design', label: 'Design', icon: <FileText className="w-4 h-4" /> }
+    { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
+    { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
   ];
 
   const config = {
@@ -479,6 +481,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'design' && (
               <DesignTab config={config} results={results} />
+            )}
+            
+            {activeTab === 'exercise' && (
+              <DesignExerciseTab />
             )}
           </div>
         </div>
