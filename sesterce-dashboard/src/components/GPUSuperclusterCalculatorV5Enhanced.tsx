@@ -5,9 +5,10 @@ import {
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
+import { calculateEnhancedStorage } from '../utils/storageCalculationsEnhanced';
 import { CalculatorTabEnhanced } from './tabs/CalculatorTabEnhanced';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
-import { StorageTabEnhanced } from './tabs/StorageTabEnhanced';
+import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhanced';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
@@ -127,6 +128,29 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   // Calculate storage costs using vendor-specific pricing
   const calculateStorageCosts = () => {
+    // Enhanced storage configuration for production-grade calculations
+    const enhancedStorageConfig = {
+      gpuCount: numGPUs,
+      gpuModel: gpuModel,
+      workloadMix: {
+        training: 70, // Default assumptions - could be made configurable
+        inference: 20,
+        finetuning: 10
+      },
+      tenantMix: {
+        whale: 60,
+        medium: 30,
+        small: 10
+      },
+      budget: 'optimized' as const,
+      storageVendor: 'auto' as const,
+      tierDistribution: 'balanced' as const
+    };
+
+    // Calculate enhanced storage requirements
+    const enhancedResults = calculateEnhancedStorage(enhancedStorageConfig);
+    
+    // Legacy compatibility - maintain existing structure for backward compatibility
     const hotCapacityPB = totalStorage * (hotPercent / 100);
     const warmCapacityPB = totalStorage * (warmPercent / 100);
     const coldCapacityPB = totalStorage * (coldPercent / 100);
@@ -143,6 +167,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const archivePower = archiveCapacityPB * 1000 * storageVendors[archiveVendor].powerPerTB / 1000;
     
     return {
+      // Legacy structure for backward compatibility
       total: hotCost + warmCost + coldCost + archiveCost,
       hot: hotCost,
       warm: warmCost,
@@ -154,7 +179,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         warm: { capacity: warmCapacityPB, vendor: storageVendors[warmVendor].name, cost: warmCost },
         cold: { capacity: coldCapacityPB, vendor: storageVendors[coldVendor].name, cost: coldCost },
         archive: { capacity: archiveCapacityPB, vendor: storageVendors[archiveVendor].name, cost: archiveCost }
-      }
+      },
+      
+      // Enhanced storage results for production-grade analysis
+      enhanced: enhancedResults
     };
   };
 
@@ -548,7 +576,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             )}
             
             {activeTab === 'storage' && (
-              <StorageTabEnhanced config={config} results={results} />
+              <StorageTabProductionEnhanced config={config} results={results} />
             )}
             
             {activeTab === 'cooling' && (
