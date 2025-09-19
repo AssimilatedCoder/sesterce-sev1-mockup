@@ -723,7 +723,7 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
                       <div>├── {systemsPerPod * portsPerSystem}× {fabricBandwidth}GbE Ports</div>
                       <div>├── 4× Leaf Switches (64-port)</div>
                       <div>├── 4× Spine Switches (64-port)</div>
-                      <div>└── {((systemsPerPod * (spec.rackPower || 0)) / 1000).toFixed(1)} MW Power</div>
+                      <div>└── {((systemsPerPod * (spec.rackPower || 0)) / 1000000).toFixed(1)} MW Power</div>
                     </div>
                   </div>
                 </div>
