@@ -7,7 +7,7 @@ import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
 import { CalculatorTabEnhanced } from './tabs/CalculatorTabEnhanced';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
-import { StorageTab } from './tabs/StorageTab';
+import { StorageTabEnhanced } from './tabs/StorageTabEnhanced';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
@@ -540,7 +540,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             )}
             
             {activeTab === 'storage' && (
-              <StorageTab config={config} results={results} />
+              <StorageTabEnhanced config={config} results={results} />
             )}
             
             {activeTab === 'cooling' && (
