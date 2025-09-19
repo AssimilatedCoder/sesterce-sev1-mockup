@@ -112,8 +112,8 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     // Calculate fabric requirements
     const railsPerGPU = isGB200 || isGB300 ? 9 : 8;
     
-    // Clos fabric calculations - Pod-based architecture
-    const gpusPerPod = 1024; // Standard pod size
+    // Clos fabric calculations - Pod-based architecture (from design document)
+    const gpusPerPod = isGB200 ? 1008 : 1024; // 1,008 GPUs per pod for GB200 (14 NVL72), 1024 for others
     const numPods = Math.ceil(numGPUs / gpusPerPod);
     
     // Leaf switches (ToR)
