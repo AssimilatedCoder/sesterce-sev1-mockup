@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Cluster Technical Architecture - Complete Document</title>
+    <style>
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            background: #ffffff;
+        }
+
+        .document-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .document-header h1 {
+            font-size: 28pt;
+            font-weight: 300;
+            margin: 0 0 15px 0;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 14pt;
+            font-weight: 400;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .version-info {
+            font-size: 10pt;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        h2 {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+
+        h3 {
+            font-size: 14pt;
+            font-weight: 600;
+            color: #34495e;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #34495e;
+            margin: 25px 0 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 10pt;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 10pt;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #e3f2fd;
+        }
+
+        .alert-info, .alert-success, .alert-warning {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+            color: #0d47a1;
+        }
+
+        .alert-success {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+            color: #1b5e20;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+            color: #e65100;
+        }
+
+        .technical-spec {
+            background: #263238;
+            color: #b0bec5;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.4;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .architecture-diagram {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.4;
+            margin: 20px 0;
+            border: 2px solid #e0e0e0;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid #3498db;
+        }
+
+        .metric-label {
+            font-size: 9pt;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 24pt;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .page-break {
+            page-break-before: always;
+            margin: 40px 0;
+        }
+
+        .document-footer {
+            margin-top: 60px;
+            padding: 30px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            font-size: 9pt;
+            color: #7f8c8d;
+            text-align: center;
+        }
+
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        @media print {
+            body { font-size: 10pt; }
+            .document-header { background: #667eea !important; }
+            th { background: #667eea !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="document-header">
+    <h1>GPU Cluster Technical Architecture</h1>
+    <div class="subtitle">
+        Large-Scale GPU Cluster Reference Architecture<br/>
+        10,000 GB200 GPUs Day-1 → 100,000 GB200 GPUs Scale-Out Design
+    </div>
+    <div class="version-info">
+        RoCE v2 Ethernet Fabric • EVPN/VXLAN Overlay • Slurm + Kubernetes Orchestration<br/>
+        Version 3.0 • Power Calculations Corrected & Validated<br/>
+        GB200 NVL72 Rack-Scale System Architecture
+    </div>
+</div>
+
+<h2>1. Reference Pod Architecture - HLD & LLD</h2>
+
+<h3>1.1 Pod Size Selection and Justification</h3>
+
+<div class="alert-info">
+    <strong>Recommended Pod Size: 1,008 GB200 GPUs (14 NVL72 Rack Systems)</strong>
+    <p>Day-1 Deployment: 10 pods × 1,008 GPUs = 10,080 GB200 GPUs total</p>
+    <p><strong>Important:</strong> Each GB200 NVL72 is a complete rack-scale system containing 72 GPUs</p>
+    <ul>
+        <li><strong>Failure Domain:</strong> Each pod represents ~1% of 100k cluster (limits blast radius)</li>
+        <li><strong>Network Scale:</strong> 112 × 400GbE ports fits within 2-tier Clos topology</li>
+        <li><strong>Power/Cooling:</strong> ~1.7-1.85 MW per pod (120-132kW per NVL72 rack)</li>
+        <li><strong>Operational:</strong> Manageable upgrade/maintenance unit</li>
+        <li><strong>Job Scheduling:</strong> Common training job sizes (512-2048 GPUs) fit within pod</li>
+    </ul>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Per Pod Specification</th>
+            <th>Quantity</th>
+            <th>Day-1 Total (10 Pods)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>GB200 NVL72 Systems</strong></td>
+            <td>72 GPUs per rack system</td>
+            <td>14 systems/pod</td>
+            <td>140 systems (10,080 GPUs)</td>
+        </tr>
+        <tr>
+            <td><strong>Rack Count</strong></td>
+            <td>One NVL72 per rack (liquid-cooled)</td>
+            <td>14 racks/pod</td>
+            <td>140 racks total</td>
+        </tr>
+        <tr>
+            <td><strong>Network Connections</strong></td>
+            <td>8× 400GbE per NVL72 (BlueField-3)</td>
+            <td>112 ports/pod</td>
+            <td>1,120 × 400GbE ports</td>
+        </tr>
+        <tr>
+            <td><strong>Leaf Switches</strong></td>
+            <td>64×400G ports (Spectrum-X or Nexus)</td>
+            <td>4 switches/pod</td>
+            <td>40 leaf switches</td>
+        </tr>
+        <tr>
+            <td><strong>Spine Switches</strong></td>
+            <td>64×400G ports</td>
+            <td>4 switches/pod</td>
+            <td>40 spine switches</td>
+        </tr>
+        <tr>
+            <td><strong>Total Bandwidth</strong></td>
+            <td>44.8 Tbps per pod</td>
+            <td>-</td>
+            <td>448 Tbps aggregate</td>
+        </tr>
+        <tr>
+            <td><strong>Power Requirement</strong></td>
+            <td>1.68-1.85 MW per pod</td>
+            <td>-</td>
+            <td>16.8-18.5 MW total</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>1.2 GB200 NVL72 System Architecture</h3>
+
+<div class="alert-success">
+    <strong>GB200 NVL72 Rack-Scale System Components</strong>
+    <p>Each NVL72 is a complete integrated rack system, not individual GPUs:</p>
+    <ul>
+        <li><strong>Compute:</strong> 18× compute trays (2 Grace CPUs + 4 Blackwell GPUs each)</li>
+        <li><strong>Total:</strong> 36 Grace CPUs + 72 Blackwell GB200 GPUs</li>
+        <li><strong>Interconnect:</strong> 9× NVLink Switch trays (130 TB/s aggregate bandwidth)</li>
+        <li><strong>Power:</strong> 8× 33kW power shelves (264kW total capacity, 120-132kW typical)</li>
+        <li><strong>Memory:</strong> 13.5 TB HBM3e (72 × ~188 GB) + CPU memory</li>
+        <li><strong>Cooling:</strong> Direct liquid cooling integrated (mandatory)</li>
+        <li><strong>Network:</strong> 4× dual-port BlueField-3 DPUs (8× 400GbE total)</li>
+    </ul>
+</div>
+
+<h3>1.3 Fabric Design - RoCE v2 Clos Network</h3>
+
+<pre class="technical-spec">
+Pod Network Topology (Per 1,008 GPU Pod):
+────────────────────────────────────────
+Architecture: 2-tier spine-leaf Clos
+NVL72 Systems: 14 (1,008 GPUs total)
+Network Ports: 112× 400GbE (8 per system via BlueField-3 DPUs)
+
+Switching Requirements:
+- Leaf Layer: 4× 64-port switches (256 ports total)
+  • 112 ports for NVL72 downlinks
+  • 144 ports for spine uplinks (36 per leaf)
+  
+- Spine Layer: 4× 64-port switches
+  • 144 ports used for leaf connections
+  • Non-blocking 1:1 bandwidth
+
+Oversubscription Analysis:
+- Compute bandwidth: 14 systems × 3.2 Tbps = 44.8 Tbps
+- Bisection bandwidth: 144 links × 400G = 57.6 Tbps
+- Oversubscription: NONE (1:1 non-blocking)
+
+Switch Platform Options:
+- NVIDIA Spectrum-X SN5600: 64× 400GbE, 25.6 Tbps
+- Cisco Nexus 9364D-GX2A: 64× 400GbE, 25.6 Tbps
+</pre>
+
+<h4>Network Port Allocation Per Pod</h4>
+
+<table>
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Port Count</th>
+            <th>Speed</th>
+            <th>Total Bandwidth</th>
+            <th>Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>NVL72 to Leaf</strong></td>
+            <td>112 ports</td>
+            <td>400 GbE</td>
+            <td>44.8 Tbps</td>
+            <td>Compute connectivity (8 per system)</td>
+        </tr>
+        <tr>
+            <td><strong>Leaf to Spine</strong></td>
+            <td>144 ports</td>
+            <td>400 GbE</td>
+            <td>57.6 Tbps</td>
+            <td>Fabric interconnect (36 per leaf)</td>
+        </tr>
+        <tr>
+            <td><strong>Inter-Pod Links</strong></td>
+            <td>16 ports</td>
+            <td>400 GbE</td>
+            <td>6.4 Tbps</td>
+            <td>Pod-to-pod connectivity</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Network</strong></td>
+            <td>32 ports</td>
+            <td>400 GbE</td>
+            <td>12.8 Tbps</td>
+            <td>VAST NVMe-oF targets</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>QoS Mapping for RoCE v2</h4>
+
+<div class="alert-warning">
+    <strong>Note:</strong> Pin DSCP/queue maps, ECN/WRED curves, DCQCN constants, and PFC watchdogs to vendor-specific configurations per switch/NIC firmware and release notes.
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Traffic Class</th>
+            <th>DSCP Value</th>
+            <th>CoS Priority</th>
+            <th>Queue Config</th>
+            <th>Bandwidth %</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>RoCE/RDMA</strong></td>
+            <td>26 (AF31)</td>
+            <td>3</td>
+            <td>No-drop (PFC enabled)</td>
+            <td>50%</td>
+        </tr>
+        <tr>
+            <td><strong>CNP Traffic</strong></td>
+            <td>48 (CS6)</td>
+            <td>7</td>
+            <td>Strict priority</td>
+            <td>5%</td>
+        </tr>
+        <tr>
+            <td><strong>Storage I/O</strong></td>
+            <td>18 (AF21)</td>
+            <td>2</td>
+            <td>Weighted fair queue</td>
+            <td>20%</td>
+        </tr>
+        <tr>
+            <td><strong>Management</strong></td>
+            <td>16 (CS2)</td>
+            <td>1</td>
+            <td>Best effort</td>
+            <td>5%</td>
+        </tr>
+        <tr>
+            <td><strong>Default</strong></td>
+            <td>0 (BE)</td>
+            <td>0</td>
+            <td>Best effort</td>
+            <td>20%</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>PFC and ECN Configuration</h4>
+
+<pre class="technical-spec">
+Priority Flow Control (PFC) Settings:
+────────────────────────────────────────
+PFC Enable: Priority 3 only (RoCE traffic)
+PFC Watchdog Timer: 200ms detection
+PFC Recovery Timer: 400ms
+Storm Protection: Auto-disable after 3 storms/min
+
+Explicit Congestion Notification (ECN):
+────────────────────────────────────────
+Marking Threshold (Min): 150KB (10% buffer)
+Marking Threshold (Max): 3MB (25% buffer)
+Marking Probability: 5-10% gradient
+Drop Probability: 0% (lossless for RDMA)
+
+DCQCN Parameters:
+────────────────────────────────────────
+Rate Increase (Rp): 50 Mbps
+Additive Increase (Rai): 5 Mbps  
+Multiplicative Decrease (Gd): 1/256
+CNP Generation Timer: 10ms
+Rate Recovery Timer: 55ms
+Byte Counter Reset: 10MB
+</pre>
+
+<h3>1.4 BlueField-3 DPU Integration</h3>
+
+<div class="alert-info">
+    <strong>DPU Configuration Per NVL72 System</strong>
+    <p>Each GB200 NVL72 system includes 4× dual-port BlueField-3 DPUs for network acceleration</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>DPU Component</th>
+            <th>Specification</th>
+            <th>Per System</th>
+            <th>Per Pod (14 systems)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>BlueField-3 DPUs</strong></td>
+            <td>Dual-port 400GbE</td>
+            <td>4 DPUs (8 ports)</td>
+            <td>56 DPUs (112 ports)</td>
+        </tr>
+        <tr>
+            <td><strong>Network Bandwidth</strong></td>
+            <td>800 Gbps per DPU</td>
+            <td>3.2 Tbps</td>
+            <td>44.8 Tbps</td>
+        </tr>
+        <tr>
+            <td><strong>ARM Cores</strong></td>
+            <td>16 cores @ 2.75GHz</td>
+            <td>64 cores</td>
+            <td>896 cores</td>
+        </tr>
+        <tr>
+            <td><strong>Memory</strong></td>
+            <td>32GB DDR5 per DPU</td>
+            <td>128GB</td>
+            <td>1.79TB</td>
+        </tr>
+        <tr>
+            <td><strong>Power per DPU</strong></td>
+            <td>Up to 150W</td>
+            <td>600W (4 DPUs)</td>
+            <td>8.4kW</td>
+        </tr>
+        <tr>
+            <td><strong>Offload Features</strong></td>
+            <td>RDMA, GPUDirect, OVS</td>
+            <td>Full offload</td>
+            <td>-</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>1.5 EVPN-MH at ToR Configuration</h3>
+
+<p>Overlay security is delivered via MACsec (link-layer) or IPsec (tunnel). EVPN control-plane uses MP-BGP.</p>
+
+<pre class="technical-spec">
+EVPN Multi-Homing Configuration:
+────────────────────────────────────────
+! Leaf switch pair configuration (per NVL72 system)
+interface Port-channel10
+  description "To NVL72-01 via BlueField-3"
+  switchport mode trunk
+  switchport trunk allowed vlan 100-199
+  mtu 9216
+  service-policy type qos input RDMA_INGRESS
+  priority-flow-control mode on
+  
+evpn
+  ethernet-segment 10
+    identifier type 0 00:11:22:33:44:55:66:77:88:10
+    redundancy all-active
+    df-election mode preference
+    designated-forwarder preference 100
+
+router bgp 65001
+  neighbor 10.0.0.1 remote-as 65100
+  address-family l2vpn evpn
+    neighbor 10.0.0.1 activate
+    neighbor 10.0.0.1 send-community extended
+    
+! VXLAN Configuration
+interface nve1
+  source-interface loopback0
+  host-reachability protocol bgp
+  member vni 10100-10199
+    ingress-replication protocol bgp
+</pre>
+
+<h3>1.6 Failure Handling and Convergence</h3>
+
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Link Failure Detection</div>
+        <div class="metric-value">50ms</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">BGP Convergence</div>
+        <div class="metric-value">300ms</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Application Recovery</div>
+        <div class="metric-value">&lt;1s</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Failure Type</th>
+            <th>Detection Method</th>
+            <th>Recovery Time</th>
+            <th>Impact</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>DPU/Link Failure</strong></td>
+            <td>BFD @ 100ms interval</td>
+            <td>&lt;300ms</td>
+            <td>12.5% BW reduction per system</td>
+        </tr>
+        <tr>
+            <td><strong>Leaf Switch Failure</strong></td>
+            <td>EVPN-MH fast failover</td>
+            <td>&lt;500ms</td>
+            <td>3-4 NVL72 systems affected</td>
+        </tr>
+        <tr>
+            <td><strong>Spine Switch Failure</strong></td>
+            <td>BGP PIC + ECMP</td>
+            <td>&lt;1s</td>
+            <td>No impact (1:1 non-blocking)</td>
+        </tr>
+        <tr>
+            <td><strong>Full NVL72 System</strong></td>
+            <td>Heartbeat + DCGM</td>
+            <td>&lt;5s detection</td>
+            <td>72 GPUs (7% of pod)</td>
+        </tr>
+        <tr>
+            <td><strong>Pod Isolation</strong></td>
+            <td>Multi-pod monitoring</td>
+            <td>&lt;30s</td>
+            <td>1,008 GPUs (10% Day-1)</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>2. Storage – Layout & Data Paths</h2>
+
+<div class="alert-info">
+    <strong>Storage Sizing for 10,000 GPU Day-1 Deployment</strong>
+    <p>20 PB usable storage scales linearly with GPU count to support 100,000 GPU deployment (200 PB)</p>
+</div>
+
+<h3>2.1 VAST Data Platform Configuration</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Day-1 (10k GPUs)</th>
+            <th>Scale (100k GPUs)</th>
+            <th>Per-Pod Allocation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Usable Capacity</strong></td>
+            <td>20 PB</td>
+            <td>200 PB</td>
+            <td>2 PB per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Raw Capacity</strong></td>
+            <td>32-35 PB</td>
+            <td>320-350 PB</td>
+            <td>3.2-3.5 PB per pod</td>
+        </tr>
+        <tr>
+            <td><strong>VAST CNodes</strong></td>
+            <td>10 nodes</td>
+            <td>100 nodes</td>
+            <td>1 CNode per pod</td>
+        </tr>
+        <tr>
+            <td><strong>VAST DBoxes</strong></td>
+            <td>10 enclosures</td>
+            <td>100 enclosures</td>
+            <td>1 DBox per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Network Connections</strong></td>
+            <td>40× 400 GbE</td>
+            <td>400× 400 GbE</td>
+            <td>4× 400 GbE per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Aggregate Throughput</strong></td>
+            <td>1.6 TB/s</td>
+            <td>16 TB/s</td>
+            <td>160 GB/s per pod</td>
+        </tr>
+    </tbody>
+</table>
+
+<pre class="technical-spec">
+VAST Cluster Sizing Per Pod (1,008 GPUs):
+────────────────────────────────────────
+Usable Capacity: 2 PB per pod
+Data Reduction: 1.3:1 (AI workloads)
+Physical After Reduction: 1.54 PB
+Erasure Coding (14+2): 1.14x overhead
+Raw Capacity Required: 3.2 PB per pod
+
+DBox Configuration (Per Pod):
+- 1× VAST DBox per pod
+- 72× 30.72 TB NVMe SSDs
+- Raw Capacity: 2.21 PB
+- Usable (after EC+reduction): 2 PB
+
+Network Configuration:
+- 4× 400 GbE connections per CNode
+- 160 GB/s throughput per pod
+- NVMe-oF targets: 16 per pod
+- Direct pod-local storage access
+</pre>
+
+<h3>2.2 NVMe-oF Target Distribution</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Storage Metric</th>
+            <th>Per NVL72 System</th>
+            <th>Per Pod (14 systems)</th>
+            <th>Day-1 Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Storage Capacity</strong></td>
+            <td>143 TB usable</td>
+            <td>2 PB</td>
+            <td>20 PB</td>
+        </tr>
+        <tr>
+            <td><strong>NVMe-oF Targets</strong></td>
+            <td>1-2 targets</td>
+            <td>16 targets</td>
+            <td>160 targets</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Bandwidth</strong></td>
+            <td>11.4 GB/s</td>
+            <td>160 GB/s</td>
+            <td>1.6 TB/s</td>
+        </tr>
+        <tr>
+            <td><strong>IOPS Capability</strong></td>
+            <td>1M IOPS</td>
+            <td>14M IOPS</td>
+            <td>140M IOPS</td>
+        </tr>
+        <tr>
+            <td><strong>Queue Pairs</strong></td>
+            <td>32 per target</td>
+            <td>512 total</td>
+            <td>5,120 total</td>
+        </tr>
+    </tbody>
+</table>
+
+<pre class="technical-spec">
+NVMe-oF Configuration (RoCE v2):
+────────────────────────────────────────
+Protocol: NVMe/RoCE v2 
+Network: Unified fabric (same as compute)
+Switch Platform: Spectrum-X or Nexus 9000
+
+Per-Target Configuration:
+- Queue Depth: 128
+- Max I/O Size: 1 MB  
+- Queue Pairs: 32
+- Connection Pool: 4-16 per host
+
+RoCE v2 Optimization:
+- PFC Priority: 3 (same as compute)
+- ECN Enabled: Yes
+- DCQCN: Active
+- DSCP Marking: AF21 (storage class)
+
+Target Distribution Strategy:
+- Round-robin across CNodes
+- NUMA-aware queue placement
+- Pod-local affinity (minimize inter-pod traffic)
+</pre>
+
+<h3>2.3 Data Path Architecture</h3>
+
+<div class="architecture-diagram">
+         Storage Data Path Architecture (Per Pod)
+
+┌─────────────────────────────────────────────────────────────┐
+│                     Pod Network Fabric                       │
+│                    (4× Leaf, 4× Spine)                      │
+└──────────┬─────────────────────┬──────────────────┘
+             │                           │
+    ┌────────▼──────────┐       ┌────────▼──────────┐
+    │   NVL72 Systems  │       │   VAST Storage   │
+    │   (14 systems)   │       │    (1 CNode)     │
+    │                  │       │                  │
+    │ 8× 400G per sys  │       │   4× 400G total  │
+    │ via BlueField-3  │◄──────►  NVMe-oF/RDMA   │
+    │                  │       │                  │
+    │  1,008 GPUs     │       │     2 PB         │
+    └──────────────────┘       └──────────────────┘
+    
+Data Flow Paths:
+1. Training Data: Storage → Leaf → NVL72 → GPU Memory
+2. Checkpoints: GPU → NVL72 → Leaf → Storage
+3. Inter-GPU: NVL72 ↔ Leaf ↔ Spine ↔ Leaf ↔ NVL72
+</div>
+
+<h3>2.4 Checkpoint Strategy</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Checkpoint Type</th>
+            <th>Frequency</th>
+            <th>Size</th>
+            <th>Duration</th>
+            <th>Impact</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Micro-checkpoint</strong></td>
+            <td>15 minutes</td>
+            <td>100-500 GB</td>
+            <td>&lt;30s</td>
+            <td>Async, no training pause</td>
+        </tr>
+        <tr>
+            <td><strong>Standard</strong></td>
+            <td>2 hours</td>
+            <td>1-5 TB</td>
+            <td>&lt;2 min</td>
+            <td>Brief pause possible</td>
+        </tr>
+        <tr>
+            <td><strong>Major</strong></td>
+            <td>24 hours</td>
+            <td>5-20 TB</td>
+            <td>&lt;10 min</td>
+            <td>Scheduled maintenance window</td>
+        </tr>
+        <tr>
+            <td><strong>Cross-Region</strong></td>
+            <td>4 hours</td>
+            <td>1-5 TB</td>
+            <td>Continuous</td>
+            <td>Async replication</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>2.5 Storage Performance Optimization</h3>
+
+<pre class="technical-spec">
+I/O Scheduling for Head-of-Line Blocking Prevention:
+────────────────────────────────────────
+Scheduler: mq-deadline with modifications
+Read Queue Depth: 128
+Write Queue Depth: 64
+Read Prioritization: 2:1 ratio
+
+Quality of Service:
+- Training Read IOPS: 80% reserved
+- Checkpoint Write: 15% reserved  
+- Management: 5% reserved
+
+Per-Connection Flow Control:
+- Max Outstanding: 32 requests
+- Timeout: 30 seconds
+- Retry: Exponential backoff
+- Circuit Breaker: 3 failures
+
+Data Pipeline:
+- Prefetch Depth: 10 blocks
+- Read-ahead: 2 MB
+- Write Coalescing: 4 MB
+- Async I/O: Mandatory
+</pre>
+
+<div class="page-break"></div>
+
+<h2>3. Scale-Out Architecture to 100,000 GPUs</h2>
+
+<h3>3.1 Scaling Strategy</h3>
+
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Day-1 GPUs</div>
+        <div class="metric-value">10,080</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Target Scale</div>
+        <div class="metric-value">100,800</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Pod Count</div>
+        <div class="metric-value">10 → 100</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Scale Phase</th>
+            <th>GPU Count</th>
+            <th>NVL72 Systems</th>
+            <th>Pods</th>
+            <th>Power Required</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Phase 1 (Day-1)</strong></td>
+            <td>10,080</td>
+            <td>140</td>
+            <td>10</td>
+            <td>16.8-18.5 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 2 (Q2)</strong></td>
+            <td>30,240</td>
+            <td>420</td>
+            <td>30</td>
+            <td>50.4-55.5 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 3 (Q3)</strong></td>
+            <td>50,400</td>
+            <td>700</td>
+            <td>50</td>
+            <td>84-92.5 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 4 (Q4)</strong></td>
+            <td>75,600</td>
+            <td>1,050</td>
+            <td>75</td>
+            <td>126-138.8 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 5 (Final)</strong></td>
+            <td>100,800</td>
+            <td>1,400</td>
+            <td>100</td>
+            <td>168-185 MW</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>3.2 Three-Tier Network Architecture at Scale</h3>
+
+<pre class="technical-spec">
+100,000 GPU Network Topology:
+────────────────────────────────────────
+Tier 1 (Access): Pod-Level Leaf/Spine
+- 100 pods × 4 leaf switches = 400 leaf switches
+- 100 pods × 4 spine switches = 400 spine switches
+- Intra-pod bandwidth: 57.6 Tbps per pod
+
+Tier 2 (Aggregation): Super-Spine Layer
+- 20 super-spine switches (512-port chassis)
+- Each pod connects with 64× 400G uplinks
+- Pod-to-pod bandwidth: 25.6 Tbps per pod
+
+Tier 3 (Core): Optional WAN/DCI Layer
+- 8 core routers for multi-site connectivity
+- 100G/400G DWDM for inter-DC links
+
+Total Switching Infrastructure:
+- 828 switches (400 leaf + 400 spine + 20 super-spine + 8 core)
+- 320,000+ fiber connections
+- 5.76 Pbps total bisection bandwidth
+</pre>
+
+<h3>3.3 Pod Interconnect Design</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Interconnect Type</th>
+            <th>Bandwidth</th>
+            <th>Ports Used</th>
+            <th>Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Intra-Pod</strong></td>
+            <td>57.6 Tbps</td>
+            <td>144× 400G</td>
+            <td>Pod-internal traffic (80% of total)</td>
+        </tr>
+        <tr>
+            <td><strong>Inter-Pod (Near)</strong></td>
+            <td>25.6 Tbps</td>
+            <td>64× 400G</td>
+            <td>Adjacent pod communication</td>
+        </tr>
+        <tr>
+            <td><strong>Inter-Pod (Far)</strong></td>
+            <td>6.4 Tbps</td>
+            <td>16× 400G</td>
+            <td>Cross-datacenter hall</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Fabric</strong></td>
+            <td>1.6 Tbps</td>
+            <td>4× 400G per pod</td>
+            <td>Distributed storage access</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>3.4 Resource Allocation at Scale</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Resource</th>
+            <th>Per Pod</th>
+            <th>Day-1 (10 Pods)</th>
+            <th>Full Scale (100 Pods)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>GB200 GPUs</strong></td>
+            <td>1,008</td>
+            <td>10,080</td>
+            <td>100,800</td>
+        </tr>
+        <tr>
+            <td><strong>NVL72 Systems</strong></td>
+            <td>14</td>
+            <td>140</td>
+            <td>1,400</td>
+        </tr>
+        <tr>
+            <td><strong>BlueField-3 DPUs</strong></td>
+            <td>56</td>
+            <td>560</td>
+            <td>5,600</td>
+        </tr>
+        <tr>
+            <td><strong>Network Ports (400G)</strong></td>
+            <td>304</td>
+            <td>3,040</td>
+            <td>30,400</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Capacity</strong></td>
+            <td>2 PB</td>
+            <td>20 PB</td>
+            <td>200 PB</td>
+        </tr>
+        <tr>
+            <td><strong>Power Consumption</strong></td>
+            <td>1.68-1.85 MW</td>
+            <td>16.8-18.5 MW</td>
+            <td>168-185 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Cooling Capacity</strong></td>
+            <td>1.68-1.85 MW</td>
+            <td>16.8-18.5 MW</td>
+            <td>168-185 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Rack Count</strong></td>
+            <td>14</td>
+            <td>140</td>
+            <td>1,400</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>3.5 Multi-Pod BGP Architecture</h3>
+
+<pre class="technical-spec">
+BGP Configuration for 100-Pod Scale:
+────────────────────────────────────────
+Pod-Level (Tier 1):
+- ASN: 65001-65100 (one per pod)
+- Prefix: 10.POD.0.0/16 per pod
+- iBGP within pod (full mesh or RR)
+
+Super-Spine Level (Tier 2):
+- ASN: 64512 (confederation)
+- Aggregates pod prefixes
+- Route Reflector clusters
+
+Routing Policy:
+- Each pod advertises summary only
+- Super-spine performs aggregation
+- Maximum-prefix limits enforced
+
+Scale Limits:
+- 100 pods × 1,000 routes = 100k routes
+- BGP convergence target: <5 seconds
+- ECMP paths: 64-way load balancing
+</pre>
+
+<div class="page-break"></div>
+
+<h2>4. Schedulers & Multi-Tenancy</h2>
+
+<h3>4.1 Slurm Configuration for 10,000+ GPUs</h3>
+
+<pre class="technical-spec">
+Slurm Cluster Configuration:
+────────────────────────────────────────
+ClusterName=gpu-cluster-prod
+SlurmctldHost=slurm-master-0(10.0.0.10)
+SlurmctldHost=slurm-master-1(10.0.0.11)
+
+# Partition Configuration (Per Pod)
+PartitionName=pod01 Nodes=nvl72-001-[001-014] Default=NO
+PartitionName=pod02 Nodes=nvl72-002-[001-014] Default=NO
+...
+PartitionName=pod10 Nodes=nvl72-010-[001-014] Default=NO
+
+# Node Configuration (14 NVL72 per pod)
+NodeName=nvl72-001-001 Gres=gpu:gb200:72 CPUBind=none
+NodeName=nvl72-001-002 Gres=gpu:gb200:72 CPUBind=none
+...
+
+# GPU Resource Mapping
+GresTypes=gpu
+# Total GPUs: 10,080 (140 nodes × 72 GPUs)
+</pre>
+
+<h3>4.2 Kubernetes Integration with RDMA</h3>
+
+<pre class="technical-spec">
+Multus CNI Configuration for BlueField-3:
+────────────────────────────────────────
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: rdma-bluefield
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "bf3-port0",  # BlueField-3 interface
+      "mode": "bridge",
+      "ipam": {
+        "type": "whereabouts",
+        "range": "10.1.0.0/16"
+      }
+    }
+
+# DPU Resource Discovery
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bluefield-resources
+data:
+  config.json: |
+    {
+      "resourceList": [
+        {
+          "resourceName": "bluefield3",
+          "selectors": {
+            "vendors": ["15b3"],
+            "deviceIDs": ["a2dc"],  # BlueField-3
+            "drivers": ["mlx5_core"]
+          }
+        }
+      ]
+    }
+</pre>
+
+<h3>4.3 Multi-Tenant Resource Allocation</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tenant Class</th>
+            <th>Priority</th>
+            <th>GPU Allocation</th>
+            <th>Max Pods</th>
+            <th>Guaranteed BW</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Production</strong></td>
+            <td>1000</td>
+            <td>4,032 GPUs (40%)</td>
+            <td>4 pods</td>
+            <td>100% line rate</td>
+        </tr>
+        <tr>
+            <td><strong>Research</strong></td>
+            <td>500</td>
+            <td>3,024 GPUs (30%)</td>
+            <td>3 pods</td>
+            <td>80% guaranteed</td>
+        </tr>
+        <tr>
+            <td><strong>Development</strong></td>
+            <td>100</td>
+            <td>2,016 GPUs (20%)</td>
+            <td>2 pods</td>
+            <td>50% guaranteed</td>
+        </tr>
+        <tr>
+            <td><strong>Batch/Scavenger</strong></td>
+            <td>10</td>
+            <td>1,008 GPUs (10%)</td>
+            <td>1 pod</td>
+            <td>Best effort</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>5. Observability & Monitoring</h2>
+
+<h3>5.1 Key Performance Metrics</h3>
+
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">GPU Utilization Target</div>
+        <div class="metric-value">&gt;95%</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Network Latency P99</div>
+        <div class="metric-value">&lt;10μs</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Storage Latency P99</div>
+        <div class="metric-value">&lt;1ms</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Metric Category</th>
+            <th>Collection Rate</th>
+            <th>Retention</th>
+            <th>Alert Threshold</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>GPU Metrics (DCGM)</strong></td>
+            <td>10 second</td>
+            <td>30 days</td>
+            <td>&lt;90% util for 5 min</td>
+        </tr>
+        <tr>
+            <td><strong>Network (INT/Telemetry)</strong></td>
+            <td>1 second</td>
+            <td>7 days</td>
+            <td>&gt;1000 PFC pauses/sec</td>
+        </tr>
+        <tr>
+            <td><strong>Storage I/O</strong></td>
+            <td>5 second</td>
+            <td>14 days</td>
+            <td>&gt;1ms P99 latency</td>
+        </tr>
+        <tr>
+            <td><strong>BlueField DPU</strong></td>
+            <td>5 second</td>
+            <td>7 days</td>
+            <td>&gt;80% CPU utilization</td>
+        </tr>
+        <tr>
+            <td><strong>Job Metrics</strong></td>
+            <td>1 minute</td>
+            <td>90 days</td>
+            <td>Queue time &gt;10 min</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>5.2 Telemetry Architecture</h3>
+
+<div class="architecture-diagram">
+┌─────────────────── Observability Stack ─────────────────────┐
+│                                                             │
+│  Per-Pod Collectors (10 instances Day-1)                   │
+│  ┌──────────────────────────────────────────────┐      │
+│  │  Prometheus  │  DCGM Exporter  │  Node Exporter │      │
+│  │  (2 replicas)│  (per NVL72)    │  (per system)  │      │
+│  └─────────────┬────────────────────────────────┘      │
+│                │                                            │
+│  Regional Aggregators (3 instances)                        │
+│  ┌─────────────┴────────────────────────────────┐      │
+│  │  Thanos Query  │  Cortex  │  Jaeger Collector  │      │
+│  └─────────────┬────────────────────────────────┘      │
+│                │                                            │
+│  Global Dashboard                                          │
+│  ┌─────────────┴────────────────────────────────┐      │
+│  │  Grafana Enterprise  │  Alert Manager  │  ML/AI │      │
+│  └─────────────────────────────────────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+</div>
+
+<h3>5.3 Release Gating Criteria</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Test Category</th>
+            <th>Pass Criteria</th>
+            <th>Duration</th>
+            <th>Scale</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>NCCL AllReduce</strong></td>
+            <td>&gt;95% of theoretical BW</td>
+            <td>24 hours</td>
+            <td>Full pod (1,008 GPUs)</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Stress</strong></td>
+            <td>&lt;1ms P99, no drops</td>
+            <td>72 hours</td>
+            <td>2 PB writes</td>
+        </tr>
+        <tr>
+            <td><strong>Network Congestion</strong></td>
+            <td>No PFC storms</td>
+            <td>48 hours</td>
+            <td>100% load</td>
+        </tr>
+        <tr>
+            <td><strong>Multi-Tenant</strong></td>
+            <td>QoS guarantees met</td>
+            <td>7 days</td>
+            <td>4 tenant classes</td>
+        </tr>
+        <tr>
+            <td><strong>Failure Recovery</strong></td>
+            <td>&lt;5 min recovery</td>
+            <td>Continuous</td>
+            <td>Chaos testing</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>6. Risk Assessment</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Risk</th>
+            <th>Probability</th>
+            <th>Impact</th>
+            <th>Mitigation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr style="background: #fef5f5;">
+            <td><strong>PFC Storm at Scale</strong></td>
+            <td>High</td>
+            <td>Critical</td>
+            <td>• PFC watchdog timers<br/>• Storm detection<br/>• Automatic isolation</td>
+        </tr>
+        <tr style="background: #fef5f5;">
+            <td><strong>Pod-Level Failure</strong></td>
+            <td>Medium</td>
+            <td>High (10% capacity)</td>
+            <td>• Cross-pod job migration<br/>• Reserved capacity<br/>• Fast checkpoint restore</td>
+        </tr>
+        <tr style="background: #fef9f0;">
+            <td><strong>DPU Firmware Issues</strong></td>
+            <td>Medium</td>
+            <td>High</td>
+            <td>• Staged rollout<br/>• Canary testing<br/>• Quick rollback</td>
+        </tr>
+        <tr style="background: #fef9f0;">
+            <td><strong>Inter-Pod Bandwidth</strong></td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>• Job placement optimization<br/>• Dynamic traffic engineering<br/>• Capacity planning</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Bottleneck</strong></td>
+            <td>Low</td>
+            <td>High</td>
+            <td>• Over-provisioning<br/>• Caching layers<br/>• I/O scheduling</td>
+        </tr>
+        <tr>
+            <td><strong>Power Infrastructure</strong></td>
+            <td>Low</td>
+            <td>Critical</td>
+            <td>• N+1 redundancy<br/>• Dual power feeds<br/>• Generator backup</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>7. Executive Summary</h2>
+
+<div class="alert-success">
+    <h3 style="margin-top: 0;">Architecture Overview</h3>
+    <p><strong>Scalable GPU Cluster: 10,000 → 100,000 GB200 GPUs</strong></p>
+    <ol>
+        <li><strong>Day-1 Deployment:</strong> 10 pods × 1,008 GPUs = 10,080 GB200 GPUs (140 NVL72 rack systems)</li>
+        <li><strong>Scale Path:</strong> Linear scaling to 100 pods (1,400 NVL72 systems) = 100,800 GPUs</li>
+        <li><strong>System Architecture:</strong> Each NVL72 is a complete rack with 72 GPUs + 36 Grace CPUs + NVLink fabric</li>
+        <li><strong>Network:</strong> 2-tier Clos per pod with BlueField-3 DPUs, scaling to 3-tier at 30+ pods</li>
+        <li><strong>Storage:</strong> 20 PB VAST (2 PB per pod) scaling to 200 PB</li>
+        <li><strong>Bandwidth:</strong> 44.8 Tbps per pod compute bandwidth, non-blocking within pods</li>
+        <li><strong>Power:</strong> 16.8-18.5 MW Day-1, scaling to 168-185 MW at full deployment</li>
+    </ol>
+</div>
+
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Systems Day-1</div>
+        <div class="metric-value">140</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">GPUs per System</div>
+        <div class="metric-value">72</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Total Day-1 GPUs</div>
+        <div class="metric-value">10,080</div>
+    </div>
+</div>
+
+<h3>Critical Design Elements</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Specification</th>
+            <th>Justification</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Pod Size</strong></td>
+            <td>14 NVL72 systems (1,008 GPUs)</td>
+            <td>Optimal failure domain, network scale</td>
+        </tr>
+        <tr>
+            <td><strong>System Power</strong></td>
+            <td>120-132kW per NVL72 rack</td>
+            <td>Liquid cooling mandatory at this density</td>
+        </tr>
+        <tr>
+            <td><strong>DPU Integration</strong></td>
+            <td>4× BlueField-3 per NVL72</td>
+            <td>8× 400G bandwidth, RDMA offload</td>
+        </tr>
+        <tr>
+            <td><strong>Network Topology</strong></td>
+            <td>Non-blocking 2-tier Clos</td>
+            <td>No oversubscription within pods</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Ratio</strong></td>
+            <td>2 GB/s per GPU</td>
+            <td>Sufficient for training workloads</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert-info">
+    <h3 style="margin-top: 0;">Key Success Factors</h3>
+    <ul>
+        <li><strong>Pod Isolation:</strong> Each pod operates independently with dedicated resources</li>
+        <li><strong>Linear Scaling:</strong> Add pods without redesigning architecture</li>
+        <li><strong>Network Performance:</strong> Non-blocking within pods, managed oversubscription between pods</li>
+        <li><strong>DPU Offload:</strong> BlueField-3 handles RDMA, freeing GPU resources</li>
+        <li><strong>Storage Locality:</strong> Pod-local storage minimizes inter-pod traffic</li>
+        <li><strong>Power Efficiency:</strong> Liquid cooling essential for ~130kW per rack density</li>
+    </ul>
+</div>
+
+<div class="document-footer">
+    <p><strong>Document Classification:</strong> Technical Architecture Specification - Complete<br/>
+    <strong>Version:</strong> 3.0 | <strong>Date:</strong> September 2025<br/>
+    <strong>Scope:</strong> 10,000 GB200 GPU Day-1 → 100,000 GPU Scale-Out<br/>
+    <strong>Architecture:</strong> Pod-based design with NVL72 rack systems and BlueField-3 DPUs<br/>
+    <strong>Review Status:</strong> Power calculations corrected and validated<br/>
+    <strong>Distribution:</strong> Infrastructure Teams Only</p>
+</div>
+
+</body>
+</html>
