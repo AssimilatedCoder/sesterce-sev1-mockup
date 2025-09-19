@@ -603,6 +603,52 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
             const spec = gpuSpecs[config.gpuModel];
             const isGB200 = config.gpuModel === 'gb200' || config.gpuModel === 'gb300';
             
+            // Get fabric specifications
+            const networkFabrics: Record<string, {
+              name: string;
+              switchPrice: number;
+              cablePrice: number;
+              transceiverPrice: number;
+              bandwidthPerGpu: number;
+              portsPerSwitch: number;
+            }> = {
+              'infiniband': {
+                name: 'InfiniBand NDR',
+                switchPrice: 120000,
+                cablePrice: 500,
+                transceiverPrice: 1500,
+                bandwidthPerGpu: 400,
+                portsPerSwitch: 64
+              },
+              'ethernet': {
+                name: 'Ethernet RoCEv2',
+                switchPrice: 85000,
+                cablePrice: 200,
+                transceiverPrice: 800,
+                bandwidthPerGpu: 400,
+                portsPerSwitch: 64
+              },
+              'infiniband-xdr': {
+                name: 'InfiniBand XDR',
+                switchPrice: 180000,
+                cablePrice: 800,
+                transceiverPrice: 2500,
+                bandwidthPerGpu: 800,
+                portsPerSwitch: 64
+              },
+              'ethernet-800g': {
+                name: 'Ethernet RoCEv2 800GbE',
+                switchPrice: 150000,
+                cablePrice: 400,
+                transceiverPrice: 1200,
+                bandwidthPerGpu: 800,
+                portsPerSwitch: 64
+              }
+            };
+            
+            const selectedFabric = networkFabrics[config.fabricType];
+            const fabricBandwidth = selectedFabric.bandwidthPerGpu;
+            
             // Architecture calculations based on design document
             const gpusPerSystem = spec.rackSize;
             const systemsTotal = Math.ceil(config.numGPUs / gpusPerSystem);
@@ -613,11 +659,11 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
             const systemsPerPod = isGB200 ? 14 : Math.ceil(1024 / gpusPerSystem);
             const podsTotal = Math.ceil(config.numGPUs / gpusPerPod);
             
-            // Network architecture per design doc
+            // Network architecture per design doc - using selected fabric bandwidth
             const dpusPerSystem = isGB200 ? 4 : 1; // 4 dual-port BlueField-3 per NVL72
-            const portsPerSystem = isGB200 ? 8 : 8; // 8x 400GbE per system
+            const portsPerSystem = isGB200 ? 8 : 8; // 8 ports per system
             const totalDPUs = systemsTotal * dpusPerSystem;
-            const total400GLinks = systemsTotal * portsPerSystem;
+            const totalLinks = systemsTotal * portsPerSystem;
             
             // Switch calculations per pod (from design doc)
             const leafSwitchesPerPod = 4; // 64-port switches
@@ -655,8 +701,8 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
                         <span className="font-medium">{totalDPUs.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>400GbE Links:</span>
-                        <span className="font-medium">{total400GLinks.toLocaleString()}</span>
+                        <span>{fabricBandwidth}GbE Links:</span>
+                        <span className="font-medium">{totalLinks.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Leaf Switches:</span>
@@ -674,7 +720,7 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
                     <div className="bg-gray-50 p-3 rounded text-xs font-mono leading-relaxed">
                       <div>Pod Topology ({gpusPerPod} GPUs):</div>
                       <div>├── {systemsPerPod}× {isGB200 ? 'NVL72' : 'DGX'} Systems</div>
-                      <div>├── {systemsPerPod * portsPerSystem}× 400GbE Ports</div>
+                      <div>├── {systemsPerPod * portsPerSystem}× {fabricBandwidth}GbE Ports</div>
                       <div>├── 4× Leaf Switches (64-port)</div>
                       <div>├── 4× Spine Switches (64-port)</div>
                       <div>└── {((systemsPerPod * (spec.rackPower || 0)) / 1000).toFixed(1)} MW Power</div>
