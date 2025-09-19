@@ -3,7 +3,6 @@ import {
   HardDrive, TrendingUp, Database, DollarSign, Zap, 
   AlertTriangle, CheckCircle2, Info, BarChart3 
 } from 'lucide-react';
-import { calculateEnhancedStorage } from '../../utils/storageCalculationsEnhanced';
 import { productionVendors, enterpriseVendors, productionDeployments } from '../../data/storageVendorsEnhanced';
 
 interface StorageTabProductionEnhancedProps {

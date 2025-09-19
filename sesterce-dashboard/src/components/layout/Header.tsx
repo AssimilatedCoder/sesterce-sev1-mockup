@@ -13,8 +13,8 @@ export const Header: React.FC = () => {
           <div className="flex-shrink-0">
             <a href="/" className="flex items-center">
               <img 
-                src="/no-work.png" 
-                alt="No Work" 
+                src="/sesterce.jpg" 
+                alt="Sesterce" 
                 className="h-12 w-auto object-contain"
               />
             </a>

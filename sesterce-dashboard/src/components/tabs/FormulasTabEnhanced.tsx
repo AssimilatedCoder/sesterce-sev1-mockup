@@ -153,20 +153,20 @@ export const FormulasTabEnhanced: React.FC = () => {
         <div className="space-y-4 font-mono text-sm">
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">Selected Tier Storage Calculation:</div>
-            <div>// For each selected storage tier:</div>
+            <div>{"// For each selected storage tier:"}</div>
             <div>tier_capacity_PB = total_storage_PB × (tier_percentage / 100)</div>
             <div>tier_raw_capacity_PB = tier_capacity_PB / tier_efficiency</div>
             <div>tier_capex = tier_capacity_PB × tier_cost_per_PB</div>
             <div>tier_opex = tier_capacity_PB × tier_annual_opex_per_PB</div>
             <div>tier_power_kW = tier_capacity_PB × tier_power_per_PB</div>
-            <div className="mt-2">// Aggregate calculations:</div>
+            <div className="mt-2">{"// Aggregate calculations:"}</div>
             <div>total_storage_capex = Σ(tier_capex)</div>
             <div>total_storage_tco_5yr = Σ(tier_capacity_PB × tier_tco_5yr_per_PB)</div>
           </div>
 
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">Storage Node Hardware Calculation:</div>
-            <div>// Based on media type:</div>
+            <div>{"// Based on media type:"}</div>
             <div>if (media_type == "all-nvme"):</div>
             <div className="ml-4">drives_per_node = 24  // 2U NVMe node</div>
             <div className="ml-4">drive_capacity_TB = 15.36</div>
@@ -177,21 +177,21 @@ export const FormulasTabEnhanced: React.FC = () => {
             <div>if (media_type == "ssd-hdd"):</div>
             <div className="ml-4">drives_per_node = 36  // 4U node</div>
             <div className="ml-4">drive_capacity_TB = 16</div>
-            <div className="mt-2">// Node count:</div>
+            <div className="mt-2">{"// Node count:"}</div>
             <div>total_drives = ⌈raw_capacity_TB / drive_capacity_TB⌉</div>
             <div>node_count = ⌈total_drives / drives_per_node⌉</div>
           </div>
 
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">Vendor-Specific Performance Tiers:</div>
-            <div>// Extreme Performance (All-NVMe):</div>
+            <div>{"// Extreme Performance (All-NVMe):"}</div>
             <div>VAST: 1+ TB/s/PB, &lt;50μs latency, $650K/PB</div>
             <div>WEKA: 720 GB/s/PB, &lt;100μs latency, $475K/PB</div>
             <div>DDN: 1.1+ TB/s/PB, &lt;100μs latency, $1M/PB</div>
-            <div className="mt-2">// High Performance (All-Flash):</div>
+            <div className="mt-2">{"// High Performance (All-Flash):"}</div>
             <div>Pure FlashBlade: 3.4 TB/s/PB, &lt;500μs, $800K/PB</div>
             <div>NetApp AFF: 350 GB/s/PB, &lt;1ms, $700K/PB</div>
-            <div className="mt-2">// Balanced (Ceph):</div>
+            <div className="mt-2">{"// Balanced (Ceph):"}</div>
             <div>Ceph NVMe: 100 GB/s/PB, &lt;2ms, $350K/PB</div>
             <div>Ceph Hybrid: 50 GB/s/PB, &lt;5ms, $200K/PB</div>
           </div>

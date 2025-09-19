@@ -5,8 +5,7 @@ import {
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
-import { calculateEnhancedStorage } from '../utils/storageCalculationsEnhanced';
-import { calculateStorageWithSelectedTiers, calculateStorageNodeBreakdown } from '../utils/storageCalculationsWithTiers';
+import { calculateStorageWithSelectedTiers } from '../utils/storageCalculationsWithTiers';
 import { CalculatorTabRedesigned } from './tabs/CalculatorTabRedesigned';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
 import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhanced';

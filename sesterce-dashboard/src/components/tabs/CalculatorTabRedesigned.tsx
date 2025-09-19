@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Zap, AlertTriangle, Network, HardDrive, Settings,
-  CheckCircle2, Info, ChevronDown, ChevronUp
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
@@ -114,6 +114,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       setStoragePreset('vast-ceph-optimal');
       applyStoragePreset('vast-ceph-optimal');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleSection = (section: string) => {
