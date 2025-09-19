@@ -69,6 +69,16 @@ const networkingEquipment = {
 export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ config, results }) => {
   const { numGPUs, gpuModel, fabricType, enableBluefield } = config;
   
+  // Use results from main calculator if available, otherwise calculate locally
+  const getNetworkingData = () => {
+    if (results && results.network) {
+      // Use data from main calculator (preferred)
+      return results.network;
+    }
+    // Fallback to local calculation if no results available
+    return calculateNetworkingDetails();
+  };
+  
   const calculateNetworkingDetails = () => {
     const isGB200 = gpuModel === 'gb200';
     const isGB300 = gpuModel === 'gb300';
@@ -198,7 +208,7 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     };
   };
   
-  const networkDetails = calculateNetworkingDetails();
+  const networkDetails = getNetworkingData();
   
   return (
     <div className="space-y-6">
