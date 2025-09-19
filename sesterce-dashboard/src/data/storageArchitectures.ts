@@ -22,6 +22,7 @@ export interface StorageArchitecture {
     mediaType: 'all-nvme' | 'nvme-ssd' | 'ssd-hdd' | 'hdd' | 'cloud';
     redundancy: string;
     efficiency: number; // Usable vs Raw ratio
+    powerPerPB: number; // kW per PB
   };
   scalability: {
     minCapacityPB: number;
@@ -52,7 +53,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'Erasure coding 17+2',
-      efficiency: 0.89 // 89% usable
+      efficiency: 0.89, // 89% usable
+      powerPerPB: 15 // kW per PB - VAST claims 40% power savings
     },
     scalability: {
       minCapacityPB: 2,
@@ -81,7 +83,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'Distributed erasure coding',
-      efficiency: 0.85
+      efficiency: 0.85,
+      powerPerPB: 25 // kW per PB
     },
     scalability: {
       minCapacityPB: 1,
@@ -110,7 +113,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'RAID-6 + replication',
-      efficiency: 0.80
+      efficiency: 0.80,
+      powerPerPB: 30 // kW per PB
     },
     scalability: {
       minCapacityPB: 5,
@@ -140,7 +144,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'RAID-6 equivalent',
-      efficiency: 0.83
+      efficiency: 0.83,
+      powerPerPB: 35 // kW per PB
     },
     scalability: {
       minCapacityPB: 1,
@@ -169,7 +174,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'RAID-DP + SnapMirror',
-      efficiency: 0.85
+      efficiency: 0.85,
+      powerPerPB: 32 // kW per PB
     },
     scalability: {
       minCapacityPB: 0.5,
@@ -199,7 +205,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'Erasure coding 8+3',
-      efficiency: 0.73
+      efficiency: 0.73,
+      powerPerPB: 20 // kW per PB - open source efficiency
     },
     scalability: {
       minCapacityPB: 1,
@@ -228,7 +235,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'nvme-ssd',
       redundancy: 'Erasure coding 8+3',
-      efficiency: 0.73
+      efficiency: 0.73,
+      powerPerPB: 12 // kW per PB - hybrid efficiency
     },
     scalability: {
       minCapacityPB: 2,
@@ -258,7 +266,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'ssd-hdd',
       redundancy: 'Erasure coding 8+3',
-      efficiency: 0.73
+      efficiency: 0.73,
+      powerPerPB: 8 // kW per PB - HDD power efficiency
     },
     scalability: {
       minCapacityPB: 5,
@@ -287,7 +296,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'nvme-ssd',
       redundancy: 'Reed-Solomon erasure coding',
-      efficiency: 0.80
+      efficiency: 0.80,
+      powerPerPB: 28 // kW per PB
     },
     scalability: {
       minCapacityPB: 1,
@@ -317,7 +327,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'cloud',
       redundancy: '11 9s durability',
-      efficiency: 1.0 // No overhead in cloud
+      efficiency: 1.0, // No overhead in cloud
+      powerPerPB: 0 // Cloud provider handles power
     },
     scalability: {
       minCapacityPB: 0.1,

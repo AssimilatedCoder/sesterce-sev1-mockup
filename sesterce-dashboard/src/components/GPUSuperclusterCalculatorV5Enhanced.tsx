@@ -6,6 +6,7 @@ import {
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
 import { calculateEnhancedStorage } from '../utils/storageCalculationsEnhanced';
+import { calculateStorageWithSelectedTiers, calculateStorageNodeBreakdown } from '../utils/storageCalculationsWithTiers';
 import { CalculatorTabRedesigned } from './tabs/CalculatorTabRedesigned';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
 import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhanced';
@@ -172,7 +173,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     };
 
     // Calculate enhanced storage requirements
-    const enhancedResults = calculateEnhancedStorage(enhancedStorageConfig);
+    const enhancedResults = calculateStorageWithSelectedTiers(enhancedStorageConfig);
     
     // Legacy compatibility - maintain existing structure for backward compatibility
     const hotCapacityPB = totalStorage * (hotPercent / 100);

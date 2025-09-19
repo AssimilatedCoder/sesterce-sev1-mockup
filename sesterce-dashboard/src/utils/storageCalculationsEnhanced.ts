@@ -25,12 +25,17 @@ export interface StorageConfig {
   budget: 'unlimited' | 'optimized' | 'cost-conscious';
   storageVendor: 'auto' | string;
   tierDistribution?: 'trainingHeavy' | 'balanced' | 'costOptimized';
+  // New fields for selected tiers architecture
+  selectedTiers?: string[];
+  tierDistributionPercentages?: Record<string, number>;
+  totalCapacityPB?: number;
 }
 
 export interface StorageResults {
   totalCapacity: {
     totalPB: number;
     tierBreakdown: Record<string, number>;
+    rawPB?: number; // Optional for enhanced calculations
   };
   bandwidth: {
     requiredTBps: number;
@@ -42,6 +47,7 @@ export interface StorageResults {
     primary: string;
     secondary: string;
     rationale: string;
+    architecture?: string; // Optional for enhanced calculations
   };
   costs: {
     capex: {
@@ -62,6 +68,7 @@ export interface StorageResults {
   performance: {
     latency: Record<string, string>;
     iops: Record<string, number>;
+    aggregateThroughputTBps?: number; // Optional for enhanced calculations
     throughput: Record<string, number>;
   };
   checkpoints: {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { FileText, Cpu, Network, Zap, Building2, Activity } from 'lucide-react';
+import { FileText, Cpu, Network, Zap, Building2, Activity, HardDrive } from 'lucide-react';
+import { calculateStorageNodeBreakdown } from '../../utils/storageCalculationsWithTiers';
 
 interface DesignTabProps {
   config: any;
@@ -8,6 +9,11 @@ interface DesignTabProps {
 
 export const DesignTab: React.FC<DesignTabProps> = ({ config, results }) => {
   const { numGPUs, gpuModel } = config;
+  
+  // Calculate storage node breakdown if results available
+  const storageNodeBreakdown = results?.storage?.enhanced ? 
+    calculateStorageNodeBreakdown(config, results.storage.enhanced) : 
+    null;
   
   // Calculate architecture breakdown based on design document
   const calculateArchitectureBreakdown = () => {
@@ -423,6 +429,109 @@ Data Flow Paths:
           </div>
         </div>
       </div>
+
+      {/* Storage Node Breakdown - Only show if using new tier system */}
+      {storageNodeBreakdown && storageNodeBreakdown.totalNodes > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <HardDrive className="w-5 h-5 text-purple-600" />
+            Storage Hardware Node Breakdown
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Node Summary */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3">Node Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Storage Nodes:</span>
+                  <span className="font-bold text-lg">{storageNodeBreakdown.totalNodes}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">All-NVMe Nodes:</span>
+                  <span className="font-medium text-red-600">{storageNodeBreakdown.nvmeNodes}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Hybrid/SSD Nodes:</span>
+                  <span className="font-medium text-orange-600">{storageNodeBreakdown.ssdNodes}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">HDD Dense Nodes:</span>
+                  <span className="font-medium text-blue-600">{storageNodeBreakdown.hddNodes}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Drive Counts */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3">Total Drive Counts</h4>
+              <div className="space-y-2 text-sm">
+                {storageNodeBreakdown.nodeDetails.map((node, idx) => (
+                  <div key={idx} className="flex justify-between">
+                    <span className="text-gray-600">{node.tier}:</span>
+                    <span className="font-medium">{node.totalDrives.toLocaleString()} drives</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Detailed Node Specifications */}
+          <div className="mt-6">
+            <h4 className="font-semibold text-gray-800 mb-3">Detailed Node Specifications</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Storage Tier</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Node Type</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Nodes</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Drives/Node</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Drive Size</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Drives</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Power/Node</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {storageNodeBreakdown.nodeDetails.map((node, idx) => (
+                    <tr key={idx}>
+                      <td className="px-4 py-2 text-sm">{node.tier}</td>
+                      <td className="px-4 py-2 text-sm">{node.nodeType}</td>
+                      <td className="px-4 py-2 text-sm text-right font-medium">{node.nodeCount}</td>
+                      <td className="px-4 py-2 text-sm text-right">{node.drivesPerNode}</td>
+                      <td className="px-4 py-2 text-sm text-right">{node.driveCapacityTB} TB</td>
+                      <td className="px-4 py-2 text-sm text-right font-medium">{node.totalDrives.toLocaleString()}</td>
+                      <td className="px-4 py-2 text-sm text-right">{node.powerPerNodeKW} kW</td>
+                    </tr>
+                  ))}
+                  <tr className="bg-gray-50 font-semibold">
+                    <td colSpan={2} className="px-4 py-2 text-sm">Total</td>
+                    <td className="px-4 py-2 text-sm text-right">{storageNodeBreakdown.totalNodes}</td>
+                    <td colSpan={2} className="px-4 py-2"></td>
+                    <td className="px-4 py-2 text-sm text-right">
+                      {storageNodeBreakdown.nodeDetails.reduce((sum, n) => sum + n.totalDrives, 0).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-right">
+                      {storageNodeBreakdown.nodeDetails.reduce((sum, n) => sum + (n.nodeCount * n.powerPerNodeKW), 0).toFixed(0)} kW
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          {/* Storage Configuration Note */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-800 mb-2">Storage Node Configuration Notes</h4>
+            <div className="text-sm text-blue-700 space-y-1">
+              <div>• <strong>NVMe Nodes:</strong> 2U form factor with 24x U.2 NVMe drives for extreme performance</div>
+              <div>• <strong>Hybrid Nodes:</strong> Mix of NVMe for caching and SSD for capacity</div>
+              <div>• <strong>Dense HDD Nodes:</strong> 4U form factor with up to 60 drives for cost-optimized capacity</div>
+              <div>• <strong>Redundancy:</strong> All configurations include appropriate RAID/erasure coding</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Key Design Principles */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border border-gray-200">

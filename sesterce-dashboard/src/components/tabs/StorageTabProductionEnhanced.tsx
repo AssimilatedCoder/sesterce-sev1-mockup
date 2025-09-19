@@ -12,27 +12,32 @@ interface StorageTabProductionEnhancedProps {
 }
 
 export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhancedProps> = ({ config, results }) => {
-  // Enhanced storage configuration
-  const storageConfig = {
-    gpuCount: config.numGPUs,
-    gpuModel: config.gpuModel,
-    workloadMix: {
-      training: 70, // Default assumptions - could be made configurable
-      inference: 20,
-      finetuning: 10
-    },
-    tenantMix: {
-      whale: 60,
-      medium: 30,
-      small: 10
-    },
-    budget: 'optimized' as const,
-    storageVendor: 'auto' as const,
-    tierDistribution: 'balanced' as const
-  };
-
-  // Calculate enhanced storage requirements
-  const storageResults = calculateEnhancedStorage(storageConfig);
+  // Use the actual results from the main calculator
+  const enhancedStorageResults = results?.storage?.enhanced;
+  
+  // If no results yet, show a message
+  if (!enhancedStorageResults) {
+    return (
+      <div className="space-y-6 p-6 bg-white rounded-lg shadow-md border border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <HardDrive className="w-6 h-6 text-blue-600" /> Storage Architecture Analysis
+        </h2>
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-semibold text-yellow-800 mb-1">No Storage Data Available</h4>
+              <p className="text-sm text-yellow-700">
+                Please configure storage options and click 'Calculate TCO' on the Calculator tab to see detailed storage analysis.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  const storageResults = enhancedStorageResults;
   
   return (
     <div className="space-y-6">
@@ -164,6 +169,92 @@ export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhanced
         </div>
       </div>
 
+      {/* Selected Storage Tiers Breakdown - Only show if using new tier system */}
+      {storageResults.totalCapacity.tierBreakdown && 
+       Object.keys(storageResults.totalCapacity.tierBreakdown).length > 0 && 
+       Object.values(storageResults.totalCapacity.tierBreakdown).some((v: any) => v && typeof v === 'object' && 'name' in v) && (
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Database className="w-5 h-5 text-purple-600" /> Selected Storage Architecture Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(storageResults.totalCapacity.tierBreakdown)
+              .filter(([_, tier]: [string, any]) => tier && typeof tier === 'object' && 'name' in tier)
+              .map(([tierId, tier]: [string, any]) => (
+              <div key={tierId} className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200">
+                <h4 className="font-semibold text-sm mb-3 text-gray-800">{tier.name}</h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Raw Capacity:</span>
+                    <span className="font-medium text-gray-900">{tier.capacityPB.toFixed(1)} PB</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Usable Capacity:</span>
+                    <span className="font-medium text-green-700">{tier.usableCapacityPB.toFixed(1)} PB</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Allocation:</span>
+                    <span className="font-medium text-blue-700">{tier.percentage}%</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Performance:</span>
+                      <span className="font-medium text-purple-700">{tier.throughputTBps.toFixed(1)} TB/s</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Latency:</span>
+                      <span className="font-medium text-orange-700">{tier.latency}</span>
+                    </div>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Media Type:</span>
+                      <span className="font-medium text-gray-700">{tier.mediaType.replace('-', ' ').toUpperCase()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Vendor:</span>
+                      <span className="font-medium text-gray-700">{tier.vendorName}</span>
+                    </div>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">5yr TCO:</span>
+                      <span className="font-bold text-green-700">${(tier.tco5Year / 1000000).toFixed(1)}M</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Power Draw:</span>
+                      <span className="font-medium text-red-700">{tier.powerKW.toFixed(0)} kW</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Total Summary for Selected Architecture */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-xs text-gray-600">Total Raw Capacity</div>
+                <div className="font-bold text-lg text-gray-900">{storageResults.totalCapacity.rawPB?.toFixed(1) || storageResults.totalCapacity.totalPB.toFixed(1)} PB</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-600">Total Usable</div>
+                <div className="font-bold text-lg text-green-700">{storageResults.totalCapacity.totalPB.toFixed(1)} PB</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-600">Aggregate Performance</div>
+                <div className="font-bold text-lg text-purple-700">{storageResults.performance.aggregateThroughputTBps?.toFixed(1) || '0'} TB/s</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-600">Total Power</div>
+                <div className="font-bold text-lg text-red-700">{storageResults.powerConsumption.totalKW.toFixed(0)} kW</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Performance Requirements & Bandwidth Analysis */}
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -196,7 +287,7 @@ export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhanced
               {Object.entries(storageResults.performance.latency).map(([tier, latency]) => (
                 <div key={tier} className="flex justify-between">
                   <span className="text-gray-600 capitalize">{tier.replace('Tier', ' Tier')}:</span>
-                  <span className="font-medium">{latency}</span>
+                  <span className="font-medium">{String(latency)}</span>
                 </div>
               ))}
             </div>
@@ -295,7 +386,7 @@ export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhanced
               {Object.entries(storageResults.costs.capex.byTier).map(([tier, cost]) => (
                 <div key={tier} className="flex justify-between">
                   <span className="text-gray-600 capitalize">{tier.replace('Tier', ' Tier')}:</span>
-                  <span className="font-medium">${(cost / 1000000).toFixed(1)}M</span>
+                  <span className="font-medium">${((Number(cost) || 0) / 1000000).toFixed(1)}M</span>
                 </div>
               ))}
             </div>
@@ -403,7 +494,7 @@ export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhanced
             Scale Thresholds & Critical Warnings
           </h3>
           <div className="space-y-2">
-            {storageResults.warnings.map((warning, index) => (
+            {storageResults.warnings.map((warning: string, index: number) => (
               <div key={index} className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-red-700">{warning}</span>
