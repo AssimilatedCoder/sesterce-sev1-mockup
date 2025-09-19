@@ -92,7 +92,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [archiveVendor, setArchiveVendor] = useState('glacier');
   
   // Networking configuration
-  const [fabricType, setFabricType] = useState('infiniband');
+  const [fabricType, setFabricType] = useState('ethernet');
   const [topology, setTopology] = useState('fat-tree');
   const [oversubscription, setOversubscription] = useState('1:1');
   const [railsPerGPU, setRailsPerGPU] = useState(8);

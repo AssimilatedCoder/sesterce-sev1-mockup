@@ -410,10 +410,10 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
               onChange={(e) => setFabricType(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             >
-              <option value="infiniband">InfiniBand NDR (400Gbps)</option>
               <option value="ethernet">Ethernet RoCEv2 (400GbE)</option>
-              <option value="infiniband-xdr">InfiniBand XDR (800Gbps)</option>
               <option value="ethernet-800g">Ethernet RoCEv2 (800GbE)</option>
+              <option value="infiniband">InfiniBand NDR (400Gbps)</option>
+              <option value="infiniband-xdr">InfiniBand XDR (800Gbps)</option>
             </select>
           </div>
           
