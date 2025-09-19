@@ -473,8 +473,8 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
           {config.enableBluefield && (
             <div className="text-xs text-gray-500 mt-2 ml-6">
               • RDMA offload & acceleration<br/>
-              • 75W per DPU, $2,500/unit<br/>
-              • {config.gpuModel.startsWith('gb') ? '1 per 2 GPUs' : '1 per 8 GPUs'}
+              • 150W per DPU, $2,500/unit<br/>
+              • {config.gpuModel.startsWith('gb') ? '4 per NVL72 system (72 GPUs)' : '1 per 8 GPUs'}
             </div>
           )}
         </div>

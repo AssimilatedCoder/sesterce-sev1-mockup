@@ -61,7 +61,7 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
     
     // Calculate IT load
     const gpuPower = numGPUs * spec.powerPerGPU;
-    const gracePower = isGB200 || isGB300 ? (numGPUs / 2) * (isGB200 ? 300 : 350) : 0;
+    const gracePower = isGB200 || isGB300 ? Math.ceil(numGPUs / 72) * (isGB200 ? 36 * 300 : 36 * 350) : 0;
     const nvlinkPower = isGB200 || isGB300 ? Math.ceil(numGPUs / 8) * (isGB200 ? 400 : 500) : 0;
     // DPU power: 4× dual-port BlueField-3 DPUs per NVL72 system at 150W each = 600W per system
     const dpuPower = config.enableBluefield ? 

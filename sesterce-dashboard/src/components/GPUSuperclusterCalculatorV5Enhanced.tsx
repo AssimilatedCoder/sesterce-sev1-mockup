@@ -274,9 +274,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const calculate = () => {
     const regionData = regionRates[region];
     
-    // GPU costs - use override if provided
+    // Calculate actual systems needed (can't buy partial systems)
+    const systemsNeeded = Math.ceil(numGPUs / spec.rackSize);
+    const actualGPUs = systemsNeeded * spec.rackSize;
+    
+    // GPU costs - use override if provided, but calculate based on actual GPUs in complete systems
     const gpuUnitPrice = gpuPriceOverride ? parseFloat(gpuPriceOverride) : spec.unitPrice;
-    const gpuCapex = gpuUnitPrice * numGPUs;
+    const gpuCapex = gpuUnitPrice * actualGPUs;
     
     // Calculate detailed storage
     const storage = calculateStorageCosts();
@@ -285,14 +289,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const network = calculateNetworkCosts();
     
     // Power calculations using design document specifications
-    const systemsTotal = Math.ceil(numGPUs / spec.rackSize);
+    const systemsTotal = systemsNeeded; // Use the systems we calculated above
     const rackPowerTotal = systemsTotal * (spec.rackPower || spec.powerPerGPU * spec.rackSize);
     const gpuPowerMW = rackPowerTotal / 1000000; // Use actual rack power from design doc
     const pueValue = pueOverride ? parseFloat(pueOverride) : (spec.pue[coolingType] || regionData.pue);
     
     // DPU power if enabled (per design doc: 4 DPUs per NVL72 system at 150W each)
     const dpuCount = enableBluefield ? 
-      (gpuModel.startsWith('gb') ? Math.ceil(numGPUs / 72) * 4 : numGPUs / 8) : 0;
+      (gpuModel.startsWith('gb') ? systemsTotal * 4 : Math.ceil(actualGPUs / 8)) : 0;
     const dpuPowerMW = dpuCount * 150 / 1000000; // 150W per BlueField-3
     const dpuCapex = dpuCount * 2500;
     
@@ -304,7 +308,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const annualPowerCost = totalPowerMW * 1000 * energyRate * 8760;
     
     // Cooling infrastructure
-    const numRacks = Math.ceil(numGPUs / spec.rackSize);
+    const numRacks = systemsTotal; // Use actual systems count
     const coolingCapex = coolingType === 'liquid' 
       ? gpuPowerMW * 1000 * 400  // $400/kW for liquid
       : gpuPowerMW * 1000 * 300; // $300/kW for air
@@ -313,7 +317,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const datacenterCapex = totalPowerMW * 10000000; // $10M/MW
     
     // Software and licensing
-    const softwareCapex = numGPUs * 6500; // $6,500/GPU
+    const softwareCapex = actualGPUs * 6500; // $6,500/GPU (for actual GPUs)
     
     // Total CAPEX
     const totalCapex = gpuCapex + storage.total + network.total + coolingCapex + 
@@ -321,23 +325,23 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     
     // Annual OPEX calculations
     const annualCoolingOpex = annualPowerCost * (coolingType === 'liquid' ? 0.15 : 0.45);
-    const annualStaff = (Math.ceil(gpuPowerMW / 2) * 166000 + Math.ceil(numGPUs / 5000) * 200000) * staffMultiplier;
+    const annualStaff = (Math.ceil(gpuPowerMW / 2) * 166000 + Math.ceil(actualGPUs / 5000) * 200000) * staffMultiplier;
     const annualMaintenance = (gpuCapex + network.total + storage.total) * (maintenancePercent / 100);
-    const annualBandwidth = numGPUs * 600; // $600/GPU/year
-    const annualLicenses = numGPUs * 500; // $500/GPU/year
+    const annualBandwidth = actualGPUs * 600; // $600/GPU/year (for actual GPUs)
+    const annualLicenses = actualGPUs * 500; // $500/GPU/year (for actual GPUs)
     const storageOpex = totalStorage * 1000000 * 0.015 * 12; // $0.015/GB/month
     
     const annualOpex = annualPowerCost + annualCoolingOpex + annualStaff + 
                       annualMaintenance + annualBandwidth + annualLicenses + storageOpex;
     
-    // Cost per GPU hour
-    const annualGpuHours = numGPUs * 8760 * (utilization / 100);
+    // Cost per GPU hour (based on actual GPUs)
+    const annualGpuHours = actualGPUs * 8760 * (utilization / 100);
     const annualDepreciation = totalCapex / depreciation;
     const costPerHour = (annualDepreciation + annualOpex) / annualGpuHours;
     
     // Network bandwidth (Tbps)
     const bandwidthPerGPU = fabricType === 'infiniband' ? 3.6 : 3.2;
-    const totalBandwidth = (numGPUs * bandwidthPerGPU) / 1000;
+    const totalBandwidth = (actualGPUs * bandwidthPerGPU) / 1000;
     
     // Storage cost per GB/month
     const totalStorageGB = totalStorage * 1000 * 1000;
@@ -348,7 +352,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     
     // Prepare detailed breakdowns
     const capexBreakdown = [
-      { name: 'GPU Hardware', unit: `$${gpuUnitPrice.toLocaleString()}/GPU`, qty: numGPUs.toLocaleString(), total: gpuCapex, pct: (gpuCapex/totalCapex*100).toFixed(1) },
+      { name: 'GPU Hardware', unit: `$${gpuUnitPrice.toLocaleString()}/GPU`, qty: `${actualGPUs.toLocaleString()} GPUs (${systemsTotal} systems)`, total: gpuCapex, pct: (gpuCapex/totalCapex*100).toFixed(1) },
       { name: 'Storage Systems (Total)', unit: 'Multi-vendor', qty: `${totalStorage} PB`, total: storage.total, pct: (storage.total/totalCapex*100).toFixed(1) },
       { name: '├─ Hot Tier', unit: storage.breakdown.hot.vendor, qty: `${storage.breakdown.hot.capacity.toFixed(1)} PB`, total: storage.hot, pct: (storage.hot/totalCapex*100).toFixed(1) },
       { name: '├─ Warm Tier', unit: storage.breakdown.warm.vendor, qty: `${storage.breakdown.warm.capacity.toFixed(1)} PB`, total: storage.warm, pct: (storage.warm/totalCapex*100).toFixed(1) },
@@ -360,7 +364,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       { name: '└─ Transceivers', unit: `$${networkFabrics[fabricType].transceiverPrice}/unit`, qty: network.counts.transceivers.toLocaleString(), total: network.costs.transceivers, pct: (network.costs.transceivers/totalCapex*100).toFixed(1) },
       { name: 'Data Center Infrastructure', unit: '$10M/MW', qty: `${totalPowerMW.toFixed(1)} MW`, total: datacenterCapex, pct: (datacenterCapex/totalCapex*100).toFixed(1) },
       { name: 'Cooling Infrastructure', unit: `$${coolingType === 'liquid' ? '400' : '300'}/kW`, qty: `${(gpuPowerMW*1000).toFixed(0)} kW`, total: coolingCapex, pct: (coolingCapex/totalCapex*100).toFixed(1) },
-      { name: 'Software & Licensing', unit: '$6,500/GPU', qty: numGPUs.toLocaleString(), total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
+      { name: 'Software & Licensing', unit: '$6,500/GPU', qty: actualGPUs.toLocaleString(), total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
     ];
     
     if (dpuCapex > 0) {
@@ -376,7 +380,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const opexBreakdown = [
       { name: 'Power Consumption', amount: annualPowerCost, pct: (annualPowerCost/annualOpex*100).toFixed(1), notes: `${totalPowerMW.toFixed(1)} MW @ $${regionData.rate}/kWh` },
       { name: 'Cooling Operations', amount: annualCoolingOpex, pct: (annualCoolingOpex/annualOpex*100).toFixed(1), notes: `${coolingType.charAt(0).toUpperCase() + coolingType.slice(1)} cooling` },
-      { name: 'Staff & Personnel', amount: annualStaff, pct: (annualStaff/annualOpex*100).toFixed(1), notes: `${Math.ceil(gpuPowerMW / 2)} DC + ${Math.ceil(numGPUs / 5000)} GPU engineers` },
+      { name: 'Staff & Personnel', amount: annualStaff, pct: (annualStaff/annualOpex*100).toFixed(1), notes: `${Math.ceil(gpuPowerMW / 2)} DC + ${Math.ceil(actualGPUs / 5000)} GPU engineers` },
       { name: 'Hardware Maintenance', amount: annualMaintenance, pct: (annualMaintenance/annualOpex*100).toFixed(1), notes: `${maintenancePercent}% of hardware CAPEX` },
       { name: 'Storage Operations', amount: storageOpex, pct: (storageOpex/annualOpex*100).toFixed(1), notes: `$0.015/GB/month` },
       { name: 'Network Bandwidth', amount: annualBandwidth, pct: (annualBandwidth/annualOpex*100).toFixed(1), notes: '$600/GPU/year' },
@@ -404,7 +408,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         topology,
         oversubscription,
         fabricType,
-        storageArchitecture
+        storageArchitecture,
+        requestedGPUs: numGPUs,
+        actualGPUs: actualGPUs,
+        systemsNeeded: systemsTotal,
+        gpusPerSystem: spec.rackSize
       }
     });
   };

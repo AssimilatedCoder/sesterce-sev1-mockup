@@ -141,14 +141,14 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     let dpuPower = 0;
     
     if (enableBluefield) {
-      // One BlueField-3 per compute node (8 GPUs for H100, 2 per tray for GB200/300)
+      // BlueField-3 DPUs per design document specifications
       if (isGB200 || isGB300) {
-        dpuCount = Math.ceil(numGPUs / 2); // One per compute tray (2 GPUs)
+        dpuCount = Math.ceil(numGPUs / 72) * 4; // 4 dual-port DPUs per NVL72 system
       } else {
         dpuCount = Math.ceil(numGPUs / 8); // One per DGX node
       }
       dpuCost = dpuCount * 2500; // BlueField-3 SuperNIC price
-      dpuPower = dpuCount * 75; // 75W per DPU
+      dpuPower = dpuCount * 150; // 150W per DPU (design doc specification)
     }
     
     // Cost calculations
@@ -260,7 +260,7 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
             <div className="bg-white p-3 rounded-lg">
               <div className="text-xs text-gray-500">DPU Power</div>
               <div className="text-xl font-bold">{(networkDetails.dpus.power / 1000).toFixed(1)} kW</div>
-              <div className="text-xs text-gray-500">75W per DPU</div>
+              <div className="text-xs text-gray-500">150W per DPU</div>
             </div>
             <div className="bg-white p-3 rounded-lg">
               <div className="text-xs text-gray-500">DPU Cost</div>

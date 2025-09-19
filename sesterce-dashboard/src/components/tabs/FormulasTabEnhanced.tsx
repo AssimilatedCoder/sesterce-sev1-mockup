@@ -85,7 +85,7 @@ export const FormulasTabEnhanced: React.FC = () => {
           
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">BlueField-3 DPU Count:</div>
-            <div>GB200/300: DPUs = ⌈GPUs / 2⌉ (one per compute tray)</div>
+            <div>GB200/300: DPUs = ⌈GPUs / 72⌉ × 4 (4 per NVL72 system)</div>
             <div>H100: DPUs = ⌈GPUs / 8⌉ (one per DGX node)</div>
           </div>
         </div>
@@ -185,9 +185,10 @@ export const FormulasTabEnhanced: React.FC = () => {
         <div className="space-y-4 font-mono text-sm">
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">BlueField-3 DPU Calculations:</div>
-            <div>DPU_Count = GB200/300: ⌈GPUs / 2⌉, H100: ⌈GPUs / 8⌉</div>
-            <div>DPU_Power_MW = DPU_Count × 75W / 1,000,000</div>
+            <div>DPU_Count = GB200/300: ⌈GPUs / 72⌉ × 4, H100: ⌈GPUs / 8⌉</div>
+            <div>DPU_Power = DPU_Count × 150W (BlueField-3)</div>
             <div>DPU_Cost = DPU_Count × $2,500</div>
+            <div className="mt-1 text-gray-600">GB200/300: 4 dual-port DPUs per NVL72 system (72 GPUs)</div>
           </div>
           
           <div className="bg-gray-50 p-3 rounded">
