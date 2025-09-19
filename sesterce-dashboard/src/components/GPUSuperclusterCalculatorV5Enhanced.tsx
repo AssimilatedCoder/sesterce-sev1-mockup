@@ -106,6 +106,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [staffMultiplier, setStaffMultiplier] = useState(1);
   const [customEnergyRate, setCustomEnergyRate] = useState('');
   
+  // Enhanced storage configuration
+  const [workloadTraining, setWorkloadTraining] = useState(70);
+  const [workloadInference, setWorkloadInference] = useState(20);
+  const [workloadFinetuning, setWorkloadFinetuning] = useState(10);
+  const [tenantWhale, setTenantWhale] = useState(60);
+  const [tenantMedium, setTenantMedium] = useState(30);
+  const [tenantSmall, setTenantSmall] = useState(10);
+  
   // Results state
   const [results, setResults] = useState<any>(null);
 
@@ -133,14 +141,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       gpuCount: numGPUs,
       gpuModel: gpuModel,
       workloadMix: {
-        training: 70, // Default assumptions - could be made configurable
-        inference: 20,
-        finetuning: 10
+        training: workloadTraining,
+        inference: workloadInference,
+        finetuning: workloadFinetuning
       },
       tenantMix: {
-        whale: 60,
-        medium: 30,
-        small: 10
+        whale: tenantWhale,
+        medium: tenantMedium,
+        small: tenantSmall
       },
       budget: 'optimized' as const,
       storageVendor: 'auto' as const,
@@ -482,7 +490,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     gpuPriceOverride,
     maintenancePercent,
     staffMultiplier,
-    customEnergyRate
+    customEnergyRate,
+    workloadTraining,
+    workloadInference,
+    workloadFinetuning,
+    tenantWhale,
+    tenantMedium,
+    tenantSmall
   };
 
   return (
@@ -564,6 +578,12 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 setMaintenancePercent={setMaintenancePercent}
                 setStaffMultiplier={setStaffMultiplier}
                 setCustomEnergyRate={setCustomEnergyRate}
+                setWorkloadTraining={setWorkloadTraining}
+                setWorkloadInference={setWorkloadInference}
+                setWorkloadFinetuning={setWorkloadFinetuning}
+                setTenantWhale={setTenantWhale}
+                setTenantMedium={setTenantMedium}
+                setTenantSmall={setTenantSmall}
                 coolingRequired={coolingRequired}
                 calculate={calculate}
                 results={results}

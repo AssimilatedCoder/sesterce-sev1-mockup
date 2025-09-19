@@ -33,6 +33,12 @@ interface CalculatorTabEnhancedProps {
   setMaintenancePercent: (value: number) => void;
   setStaffMultiplier: (value: number) => void;
   setCustomEnergyRate: (value: string) => void;
+  setWorkloadTraining: (value: number) => void;
+  setWorkloadInference: (value: number) => void;
+  setWorkloadFinetuning: (value: number) => void;
+  setTenantWhale: (value: number) => void;
+  setTenantMedium: (value: number) => void;
+  setTenantSmall: (value: number) => void;
   coolingRequired: boolean;
   calculate: () => void;
   results: any;
@@ -75,6 +81,12 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
   setMaintenancePercent,
   setStaffMultiplier,
   setCustomEnergyRate,
+  setWorkloadTraining,
+  setWorkloadInference,
+  setWorkloadFinetuning,
+  setTenantWhale,
+  setTenantMedium,
+  setTenantSmall,
   coolingRequired,
   calculate,
   results,
@@ -480,6 +492,112 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
         </div>
       </div>
       
+      {/* Enhanced Storage Configuration */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h3 className="text-sm font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <HardDrive className="w-4 h-4 text-blue-600" />
+          Production Storage Configuration
+        </h3>
+        
+        {/* Workload Mix */}
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-blue-800 mb-3">Workload Distribution (%)</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Training Workloads</label>
+              <input 
+                type="number"
+                min="0"
+                max="100"
+                value={config.workloadTraining}
+                onChange={(e) => setWorkloadTraining(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">High bandwidth, 2.7 GiB/s per GPU</span>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Inference Workloads</label>
+              <input 
+                type="number"
+                min="0"
+                max="100"
+                value={config.workloadInference}
+                onChange={(e) => setWorkloadInference(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">Lower bandwidth, 100-500 MB/s per GPU</span>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Fine-tuning Workloads</label>
+              <input 
+                type="number"
+                min="0"
+                max="100"
+                value={config.workloadFinetuning}
+                onChange={(e) => setWorkloadFinetuning(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">Medium bandwidth, 2.0 GiB/s per GPU</span>
+            </div>
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            Total: {config.workloadTraining + config.workloadInference + config.workloadFinetuning}% 
+            {config.workloadTraining + config.workloadInference + config.workloadFinetuning !== 100 && 
+              <span className="text-red-600 ml-1">(Must equal 100%)</span>
+            }
+          </div>
+        </div>
+
+        {/* Tenant Mix */}
+        <div>
+          <h4 className="text-sm font-medium text-blue-800 mb-3">Multi-Tenant Distribution (%)</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Whale Tenants (&gt;1000 GPUs)</label>
+              <input 
+                type="number"
+                min="0"
+                max="100"
+                value={config.tenantWhale}
+                onChange={(e) => setTenantWhale(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">Dedicated partitions, 99.9% SLA</span>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Medium Tenants (100-1000 GPUs)</label>
+              <input 
+                type="number"
+                min="0"
+                max="100"
+                value={config.tenantMedium}
+                onChange={(e) => setTenantMedium(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">Shared with QoS guarantees</span>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Small Tenants (&lt;100 GPUs)</label>
+              <input 
+                type="number"
+                min="0"
+                max="100"
+                value={config.tenantSmall}
+                onChange={(e) => setTenantSmall(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">Best effort pools, container CSI</span>
+            </div>
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            Total: {config.tenantWhale + config.tenantMedium + config.tenantSmall}% 
+            {config.tenantWhale + config.tenantMedium + config.tenantSmall !== 100 && 
+              <span className="text-red-600 ml-1">(Must equal 100%)</span>
+            }
+          </div>
+        </div>
+      </div>
+
       {/* Advanced Options */}
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
