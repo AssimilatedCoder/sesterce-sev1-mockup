@@ -32,13 +32,14 @@ interface CalculatorTabEnhancedProps {
   setGpuPriceOverride: (value: string) => void;
   setMaintenancePercent: (value: number) => void;
   setStaffMultiplier: (value: number) => void;
+  setCustomEnergyRate: (value: string) => void;
   coolingRequired: boolean;
   calculate: () => void;
   results: any;
   formatNumber: (num: number) => string;
 }
 
-const regionRates = {
+const regionRates: Record<string, { rate: number; name: string }> = {
   'us-texas': { rate: 0.047, name: 'US Texas' },
   'us-virginia': { rate: 0.085, name: 'US Virginia' },
   'us-california': { rate: 0.150, name: 'US California' },
@@ -73,6 +74,7 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
   setGpuPriceOverride,
   setMaintenancePercent,
   setStaffMultiplier,
+  setCustomEnergyRate,
   coolingRequired,
   calculate,
   results,
@@ -96,6 +98,19 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
   
   return (
     <div className="space-y-5">
+      {/* Software Licensing Warning Banner */}
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="text-sm font-semibold text-red-800 mb-1">Important Notice</h4>
+            <p className="text-sm text-red-700">
+              This TCO calculator does not yet include Software Support and/or Licensing costs. 
+              These costs can be significant and should be factored into your total budget planning.
+            </p>
+          </div>
+        </div>
+      </div>
       {/* GPU Configuration */}
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -398,6 +413,7 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
               <option value="infiniband">InfiniBand NDR (400Gbps)</option>
               <option value="ethernet">Ethernet RoCEv2 (400GbE)</option>
               <option value="infiniband-xdr">InfiniBand XDR (800Gbps)</option>
+              <option value="ethernet-800g">Ethernet RoCEv2 (800GbE)</option>
             </select>
           </div>
           
@@ -470,7 +486,7 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
           <Settings className="w-4 h-4 text-gray-600" />
           Advanced Options
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">PUE Override</label>
             <input 
@@ -533,6 +549,23 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
               Adjust for region
             </span>
           </div>
+          
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Custom Energy Rate ($/kWh)</label>
+            <input 
+              type="number"
+              value={config.customEnergyRate}
+              onChange={(e) => setCustomEnergyRate(e.target.value)}
+              placeholder={`Auto (${regionRates[config.region]?.name}: $${regionRates[config.region]?.rate})`}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              min="0.01"
+              max="1"
+              step="0.001"
+            />
+            <span className="text-xs text-gray-500 mt-1 block">
+              Override region rate
+            </span>
+          </div>
         </div>
       </div>
       
@@ -558,8 +591,8 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
         Calculate Complete Infrastructure TCO
       </button>
       
-      {/* Architecture Breakdown Callout */}
-      {results && (
+      {/* Architecture Breakdown Callout - Always visible and real-time */}
+      {config.numGPUs > 0 && (
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
           <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-green-600" />

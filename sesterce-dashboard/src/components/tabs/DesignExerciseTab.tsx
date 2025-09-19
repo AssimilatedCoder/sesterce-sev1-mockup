@@ -14,10 +14,6 @@ export const DesignExerciseTab: React.FC = () => {
               This section contains the complete design exercise outcome for scaling from 10,000 to 100,000 GB200 GPUs. 
               The content below is static and based on the original exercise guidelines and requirements.
             </p>
-            <p className="text-sm text-gray-600">
-              <strong>Note:</strong> This is the reference architecture document that serves as the foundation for all calculations 
-              and specifications used throughout this calculator.
-            </p>
           </div>
         </div>
       </div>

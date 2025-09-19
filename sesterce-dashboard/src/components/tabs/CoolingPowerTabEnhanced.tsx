@@ -1,5 +1,5 @@
 import React from 'react';
-import { Thermometer, Zap, Droplets, Building2 } from 'lucide-react';
+import { Thermometer, Zap, Droplets, Building2, AlertTriangle } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 
 interface CoolingPowerTabEnhancedProps {
@@ -192,6 +192,19 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
   
   return (
     <div className="space-y-6">
+      {/* Software Licensing Warning Banner */}
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="text-sm font-semibold text-red-800 mb-1">Important Notice</h4>
+            <p className="text-sm text-red-700">
+              This TCO calculator does not yet include Software Support and/or Licensing costs. 
+              These costs can be significant and should be factored into your total budget planning.
+            </p>
+          </div>
+        </div>
+      </div>
       <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-200 pb-3">
         Cooling & Power Infrastructure
       </h2>

@@ -56,6 +56,14 @@ const networkFabrics: Record<string, {
     transceiverPrice: 2500,
     bandwidthPerGpu: 800,
     portsPerSwitch: 64
+  },
+  'ethernet-800g': {
+    name: 'Ethernet RoCEv2 800GbE',
+    switchPrice: 150000, // Higher-end 800G switches
+    cablePrice: 400,
+    transceiverPrice: 1200,
+    bandwidthPerGpu: 800,
+    portsPerSwitch: 64
   }
 };
 
@@ -95,6 +103,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [gpuPriceOverride, setGpuPriceOverride] = useState('');
   const [maintenancePercent, setMaintenancePercent] = useState(3);
   const [staffMultiplier, setStaffMultiplier] = useState(1);
+  const [customEnergyRate, setCustomEnergyRate] = useState('');
   
   // Results state
   const [results, setResults] = useState<any>(null);
@@ -227,7 +236,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     // Total IT power including storage and DPUs
     const totalItPowerMW = gpuPowerMW + storage.power + dpuPowerMW;
     const totalPowerMW = totalItPowerMW * pueValue;
-    const annualPowerCost = totalPowerMW * 1000 * regionData.rate * 8760;
+    // Use custom energy rate if provided, otherwise use region rate
+    const energyRate = customEnergyRate ? parseFloat(customEnergyRate) : regionData.rate;
+    const annualPowerCost = totalPowerMW * 1000 * energyRate * 8760;
     
     // Cooling infrastructure
     const numRacks = Math.ceil(numGPUs / spec.rackSize);
@@ -371,7 +382,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     pueOverride,
     gpuPriceOverride,
     maintenancePercent,
-    staffMultiplier
+    staffMultiplier,
+    customEnergyRate
   };
 
   return (
@@ -452,6 +464,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 setGpuPriceOverride={setGpuPriceOverride}
                 setMaintenancePercent={setMaintenancePercent}
                 setStaffMultiplier={setStaffMultiplier}
+                setCustomEnergyRate={setCustomEnergyRate}
                 coolingRequired={coolingRequired}
                 calculate={calculate}
                 results={results}
