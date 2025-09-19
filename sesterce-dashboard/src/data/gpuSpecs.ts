@@ -13,7 +13,7 @@ interface GPUSpec {
 export const gpuSpecs: Record<string, GPUSpec> = {
   'gb200': {
     name: 'GB200 NVL72',
-    powerPerGPU: 1200,
+    powerPerGPU: 1542, // (126kW - 10.8kW Grace - 3.6kW NVLink - 0.6kW DPU) ÷ 72 GPUs = 1542W per GPU
     memoryPerGPU: 188, // 13.5TB / 72 GPUs ≈ 188GB per GPU (from design doc)
     unitPrice: 65000,
     rackSize: 72,
@@ -24,11 +24,11 @@ export const gpuSpecs: Record<string, GPUSpec> = {
   },
   'gb300': {
     name: 'GB300 NVL72',
-    powerPerGPU: 1400,
+    powerPerGPU: 1715, // (137.5kW - 12.6kW Grace - 4.5kW NVLink - 0.6kW DPU) ÷ 72 GPUs = 1715W per GPU
     memoryPerGPU: 288, // 20.7TB / 72 GPUs ≈ 288GB per GPU (from design doc)
     unitPrice: 85000,
     rackSize: 72,
-    rackPower: 137500, // 137.5kW average (135-140kW range from design doc)
+    rackPower: 141200, // 141.2kW calculated (123.5kW GPU + 12.6kW Grace + 4.5kW NVLink + 0.6kW DPU)
     coolingOptions: ['liquid'],
     pue: { liquid: 1.08 },
     reference: 'https://www.nvidia.com/en-us/data-center/gb300-nvl72/'

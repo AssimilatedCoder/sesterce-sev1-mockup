@@ -15,8 +15,8 @@ export const FormulasTabEnhanced: React.FC = () => {
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">GB200/GB300 Rack Power:</div>
             <div>Rack_Power = (GPUs_per_rack × GPU_Power) + (Grace_CPUs × Grace_Power) + (NVLink_Switches × Switch_Power)</div>
-            <div className="mt-1 text-gray-600">GB200: 72 × 1200W + 36 × 300W + 9 × 400W = 120kW</div>
-            <div className="text-gray-600">GB300: 72 × 1400W + 36 × 350W + 9 × 500W = 140kW</div>
+            <div className="mt-1 text-gray-600">GB200: 72 × 1542W + 36 × 300W + 9 × 400W + 4 × 150W = 111kW + 10.8kW + 3.6kW + 0.6kW = 126kW</div>
+            <div className="text-gray-600">GB300: 72 × 1715W + 36 × 350W + 9 × 500W + 4 × 150W = 123.5kW + 12.6kW + 4.5kW + 0.6kW = 141.2kW</div>
           </div>
           
           <div className="bg-gray-50 p-3 rounded">
@@ -28,7 +28,7 @@ export const FormulasTabEnhanced: React.FC = () => {
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">Total IT Power:</div>
             <div>IT_Power = GPU_Power + CPU_Power + NVLink_Power + DPU_Power + Network_Power + Storage_Power</div>
-            <div className="mt-1 text-gray-600">DPU_Power = DPU_Count × 75W (BlueField-3)</div>
+            <div className="mt-1 text-gray-600">DPU_Power = DPU_Count × 150W (BlueField-3)</div>
           </div>
         </div>
       </div>
