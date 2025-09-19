@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Container } from './components/layout/Container';
 import { TabNavigation } from './components/features/TabNavigation';
@@ -6,19 +7,22 @@ import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboard
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Activity, Calculator } from 'lucide-react';
 
-function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+function AppContent() {
+  const location = useLocation();
+  const activeTab = location.pathname === '/calculator' ? 'calculator' : 'dashboard';
 
   const tabs = [
     {
       id: 'dashboard',
       label: 'SEV-1 War Room',
-      icon: <Activity className="w-5 h-5" />
+      icon: <Activity className="w-5 h-5" />,
+      path: '/'
     },
     {
       id: 'calculator',
       label: 'GPU SuperCluster Calculator',
-      icon: <Calculator className="w-5 h-5" />
+      icon: <Calculator className="w-5 h-5" />,
+      path: '/calculator'
     }
   ];
 
@@ -39,18 +43,29 @@ function App() {
             <TabNavigation
               tabs={tabs}
               activeTab={activeTab}
-              onTabChange={setActiveTab}
             />
           </Container>
         </div>
 
         {/* Tab Content */}
         <div className="min-h-screen">
-          {activeTab === 'dashboard' && <GrafanaDashboardOriginal />}
-          {activeTab === 'calculator' && <GPUSuperclusterCalculatorV5Enhanced />}
+          <Routes>
+            <Route path="/" element={<GrafanaDashboardOriginal />} />
+            <Route path="/calculator" element={<GPUSuperclusterCalculatorV5Enhanced />} />
+            <Route path="/pricing" element={<Navigate to="/calculator" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
