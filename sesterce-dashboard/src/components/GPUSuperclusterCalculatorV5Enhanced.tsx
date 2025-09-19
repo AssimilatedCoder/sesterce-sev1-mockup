@@ -6,7 +6,7 @@ import {
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
 import { calculateEnhancedStorage } from '../utils/storageCalculationsEnhanced';
-import { CalculatorTabEnhanced } from './tabs/CalculatorTabEnhanced';
+import { CalculatorTabRedesigned } from './tabs/CalculatorTabRedesigned';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
 import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhanced';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
@@ -114,6 +114,18 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [tenantMedium, setTenantMedium] = useState(30);
   const [tenantSmall, setTenantSmall] = useState(10);
   
+  // New enhanced storage architecture state
+  const [selectedStorageTiers, setSelectedStorageTiers] = useState<string[]>([
+    'vast-universal', 'ceph-nvme', 'ceph-hybrid', 'ceph-hdd'
+  ]);
+  const [storageTierDistribution, setStorageTierDistribution] = useState<Record<string, number>>({
+    'vast-universal': 25,
+    'ceph-nvme': 25,
+    'ceph-hybrid': 30,
+    'ceph-hdd': 20
+  });
+  const [storagePreset, setStoragePreset] = useState('vast-ceph-optimal');
+  
   // Results state
   const [results, setResults] = useState<any>(null);
 
@@ -152,7 +164,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       },
       budget: 'optimized' as const,
       storageVendor: 'auto' as const,
-      tierDistribution: 'balanced' as const
+      tierDistribution: 'balanced' as const,
+      // Pass the selected storage architecture
+      selectedTiers: selectedStorageTiers,
+      tierDistributionPercentages: storageTierDistribution,
+      totalCapacityPB: totalStorage
     };
 
     // Calculate enhanced storage requirements
@@ -496,7 +512,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     workloadFinetuning,
     tenantWhale,
     tenantMedium,
-    tenantSmall
+    tenantSmall,
+    selectedStorageTiers,
+    storageTierDistribution,
+    storagePreset
   };
 
   return (
@@ -550,7 +569,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
           {/* Tab Content */}
           <div className="min-h-[600px]">
             {activeTab === 'calculator' && (
-              <CalculatorTabEnhanced
+              <CalculatorTabRedesigned
                 config={config}
                 setGpuModel={setGpuModel}
                 setNumGPUs={setNumGPUs}
@@ -584,6 +603,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 setTenantWhale={setTenantWhale}
                 setTenantMedium={setTenantMedium}
                 setTenantSmall={setTenantSmall}
+                setSelectedStorageTiers={setSelectedStorageTiers}
+                setStorageTierDistribution={setStorageTierDistribution}
+                setStoragePreset={setStoragePreset}
                 coolingRequired={coolingRequired}
                 calculate={calculate}
                 results={results}
