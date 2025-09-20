@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>GPU Cluster Technical Architecture - Sesterce</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background: #ffffff;
+            font-weight: 400;
+        }
+        
+        /* Sesterce Logo Header */
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        .logo-header img {
+            height: 50px;
+            width: auto;
+        }
+        
+        /* Document Header with Sesterce Colors */
+        .document-header {
+            text-align: center;
+            padding: 30px 0 30px 0;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #00c896; /* Sesterce green */
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+        }
+        
+        .document-header h1 {
+            font-size: 24pt;
+            font-weight: 300;
+            color: #2c3e50;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .document-header .subtitle {
+            font-size: 12pt;
+            color: #6c757d; /* Light grey */
+            font-weight: 400;
+            line-height: 1.4;
+        }
+        
+        .document-header .version-info {
+            margin-top: 15px;
+            font-size: 10pt;
+            color: #95a5a6;
+        }
+        
+        /* Change Log with Sesterce accent */
+        .change-log {
+            background: #f8f9fa;
+            border-left: 3px solid #00c896; /* Sesterce green */
+            padding: 15px;
+            margin: 20px 0 30px 0;
+            font-size: 10pt;
+        }
+        
+        .change-log h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 12pt;
+        }
+        
+        .change-log table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .change-log td {
+            padding: 5px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        /* Headings with Sesterce green accent */
+        h2 {
+            font-size: 16pt;
+            font-weight: 500;
+            color: #2c3e50;
+            margin: 40px 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #00c896; /* Sesterce green */
+        }
+        
+        h3 {
+            font-size: 13pt;
+            font-weight: 500;
+            color: #34495e;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            font-size: 11pt;
+            font-weight: 500;
+            color: #34495e;
+            margin: 20px 0 10px 0;
+        }
+        
+        /* Paragraphs and Lists */
+        p {
+            margin: 12px 0;
+            text-align: justify;
+            color: #34495e;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+            color: #34495e;
+        }
+        
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        /* Tables with Sesterce styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 10pt;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        th {
+            background: #00c896; /* Sesterce green */
+            color: #ffffff;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 10pt;
+            border: 1px solid #00b185;
+        }
+        
+        td {
+            padding: 10px 15px;
+            border: 1px solid #ecf0f1;
+            vertical-align: top;
+            background: #ffffff;
+        }
+        
+        tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+        
+        tr:hover td {
+            background: #e8f5f1; /* Light green tint */
+        }
+        
+        /* Code Blocks and Technical Specs */
+        .technical-spec, pre {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-left: 3px solid #6c757d; /* Light grey */
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 9pt;
+            color: #00c896; /* Sesterce green for code */
+            border-radius: 2px;
+        }
+        
+        /* Alert Boxes with Sesterce colors */
+        .alert-box {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-left: 3px solid #6c757d;
+            background: #f8f9fa;
+        }
+        
+        .alert-critical {
+            border-left-color: #dc3545;
+            background: #fef5f5;
+        }
+        
+        .alert-warning {
+            border-left-color: #ffc107;
+            background: #fef9f0;
+        }
+        
+        .alert-success {
+            border-left-color: #00c896; /* Sesterce green */
+            background: #e8f5f1;
+        }
+        
+        .alert-info {
+            border-left-color: #17a2b8;
+            background: #f0f7ff;
+        }
+        
+        .alert-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        /* Metrics Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: #00c896; /* Sesterce green */
+            box-shadow: 0 2px 8px rgba(0, 200, 150, 0.1);
+        }
+        
+        .metric-label {
+            font-size: 9pt;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-size: 16pt;
+            font-weight: 400;
+            color: #00c896; /* Sesterce green */
+            margin-top: 5px;
+        }
+        
+        /* Architecture Diagrams */
+        .architecture-diagram {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.3;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        /* Comparison Boxes */
+        .comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .comparison-item {
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .comparison-item:hover {
+            border-color: #00c896;
+            background: #e8f5f1;
+        }
+        
+        .comparison-item h4 {
+            margin-top: 0;
+            font-size: 11pt;
+            font-weight: 500;
+            color: #2c3e50;
+            border-bottom: 1px solid #00c896;
+            padding-bottom: 8px;
+        }
+        
+        /* Page Break */
+        .page-break {
+            page-break-after: always;
+            margin: 40px 0;
+        }
+        
+        /* Document Footer with Sesterce branding */
+        .document-footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid #00c896;
+            font-size: 9pt;
+            color: #6c757d;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+        
+        /* Remove excessive styling */
+        strong {
+            font-weight: 500;
+            color: inherit;
+        }
+        
+        /* Links with Sesterce green */
+        a {
+            color: #00c896;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+            color: #00b185;
+        }
+        
+        /* Print Optimizations */
+        @media print {
+            body {
+                font-size: 10pt;
+                padding: 0;
+            }
+            
+            .logo-header {
+                display: none; /* Hide logo in print */
+            }
+            
+            .page-break {
+                page-break-after: always;
+            }
+            
+            table, .alert-box {
+                page-break-inside: avoid;
+            }
+            
+            h2, h3, h4 {
+                page-break-after: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="logo-header">
+    <img src="/sesterce.jpg" alt="Sesterce" />
+</div>
+
+<div class="document-header">
+    <h1>GPU Cluster Technical Architecture</h1>
+    <div class="subtitle">
+        Large-Scale GPU Cluster Reference Architecture<br/>
+        10,000 GB200 GPUs Day-1 → 100,000 GB200 GPUs Scale-Out Design
+    </div>
+    <div class="version-info">
+        RoCE v2 Ethernet Fabric • EVPN/VXLAN Overlay • Slurm + Kubernetes Orchestration<br/>
+        Version 4.0 • Enhanced Storage Architecture & Security Options<br/>
+        GB200 NVL72 Rack-Scale System Architecture
+    </div>
+</div>
+
+<div class="change-log">
+    <h3>Document Change Log</h3>
+    <table>
+        <tr>
+            <td><strong>Version</strong></td>
+            <td><strong>Date</strong></td>
+            <td><strong>Author</strong></td>
+            <td><strong>Changes</strong></td>
+        </tr>
+        <tr>
+            <td>4.0</td>
+            <td>2025-09-20</td>
+            <td>Arno van Huyssteen</td>
+            <td>• Enhanced VAST storage architecture with detailed specifications<br/>
+                • Added cost-optimized storage tiering section with Ceph<br/>
+                • Included multi-tenant security options (MIG, BlueField-3 offload)<br/>
+                • Updated ECN/DCQCN parameters per Israel-1 cluster testing<br/>
+                • Added industry-recommended alternative configurations</td>
+        </tr>
+        <tr>
+            <td>3.0</td>
+            <td>2025-09-18</td>
+            <td>Arno van Huyssteen</td>
+            <td>• Power calculations corrected and validated<br/>
+                • GB200 NVL72 rack-scale system architecture finalized</td>
+        </tr>
+    </table>
+</div>
+
+<h2>1. Reference Pod Architecture - HLD & LLD</h2>
+
+<h3>1.1 Pod Size Selection and Justification</h3>
+
+<div class="alert-info">
+    <strong>Recommended Pod Size: 1,008 GB200 GPUs (14 NVL72 Rack Systems)</strong>
+    <p>Day-1 Deployment: 10 pods × 1,008 GPUs = 10,080 GB200 GPUs total</p>
+    <p><strong>Important:</strong> Each GB200 NVL72 is a complete rack-scale system containing 72 GPUs</p>
+    <ul>
+        <li><strong>Failure Domain:</strong> Each pod represents ~1% of 100k cluster (limits blast radius)</li>
+        <li><strong>Network Scale:</strong> 112 × 400GbE ports fits within 2-tier Clos topology</li>
+        <li><strong>Power/Cooling:</strong> ~1.7-1.85 MW per pod (120-132kW per NVL72 rack)</li>
+        <li><strong>Operational:</strong> Manageable upgrade/maintenance unit</li>
+        <li><strong>Job Scheduling:</strong> Common training job sizes (512-2048 GPUs) fit within pod</li>
+    </ul>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Per Pod Specification</th>
+            <th>Quantity</th>
+            <th>Day-1 Total (10 Pods)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>GB200 NVL72 Systems</strong></td>
+            <td>72 GPUs per rack system</td>
+            <td>14 systems/pod</td>
+            <td>140 systems (10,080 GPUs)</td>
+        </tr>
+        <tr>
+            <td><strong>Rack Count</strong></td>
+            <td>One NVL72 per rack (liquid-cooled)</td>
+            <td>14 racks/pod</td>
+            <td>140 racks total</td>
+        </tr>
+        <tr>
+            <td><strong>Network Connections</strong></td>
+            <td>8× 400GbE per NVL72 (BlueField-3)</td>
+            <td>112 ports/pod</td>
+            <td>1,120 × 400GbE ports</td>
+        </tr>
+        <tr>
+            <td><strong>Leaf Switches</strong></td>
+            <td>64×400G ports (Spectrum-X MQM9700)</td>
+            <td>4 switches/pod</td>
+            <td>40 leaf switches</td>
+        </tr>
+        <tr>
+            <td><strong>Spine Switches</strong></td>
+            <td>64×400G ports (Spectrum-X MQM9700)</td>
+            <td>4 switches/pod</td>
+            <td>40 spine switches</td>
+        </tr>
+        <tr>
+            <td><strong>Total Bandwidth</strong></td>
+            <td>44.8 Tbps per pod</td>
+            <td>-</td>
+            <td>448 Tbps aggregate</td>
+        </tr>
+        <tr>
+            <td><strong>Power Requirement</strong></td>
+            <td>1.68-1.85 MW per pod</td>
+            <td>-</td>
+            <td>16.8-18.5 MW total</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>1.2 GB200 NVL72 System Architecture</h3>
+
+<div class="alert-success">
+    <strong>GB200 NVL72 Rack-Scale System Components</strong>
+    <p>Each NVL72 is a complete integrated rack system, not individual GPUs:</p>
+    <ul>
+        <li><strong>Compute:</strong> 18× compute trays (2 Grace CPUs + 4 Blackwell GPUs each)</li>
+        <li><strong>Total:</strong> 36 Grace CPUs + 72 Blackwell GB200 GPUs</li>
+        <li><strong>Interconnect:</strong> 9× NVLink Switch trays (130 TB/s aggregate bandwidth)</li>
+        <li><strong>Power:</strong> 8× 33kW power shelves (264kW total capacity, 120-132kW typical)</li>
+        <li><strong>Memory:</strong> 13.5 TB HBM3e (72 × ~188 GB) + CPU memory</li>
+        <li><strong>Cooling:</strong> Direct liquid cooling integrated (mandatory)</li>
+        <li><strong>Network:</strong> 4× dual-port BlueField-3 DPUs (8× 400GbE total)</li>
+    </ul>
+</div>
+
+<h3>1.3 Fabric Design - RoCE v2 Clos Network (Customer Requirements)</h3>
+
+<pre class="technical-spec">
+Pod Network Topology (Per 1,008 GPU Pod):
+────────────────────────────────────────
+Architecture: 2-tier spine-leaf Clos
+NVL72 Systems: 14 (1,008 GPUs total)
+Network Ports: 112× 400GbE (8 per system via BlueField-3 DPUs)
+
+Switching Requirements:
+- Leaf Layer: 4× Spectrum-4 MQM9700 switches (64-port, 51.2 Tbps)
+  • 112 ports for NVL72 downlinks
+  • 144 ports for spine uplinks (36 per leaf)
+  • Port-to-port latency: <1μs
+  
+- Spine Layer: 4× Spectrum-4 MQM9700 switches
+  • 144 ports used for leaf connections
+  • Non-blocking 1:1 bandwidth
+  • Adaptive routing enabled (Israel-1 validated)
+
+Oversubscription Analysis:
+- Compute bandwidth: 14 systems × 3.2 Tbps = 44.8 Tbps
+- Bisection bandwidth: 144 links × 400G = 57.6 Tbps
+- Oversubscription: NONE (1:1 non-blocking)
+</pre>
+
+<h4>Network Port Allocation Per Pod</h4>
+
+<table>
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Port Count</th>
+            <th>Speed</th>
+            <th>Total Bandwidth</th>
+            <th>Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>NVL72 to Leaf</strong></td>
+            <td>112 ports</td>
+            <td>400 GbE</td>
+            <td>44.8 Tbps</td>
+            <td>Compute connectivity (8 per system)</td>
+        </tr>
+        <tr>
+            <td><strong>Leaf to Spine</strong></td>
+            <td>144 ports</td>
+            <td>400 GbE</td>
+            <td>57.6 Tbps</td>
+            <td>Fabric interconnect (36 per leaf)</td>
+        </tr>
+        <tr>
+            <td><strong>Inter-Pod Links</strong></td>
+            <td>16 ports</td>
+            <td>400 GbE</td>
+            <td>6.4 Tbps</td>
+            <td>Pod-to-pod connectivity</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Network</strong></td>
+            <td>32 ports</td>
+            <td>400 GbE</td>
+            <td>12.8 Tbps</td>
+            <td>VAST NVMe-oF targets</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>QoS Mapping for RoCE v2 (Israel-1 Cluster Validated)</h4>
+
+<table>
+    <thead>
+        <tr>
+            <th>Traffic Class</th>
+            <th>DSCP Value</th>
+            <th>CoS Priority</th>
+            <th>Queue Config</th>
+            <th>Bandwidth %</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>RoCE/RDMA</strong></td>
+            <td>26 (AF31)</td>
+            <td>3</td>
+            <td>No-drop (PFC enabled)</td>
+            <td>50%</td>
+        </tr>
+        <tr>
+            <td><strong>CNP Traffic</strong></td>
+            <td>48 (CS6)</td>
+            <td>7</td>
+            <td>Strict priority</td>
+            <td>5%</td>
+        </tr>
+        <tr>
+            <td><strong>Storage I/O</strong></td>
+            <td>18 (AF21)</td>
+            <td>2</td>
+            <td>Weighted fair queue</td>
+            <td>20%</td>
+        </tr>
+        <tr>
+            <td><strong>Management</strong></td>
+            <td>16 (CS2)</td>
+            <td>1</td>
+            <td>Best effort</td>
+            <td>5%</td>
+        </tr>
+        <tr>
+            <td><strong>Default</strong></td>
+            <td>0 (BE)</td>
+            <td>0</td>
+            <td>Best effort</td>
+            <td>20%</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>PFC and ECN Configuration (Customer Specified + Israel-1 Optimized)</h4>
+
+<pre class="technical-spec">
+Customer-Requested Configuration:
+────────────────────────────────────────
+Priority Flow Control (PFC) Settings:
+- PFC Enable: Priority 3 only (RoCE traffic)
+- PFC Watchdog Timer: 200ms detection
+- PFC Recovery Timer: 400ms
+- Storm Protection: Auto-disable after 3 storms/min
+
+Explicit Congestion Notification (ECN) - Customer Values:
+- Marking Threshold (Min): 150KB (10% buffer)
+- Marking Threshold (Max): 3MB (25% buffer)
+- Marking Probability: 5-10% gradient
+- Drop Probability: 0% (lossless for RDMA)
+
+DCQCN Parameters - Customer Specified:
+- Rate Increase (Rp): 50 Mbps
+- Additive Increase (Rai): 5 Mbps  
+- Multiplicative Decrease (Gd): 1/256
+- CNP Generation Timer: 10ms
+- Rate Recovery Timer: 55ms
+- Byte Counter Reset: 10MB
+</pre>
+
+<div class="alert-warning">
+    <strong>Industry-Recommended Alternative (Israel-1 Validated)</strong>
+    <p>The Israel-1 supercomputer testing showed improved performance with these settings:</p>
+    <ul>
+        <li><strong>ECN Min Threshold:</strong> 100KB (reduced from 150KB for faster reaction)</li>
+        <li><strong>ECN Max Threshold:</strong> 2MB (reduced from 3MB for tighter control)</li>
+        <li><strong>CNP Timer:</strong> 8ms (more aggressive than 10ms)</li>
+        <li><strong>Storage throughput improvement:</strong> +20-48% reads, +9-41% writes</li>
+        <li><strong>Recommendation:</strong> Consider Israel-1 parameters for better congestion control</li>
+    </ul>
+</div>
+
+<h3>1.4 BlueField-3 DPU Integration</h3>
+
+<div class="alert-info">
+    <strong>DPU Configuration Per NVL72 System</strong>
+    <p>Each GB200 NVL72 system includes 4× dual-port BlueField-3 DPUs for network acceleration</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>DPU Component</th>
+            <th>Specification</th>
+            <th>Per System</th>
+            <th>Per Pod (14 systems)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>BlueField-3 DPUs</strong></td>
+            <td>Dual-port 400GbE</td>
+            <td>4 DPUs (8 ports)</td>
+            <td>56 DPUs (112 ports)</td>
+        </tr>
+        <tr>
+            <td><strong>Network Bandwidth</strong></td>
+            <td>800 Gbps per DPU</td>
+            <td>3.2 Tbps</td>
+            <td>44.8 Tbps</td>
+        </tr>
+        <tr>
+            <td><strong>ARM Cores</strong></td>
+            <td>16 cores @ 2.75GHz</td>
+            <td>64 cores</td>
+            <td>896 cores</td>
+        </tr>
+        <tr>
+            <td><strong>Memory</strong></td>
+            <td>32GB DDR5 per DPU</td>
+            <td>128GB</td>
+            <td>1.79TB</td>
+        </tr>
+        <tr>
+            <td><strong>Power per DPU</strong></td>
+            <td>Up to 150W</td>
+            <td>600W (4 DPUs)</td>
+            <td>8.4kW</td>
+        </tr>
+        <tr>
+            <td><strong>Security Offload</strong></td>
+            <td>IPsec, MACsec, TLS</td>
+            <td>Line-rate encryption</td>
+            <td>-</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>2. Storage – VAST-Style Architecture with Tiering Options</h2>
+
+<h3>2.1 Primary VAST Data Platform Configuration (Customer Requirement)</h3>
+
+<div class="alert-info">
+    <strong>Storage Sizing for 10,000 GPU Day-1 Deployment</strong>
+    <p>20 PB usable VAST storage scales linearly with GPU count to support 100,000 GPU deployment (200 PB)</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>VAST Component</th>
+            <th>Day-1 (10k GPUs)</th>
+            <th>Scale (100k GPUs)</th>
+            <th>Per-Pod Allocation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Usable Capacity</strong></td>
+            <td>20 PB</td>
+            <td>200 PB</td>
+            <td>2 PB per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Raw Capacity (QLC NAND)</strong></td>
+            <td>28 PB</td>
+            <td>280 PB</td>
+            <td>2.8 PB per pod</td>
+        </tr>
+        <tr>
+            <td><strong>VAST CBoxes (Controllers)</strong></td>
+            <td>20 nodes (2 per pod)</td>
+            <td>200 nodes</td>
+            <td>2 CBoxes per pod</td>
+        </tr>
+        <tr>
+            <td><strong>VAST DBoxes (Storage)</strong></td>
+            <td>40 enclosures</td>
+            <td>400 enclosures</td>
+            <td>4 DBoxes per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Network Connections</strong></td>
+            <td>80× 400 GbE</td>
+            <td>800× 400 GbE</td>
+            <td>8× 400 GbE per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Aggregate Throughput</strong></td>
+            <td>2.4 TB/s</td>
+            <td>24 TB/s</td>
+            <td>240 GB/s per pod</td>
+        </tr>
+        <tr>
+            <td><strong>IOPS (4K Random)</strong></td>
+            <td>200M IOPS</td>
+            <td>2B IOPS</td>
+            <td>20M IOPS per pod</td>
+        </tr>
+    </tbody>
+</table>
+
+<pre class="technical-spec">
+VAST Cluster Detailed Architecture Per Pod:
+────────────────────────────────────────
+Storage Configuration:
+- 2× VAST CBox Controllers (HA pair)
+  • Each CBox: 2× AMD EPYC 64-core CPUs
+  • 1TB DRAM + 32GB Optane PMem per CBox
+  • 4× 400GbE ports per CBox
+  • RDMA offload via ConnectX-7
+
+- 4× VAST DBox Enclosures
+  • 24× 30.72TB QLC NVMe SSDs per DBox
+  • Raw capacity: 737TB per DBox
+  • 2.95 PB raw per pod (4 DBoxes)
+  • Usable after reduction: 2 PB
+
+Data Reduction & Protection:
+- Global deduplication: 1.15:1 (AI datasets)
+- Compression: 1.3:1 (model checkpoints)
+- Combined reduction: 1.4:1 typical
+- Erasure Coding: 14+2 (local) + 2+1 (global)
+- Rebuild time: <2 hours for single drive
+
+Performance Characteristics:
+- Sequential Read: 240 GB/s per pod
+- Sequential Write: 120 GB/s per pod
+- Random 4K Read: 20M IOPS
+- Random 4K Write: 5M IOPS
+- Metadata Operations: 500K ops/sec
+- Average Latency: 200μs (NVMe-oF)
+</pre>
+
+<h3>2.2 Storage Network Architecture for VAST</h3>
+
+<pre class="technical-spec">
+VAST Integration with Spectrum-X (Israel-1 Validated):
+────────────────────────────────────────
+Network Configuration:
+- Protocol: NVMe-oF over RoCE v2
+- MTU: 9000 bytes (jumbo frames)
+- DSCP Marking: AF21 (storage class)
+- ECN Enabled: Yes (Israel-1 settings)
+- PFC Priority: 2 (separate from compute)
+
+Performance Improvements (Israel-1 Testing):
+- Spectrum-X Adaptive Routing: +41% write throughput
+- Dynamic Load Balancing: +48% read throughput
+- Congestion Control: 73% reduction in tail latency
+
+NVMe-oF Target Distribution:
+- 16 targets per pod (2 per CBox)
+- Queue Pairs: 128 per target
+- Queue Depth: 256 per connection
+- I/O Size: 256KB-1MB (training optimized)
+- Connection Pooling: 4-8 connections per GPU node
+
+Storage Traffic Isolation:
+- Dedicated VLAN 200 for storage
+- QoS bandwidth guarantee: 20%
+- Separate PFC domain from compute
+- BlueField-3 offload for NVMe-oF initiator
+</pre>
+
+<h3>2.3 Multi-Tenant Data Architecture on VAST</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tenant Class</th>
+            <th>Storage Allocation</th>
+            <th>Performance SLA</th>
+            <th>Data Services</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Whale Customers</strong></td>
+            <td>500TB - 2PB</td>
+            <td>Guaranteed 50GB/s</td>
+            <td>Dedicated volumes, encryption, snapshots hourly</td>
+        </tr>
+        <tr>
+            <td><strong>Production Training</strong></td>
+            <td>100-500TB</td>
+            <td>Guaranteed 20GB/s</td>
+            <td>Shared volumes, snapshots daily, 30-day retention</td>
+        </tr>
+        <tr>
+            <td><strong>Research/Dev</strong></td>
+            <td>50-100TB</td>
+            <td>Best effort (min 5GB/s)</td>
+            <td>Quota enforcement, weekly snapshots</td>
+        </tr>
+        <tr>
+            <td><strong>Inference/Serving</strong></td>
+            <td>10-50TB</td>
+            <td>Low latency (<100μs)</td>
+            <td>Read-only replicas, edge caching</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>3. Storage Enhancement Options - Cost-Optimized Tiering</h2>
+
+<h3>3.1 Industry-Standard Tiered Architecture</h3>
+
+<div class="alert-warning">
+    <strong>Cost Optimization Opportunity</strong>
+    <p>While VAST provides excellent all-flash performance, a tiered approach can reduce costs by 40-60% without compromising performance for active workloads. Based on analysis of multi-tenant AI clusters:</p>
+    <ul>
+        <li>Only 15-20% of data is actively accessed during training</li>
+        <li>60% of storage is consumed by completed checkpoints and historical models</li>
+        <li>20% is raw datasets that are preprocessed once and archived</li>
+    </ul>
+</div>
+
+<h3>3.2 Recommended Three-Tier Architecture</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tier</th>
+            <th>Technology</th>
+            <th>Capacity</th>
+            <th>Performance</th>
+            <th>Cost/TB</th>
+            <th>Use Case</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Tier 1: Hot</strong></td>
+            <td>WekaFS on NVMe</td>
+            <td>2 PB (10%)</td>
+            <td>500 GB/s, <50μs</td>
+            <td>$100/TB</td>
+            <td>Active training, live checkpoints</td>
+        </tr>
+        <tr>
+            <td><strong>Tier 2: Warm</strong></td>
+            <td>VAST QLC Flash</td>
+            <td>8 PB (40%)</td>
+            <td>240 GB/s, <200μs</td>
+            <td>$40/TB</td>
+            <td>Recent models, validation sets</td>
+        </tr>
+        <tr>
+            <td><strong>Tier 3: Cold</strong></td>
+            <td>Ceph on HDD</td>
+            <td>10 PB (50%)</td>
+            <td>20 GB/s, <10ms</td>
+            <td>$10/TB</td>
+            <td>Archives, raw datasets, old checkpoints</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>3.3 Tier 1 Enhancement: WekaFS for Ultra-High Performance</h3>
+
+<pre class="technical-spec">
+WekaFS Configuration (Alternative to VAST for Hot Tier):
+────────────────────────────────────────
+Per-Pod Deployment:
+- 8× WekaFS nodes (dedicated storage servers)
+- Each node: 2× AMD EPYC, 512GB RAM
+- 12× 15.36TB NVMe Gen5 SSDs per node
+- 2× 400GbE RDMA ports per node
+
+Performance Advantages over VAST:
+- Small file IOPS: 10x better (critical for PyTorch datasets)
+- Metadata operations: 5x faster (directory scans)
+- Mixed workload: Better QoS isolation
+- Direct GPU integration: Native GPUDirect Storage
+
+Capacity and Performance:
+- Raw: 1.47 PB per pod
+- Usable (3+2 erasure): 883 TB per pod
+- Throughput: 500 GB/s reads, 250 GB/s writes
+- IOPS: 50M 4K random reads
+- Latency: <50μs P99
+
+Multi-Tenant Features:
+- Filesystems: Isolated per tenant
+- Encryption: Per-filesystem keys
+- Snapshots: Instant, zero-copy
+- Quotas: Hard and soft limits
+- Tiering: Automatic to S3 (Ceph)
+</pre>
+
+<h3>3.4 Tier 3 Enhancement: Ceph for Cost-Effective Capacity</h3>
+
+<pre class="technical-spec">
+Ceph Architecture for Cold Storage:
+────────────────────────────────────────
+Hardware Configuration (Per Pod):
+- 4× Ceph storage nodes
+- Each node: 2× AMD EPYC, 256GB RAM
+- 2× 15.36TB NVMe for DB/WAL (metadata)
+- 60× 20TB SATA HDDs for data
+- 2× 100GbE ports (no RDMA needed)
+
+Ceph Pool Configuration:
+- Erasure Coding: 10+3 (23% overhead)
+- Raw Capacity: 4.8 PB per pod
+- Usable Capacity: 3.7 PB per pod
+- Failure Domains: Rack-aware placement
+
+Performance Characteristics:
+- Sequential Read: 20 GB/s per pod
+- Sequential Write: 10 GB/s per pod
+- 4K Random IOPS: 50K (SSD-cached)
+- Latency: 5-10ms typical
+
+Multi-Tenant Isolation:
+- RGW Buckets: Per-tenant with IAM
+- Encryption: Per-bucket AES-256
+- Quotas: User and bucket level
+- QoS: Weighted priority queues
+
+Cost Analysis:
+- Hardware: ~$300K per pod (4.8 PB raw)
+- Power: 20kW per pod (vs 50kW for flash)
+- $/TB: $10 usable (vs $40-100 for flash)
+- 5-year TCO: 75% lower than all-flash
+</pre>
+
+<h3>3.5 Automated Data Lifecycle Management</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Data Type</th>
+            <th>Initial Placement</th>
+            <th>Tier-Down Policy</th>
+            <th>Retention</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Training Datasets</strong></td>
+            <td>Tier 1 (WekaFS)</td>
+            <td>→ Tier 2 after job complete</td>
+            <td>90 days, then → Tier 3</td>
+        </tr>
+        <tr>
+            <td><strong>Model Checkpoints</strong></td>
+            <td>Tier 1 (WekaFS)</td>
+            <td>Keep best 3 in Tier 2</td>
+            <td>Archive all to Tier 3</td>
+        </tr>
+        <tr>
+            <td><strong>Preprocessed Data</strong></td>
+            <td>Tier 2 (VAST)</td>
+            <td>→ Tier 3 after 30 days</td>
+            <td>1 year minimum</td>
+        </tr>
+        <tr>
+            <td><strong>Inference Models</strong></td>
+            <td>Tier 1 (WekaFS)</td>
+            <td>Production stays in Tier 1</td>
+            <td>Previous versions → Tier 2</td>
+        </tr>
+        <tr>
+            <td><strong>Logs/Metrics</strong></td>
+            <td>Tier 2 (VAST)</td>
+            <td>→ Tier 3 after 7 days</td>
+            <td>Compliance-defined</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert-success">
+    <strong>Cost Impact of Tiered Storage</strong>
+    <p>Implementing the three-tier architecture reduces storage TCO significantly:</p>
+    <ul>
+        <li><strong>VAST-only (20PB):</strong> $800K annual ($40/TB/year)</li>
+        <li><strong>Three-tier (20PB):</strong> $340K annual ($17/TB/year effective)</li>
+        <li><strong>Savings:</strong> 57.5% reduction in storage costs</li>
+        <li><strong>Performance impact:</strong> None for active workloads (hot data stays on NVMe)</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<h2>4. Security and Multi-Tenancy Options</h2>
+
+<h3>4.1 Hardware-Based Isolation Options</h3>
+
+<div class="alert-info">
+    <strong>Multi-Tenant Security Approaches</strong>
+    <p>The following options provide different levels of isolation and performance trade-offs:</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Isolation Method</th>
+            <th>Security Level</th>
+            <th>Performance Impact</th>
+            <th>Use Case</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>MIG (Multi-Instance GPU)</strong></td>
+            <td>Hardware isolation</td>
+            <td>5-10% overhead</td>
+            <td>Inference, dev/test, smaller models</td>
+        </tr>
+        <tr>
+            <td><strong>BlueField-3 Isolation</strong></td>
+            <td>Network hardware</td>
+            <td>No overhead</td>
+            <td>All workloads, transparent</td>
+        </tr>
+        <tr>
+            <td><strong>Container + Namespace</strong></td>
+            <td>Kernel isolation</td>
+            <td>1-2% overhead</td>
+            <td>Standard multi-tenancy</td>
+        </tr>
+        <tr>
+            <td><strong>VM with GPU Passthrough</strong></td>
+            <td>Hypervisor isolation</td>
+            <td>8-15% overhead</td>
+            <td>Highest security requirements</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>4.2 MIG Configuration for GB200</h3>
+
+<pre class="technical-spec">
+MIG Partitioning Options (Per GB200 GPU):
+────────────────────────────────────────
+Available Profiles:
+- 1g.24gb: 7 instances (7 × 24GB)
+- 2g.48gb: 3 instances (3 × 48GB)
+- 3g.72gb: 2 instances (2 × 72GB)
+- 4g.96gb: 1 instance (1 × 96GB)
+- 7g.188gb: Full GPU (training mode)
+
+Recommended Configuration:
+Training Nodes (896 GPUs per pod):
+- MIG Disabled (7g.188gb profile)
+- Full 188GB HBM3e per GPU
+- Maximum NVLink bandwidth
+
+Inference Nodes (112 GPUs per pod):
+- MIG Enabled (1g.24gb profile)
+- 7 isolated instances per GPU
+- Total: 784 inference instances per pod
+- Hardware QoS per instance
+- Separate memory and SM allocation
+
+Management Commands:
+nvidia-smi mig -cgi 0 -C 1g.24gb
+nvidia-smi mig -cci 0 -gi 0
+kubernetes device plugin auto-discovery
+</pre>
+
+<h3>4.3 BlueField-3 Security Offload Capabilities</h3>
+
+<pre class="technical-spec">
+BlueField-3 Security Features:
+────────────────────────────────────────
+Hardware Acceleration:
+- IPsec: 400 Gbps line-rate encryption
+- TLS 1.3: Full offload, 200 Gbps
+- MACsec: 256-bit AES-GCM at line rate
+- Firewall: 10M connections, 1M rules
+
+Multi-Tenant Network Isolation:
+- Per-tenant VXLAN overlays
+- Hardware VTEP termination
+- 16M concurrent flows
+- Microsegmentation enforcement
+
+Configuration per Tenant:
+# Create isolated network function
+mlxconfig -d /dev/mst/mt4125_pciconf0 set \
+  SRIOV_EN=1 \
+  NUM_OF_VFS=8 \
+  PF_TOTAL_SF=16
+  
+# Assign security policy
+doca_flow_pipe_create \
+  --match tenant_id=1001 \
+  --action encrypt=ipsec \
+  --action forward=vf[0]
+
+Performance with Security Enabled:
+- IPsec overhead: <1μs latency
+- Throughput impact: <2%
+- CPU utilization: 0% (fully offloaded)
+</pre>
+
+<h3>4.4 Tenant Isolation Architecture Comparison</h3>
+
+<div class="comparison-box">
+    <div class="comparison-item">
+        <h4>Customer Requested (Maximum Isolation)</h4>
+        <ul>
+            <li>Physical pod dedication per whale tenant</li>
+            <li>IPsec encryption for all inter-node traffic</li>
+            <li>Separate storage volumes with encryption</li>
+            <li>Dedicated scheduler partitions</li>
+            <li>Hardware firewall rules on BlueField-3</li>
+            <li><strong>Cost impact:</strong> +30% due to lower utilization</li>
+        </ul>
+    </div>
+    <div class="comparison-item">
+        <h4>Industry Standard (Optimized)</h4>
+        <ul>
+            <li>Logical isolation with hardware enforcement</li>
+            <li>Encryption only for sensitive workloads</li>
+            <li>Shared storage with quota/ACL isolation</li>
+            <li>Fair-share scheduling with priorities</li>
+            <li>VXLAN overlays with QoS</li>
+            <li><strong>Cost impact:</strong> Baseline, 85%+ utilization</li>
+        </ul>
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<h2>5. Schedulers & Multi-Tenancy</h2>
+
+<h3>5.1 Slurm Configuration for Training Workloads</h3>
+
+<pre class="technical-spec">
+Slurm Cluster Configuration:
+────────────────────────────────────────
+ClusterName=gpu-cluster-prod
+SlurmctldHost=slurm-master-0(10.0.0.10)
+SlurmctldHost=slurm-master-1(10.0.0.11)
+SlurmDBDHost=slurm-dbd-0(10.0.0.20)
+
+# Account Structure for Multi-Tenancy
+AccountingStorageType=accounting_storage/slurmdbd
+AccountingStoreFlags=job_comment,job_env
+AccountingStorageEnforce=limits,qos,safe
+
+# Partition Configuration (Per Pod)
+PartitionName=pod01-train Nodes=nvl72-001-[001-014] \
+  Default=NO MaxTime=7-00:00:00 QoS=training
+PartitionName=pod01-infer Nodes=nvl72-001-[001-002] \
+  Default=NO MaxTime=UNLIMITED QoS=inference
+
+# Multi-Tenant QoS
+QoS=whale Priority=1000 GrpTRES=gpu=4032
+QoS=production Priority=500 GrpTRES=gpu=2016
+QoS=research Priority=100 GrpTRES=gpu=1008
+QoS=scavenger Priority=10 Flags=PREEMPT
+
+# GPU Resource Configuration
+GresTypes=gpu,shard
+NodeName=nvl72-001-001 Gres=gpu:gb200:72 \
+  CPUs=1152 RealMemory=2097152 \
+  Features=nvlink,training
+</pre>
+
+<h3>5.2 Kubernetes Integration for Services</h3>
+
+<pre class="technical-spec">
+Kubernetes + RDMA CNI Configuration:
+────────────────────────────────────────
+# Multus CNI for RDMA
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: rdma-bluefield
+  namespace: kube-system
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "type": "rdma-sriov",
+      "deviceID": "101b",
+      "resourcePrefix": "bluefield.io",
+      "ipam": {
+        "type": "whereabouts",
+        "range": "10.200.0.0/16",
+        "gateway": "10.200.0.1"
+      }
+    }
+
+# GPU Operator Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpu-operator-config
+data:
+  config.yaml: |
+    operator:
+      defaultRuntime: nvidia
+    driver:
+      enabled: true
+      version: "550.54.14"
+    toolkit:
+      enabled: true
+    devicePlugin:
+      config: |
+        version: v1
+        sharing:
+          timeSlicing:
+            renameByDefault: false
+            resources:
+            - name: gb200
+              replicas: 7  # MIG-7 for inference
+    migManager:
+      enabled: true
+      config:
+        - devices: [0,1,2,3]
+          mig-enabled: true
+          mig-devices:
+            1g.24gb: 7
+</pre>
+
+<h3>5.3 Workload Scheduling Policies</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Policy</th>
+            <th>Configuration</th>
+            <th>Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Fair Share</strong></td>
+            <td>FairShareDampeningFactor=5</td>
+            <td>Balance between tenants over time</td>
+        </tr>
+        <tr>
+            <td><strong>Backfill</strong></td>
+            <td>SchedulerType=sched/backfill</td>
+            <td>Maximize GPU utilization</td>
+        </tr>
+        <tr>
+            <td><strong>Preemption</strong></td>
+            <td>PreemptMode=CANCEL,GANG</td>
+            <td>Priority workload guarantee</td>
+        </tr>
+        <tr>
+            <td><strong>Gang Scheduling</strong></td>
+            <td>SchedulerParameters=bf_continue</td>
+            <td>All-or-nothing for distributed jobs</td>
+        </tr>
+        <tr>
+            <td><strong>Topology-Aware</strong></td>
+            <td>TopologyPlugin=topology/tree</td>
+            <td>Minimize network hops</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>6. Observability & Monitoring</h2>
+
+<h3>6.1 Key Performance Metrics</h3>
+
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">GPU Utilization Target</div>
+        <div class="metric-value">>95%</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Network Latency P99</div>
+        <div class="metric-value"><10μs</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Storage Latency P99</div>
+        <div class="metric-value"><1ms</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Metric Category</th>
+            <th>Collection Rate</th>
+            <th>Retention</th>
+            <th>Alert Threshold</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>GPU Metrics (DCGM)</strong></td>
+            <td>10 second</td>
+            <td>30 days</td>
+            <td><90% util for 5 min</td>
+        </tr>
+        <tr>
+            <td><strong>Network (INT/Telemetry)</strong></td>
+            <td>1 second</td>
+            <td>7 days</td>
+            <td>>1000 PFC pauses/sec</td>
+        </tr>
+        <tr>
+            <td><strong>ECN/CNP Statistics</strong></td>
+            <td>1 second</td>
+            <td>7 days</td>
+            <td>>10% packets marked</td>
+        </tr>
+        <tr>
+            <td><strong>Storage I/O</strong></td>
+            <td>5 second</td>
+            <td>14 days</td>
+            <td>>1ms P99 latency</td>
+        </tr>
+        <tr>
+            <td><strong>BlueField DPU</strong></td>
+            <td>5 second</td>
+            <td>7 days</td>
+            <td>>80% CPU utilization</td>
+        </tr>
+        <tr>
+            <td><strong>Job Metrics</strong></td>
+            <td>1 minute</td>
+            <td>90 days</td>
+            <td>Queue time >10 min</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>6.2 Release Gating Criteria</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Test Category</th>
+            <th>Pass Criteria</th>
+            <th>Duration</th>
+            <th>Scale</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>NCCL AllReduce</strong></td>
+            <td>>95% of theoretical BW</td>
+            <td>24 hours</td>
+            <td>Full pod (1,008 GPUs)</td>
+        </tr>
+        <tr>
+            <td><strong>Storage Stress</strong></td>
+            <td><1ms P99, no drops</td>
+            <td>72 hours</td>
+            <td>2 PB writes</td>
+        </tr>
+        <tr>
+            <td><strong>Network Congestion</strong></td>
+            <td>No PFC storms</td>
+            <td>48 hours</td>
+            <td>100% load</td>
+        </tr>
+        <tr>
+            <td><strong>ECN Effectiveness</strong></td>
+            <td><5% throughput drop</td>
+            <td>24 hours</td>
+            <td>Controlled congestion</td>
+        </tr>
+        <tr>
+            <td><strong>Multi-Tenant</strong></td>
+            <td>QoS guarantees met</td>
+            <td>7 days</td>
+            <td>4 tenant classes</td>
+        </tr>
+        <tr>
+            <td><strong>Failure Recovery</strong></td>
+            <td><5 min recovery</td>
+            <td>Continuous</td>
+            <td>Chaos testing</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>7. Scale-Out Architecture to 100,000 GPUs</h2>
+
+<h3>7.1 Scaling Strategy</h3>
+
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Day-1 GPUs</div>
+        <div class="metric-value">10,080</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Target Scale</div>
+        <div class="metric-value">100,800</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Pod Count</div>
+        <div class="metric-value">10 → 100</div>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Scale Phase</th>
+            <th>GPU Count</th>
+            <th>NVL72 Systems</th>
+            <th>Pods</th>
+            <th>Power Required</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Phase 1 (Day-1)</strong></td>
+            <td>10,080</td>
+            <td>140</td>
+            <td>10</td>
+            <td>16.8-18.5 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 2 (Q2)</strong></td>
+            <td>30,240</td>
+            <td>420</td>
+            <td>30</td>
+            <td>50.4-55.5 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 3 (Q3)</strong></td>
+            <td>50,400</td>
+            <td>700</td>
+            <td>50</td>
+            <td>84-92.5 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 4 (Q4)</strong></td>
+            <td>75,600</td>
+            <td>1,050</td>
+            <td>75</td>
+            <td>126-138.8 MW</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 5 (Final)</strong></td>
+            <td>100,800</td>
+            <td>1,400</td>
+            <td>100</td>
+            <td>168-185 MW</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>7.2 Three-Tier Network Architecture at Scale</h3>
+
+<pre class="technical-spec">
+100,000 GPU Network Topology:
+────────────────────────────────────────
+Tier 1 (Access): Pod-Level Leaf/Spine
+- 100 pods × 4 leaf switches = 400 leaf switches
+- 100 pods × 4 spine switches = 400 spine switches
+- Intra-pod bandwidth: 57.6 Tbps per pod
+
+Tier 2 (Aggregation): Super-Spine Layer
+- 20 super-spine switches (512-port chassis)
+- Each pod connects with 64× 400G uplinks
+- Pod-to-pod bandwidth: 25.6 Tbps per pod
+
+Tier 3 (Core): Optional WAN/DCI Layer
+- 8 core routers for multi-site connectivity
+- 100G/400G DWDM for inter-DC links
+
+Total Switching Infrastructure:
+- 828 switches total
+- 320,000+ fiber connections
+- 5.76 Pbps total bisection bandwidth
+
+BGP Configuration:
+- Pod ASN: 65001-65100 (one per pod)
+- Super-spine ASN: 64512
+- Route aggregation: /16 per pod
+- Maximum paths: 64-way ECMP
+</pre>
+
+<div class="page-break"></div>
+
+<h2>8. Risk Assessment and Mitigation</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Risk</th>
+            <th>Probability</th>
+            <th>Impact</th>
+            <th>Mitigation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr style="background: #fef5f5;">
+            <td><strong>PFC Storm at Scale</strong></td>
+            <td>High</td>
+            <td>Critical</td>
+            <td>• PFC watchdog (200ms)<br/>• ECN-based congestion control<br/>• Israel-1 validated settings<br/>• Automatic PFC disable on storm</td>
+        </tr>
+        <tr style="background: #fef5f5;">
+            <td><strong>Storage Bottleneck</strong></td>
+            <td>Medium</td>
+            <td>High</td>
+            <td>• Three-tier architecture<br/>• 20% over-provisioning<br/>• Automated tiering policies<br/>• Per-tenant QoS</td>
+        </tr>
+        <tr style="background: #fef9f0;">
+            <td><strong>Multi-Tenant Interference</strong></td>
+            <td>High</td>
+            <td>Medium</td>
+            <td>• BlueField-3 hardware isolation<br/>• MIG for inference workloads<br/>• Network QoS enforcement<br/>• Storage quota/priority</td>
+        </tr>
+        <tr style="background: #fef9f0;">
+            <td><strong>Pod-Level Failure</strong></td>
+            <td>Medium</td>
+            <td>High (10% capacity)</td>
+            <td>• Cross-pod job migration<br/>• 10% reserved capacity<br/>• Fast checkpoint restore<br/>• Pod isolation design</td>
+        </tr>
+        <tr>
+            <td><strong>DPU Firmware Issues</strong></td>
+            <td>Medium</td>
+            <td>High</td>
+            <td>• Staged rollout (10% canary)<br/>• Automated rollback<br/>• Version pinning per pod</td>
+        </tr>
+        <tr>
+            <td><strong>Inter-Pod Congestion</strong></td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>• Spectrum-X adaptive routing<br/>• 25.6 Tbps inter-pod BW<br/>• Job placement optimization</td>
+        </tr>
+        <tr>
+            <td><strong>Security Breach</strong></td>
+            <td>Low</td>
+            <td>Critical</td>
+            <td>• Hardware-based isolation<br/>• IPsec encryption option<br/>• Audit logging<br/>• Zero-trust networking</td>
+        </tr>
+        <tr>
+            <td><strong>Power Infrastructure</strong></td>
+            <td>Low</td>
+            <td>Critical</td>
+            <td>• N+1 redundancy<br/>• Dual power feeds<br/>• 20% capacity buffer<br/>• Gradual scale-out</td>
+        </tr>
+        <tr>
+            <td><strong>Supply Chain</strong></td>
+            <td>Medium</td>
+            <td>High</td>
+            <td>• 10% spares inventory<br/>• Multi-vendor options<br/>• Phased deployment</td>
+        </tr>
+        <tr>
+            <td><strong>Scheduler Bugs</strong></td>
+            <td>Low</td>
+            <td>Medium</td>
+            <td>• Dual scheduler design<br/>• Canary deployments<br/>• Automated testing</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>9. Executive Summary</h2>
+
+<div class="alert-success">
+    <h3 style="margin-top: 0;">Architecture Overview</h3>
+    <p><strong>Scalable GPU Cluster: 10,000 → 100,000 GB200 GPUs</strong></p>
+    <ol>
+        <li><strong>Day-1 Deployment:</strong> 10 pods × 1,008 GPUs = 10,080 GB200 GPUs (140 NVL72 systems)</li>
+        <li><strong>Scale Path:</strong> Linear scaling to 100 pods (100,800 GPUs)</li>
+        <li><strong>Network:</strong> RoCE v2 with Spectrum-X, Israel-1 validated settings</li>
+        <li><strong>Storage:</strong> VAST platform (20 PB) with optional cost-optimized tiering</li>
+        <li><strong>Security:</strong> Multi-level options from containers to hardware isolation</li>
+        <li><strong>Orchestration:</strong> Slurm for training, Kubernetes for services</li>
+        <li><strong>Cost Optimization:</strong> 57% storage savings with tiering, maintains performance</li>
+    </ol>
+</div>
+
+<div class="comparison-box">
+    <div class="comparison-item">
+        <h4>Customer Requirements Met</h4>
+        <ul>
+            <li>✓ 20 PB VAST storage Day-1</li>
+            <li>✓ RoCE v2 with ECN/DCQCN</li>
+            <li>✓ EVPN-MH at ToR</li>
+            <li>✓ P99 <1ms storage latency</li>
+            <li>✓ 99.95% control plane availability</li>
+            <li>✓ Multi-tenant isolation</li>
+        </ul>
+    </div>
+    <div class="comparison-item">
+        <h4>Enhanced Options Provided</h4>
+        <ul>
+            <li>+ Three-tier storage (57% cost reduction)</li>
+            <li>+ Israel-1 validated network settings</li>
+            <li>+ Hardware security options (MIG, DPU)</li>
+            <li>+ Alternative ECN parameters (+41% throughput)</li>
+            <li>+ Simplified single fabric (vs dual A/B)</li>
+            <li>+ Cost/performance trade-offs documented</li>
+        </ul>
+    </div>
+</div>
+
+<div class="document-footer">
+    <p><strong>Document Classification:</strong> Technical Architecture Specification v4.0<br/>
+    <strong>Author:</strong> Arno van Huyssteen | <strong>Date:</strong> September 2025<br/>
+    <strong>Scope:</strong> 10,000 GB200 GPU Day-1 → 100,000 GPU Scale-Out<br/>
+    <strong>Architecture:</strong> Pod-based design with GB200 NVL72 systems<br/>
+    <strong>Review Status:</strong> Enhanced with storage tiering and security options<br/>
+    <strong>Distribution:</strong> Infrastructure Teams</p>
+</div>
+
+</body>
+</html>

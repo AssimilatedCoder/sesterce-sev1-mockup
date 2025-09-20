@@ -30,7 +30,7 @@ export const DesignExerciseTab: React.FC = () => {
         {/* Full document iframe */}
         <div className="w-full" style={{ height: '80vh' }}>
           <iframe
-            src="/gpu-cluster-architecture-complete.html"
+            src="/gpu-cluster-architecture-v4.html"
             className="w-full h-full border-0"
             title="GPU Cluster Technical Architecture - Complete Document"
             style={{ minHeight: '600px' }}
