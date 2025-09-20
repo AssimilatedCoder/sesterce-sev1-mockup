@@ -183,6 +183,58 @@ view_logs() {
     fi
 }
 
+# Function to update port configuration
+update_port() {
+    echo -e "${GREEN}🔄 Updating port configuration to 3025...${NC}"
+    
+    if [ "$IS_UBUNTU" = true ]; then
+        # Stop services first
+        echo "Stopping services..."
+        sudo systemctl stop nginx
+        sudo systemctl stop sesterce-calculator-api 2>/dev/null || true
+        
+        # Update Nginx configuration
+        echo "Updating Nginx configuration..."
+        if [ -f "/etc/nginx/sites-available/sesterce-dashboard" ]; then
+            sudo sed -i 's/listen 7777/listen 3025/g' /etc/nginx/sites-available/sesterce-dashboard
+            sudo sed -i 's/listen \[::\]:7777/listen \[::\]:3025/g' /etc/nginx/sites-available/sesterce-dashboard
+            echo "✅ Nginx configuration updated"
+        fi
+        
+        # Test Nginx configuration
+        sudo nginx -t
+        
+        # Restart services
+        echo "Restarting services..."
+        sudo systemctl start nginx
+        sudo systemctl start sesterce-calculator-api 2>/dev/null || true
+        
+        echo -e "${GREEN}✅ Port updated to 3025${NC}"
+    else
+        # macOS
+        echo "Updating Nginx configuration..."
+        if [ -d "/opt/homebrew/etc/nginx/servers" ]; then
+            NGINX_DIR="/opt/homebrew/etc/nginx/servers"
+        elif [ -d "/usr/local/etc/nginx/servers" ]; then
+            NGINX_DIR="/usr/local/etc/nginx/servers"
+        else
+            echo -e "${RED}❌ Nginx servers directory not found${NC}"
+            return 1
+        fi
+        
+        # Copy new configuration
+        sudo cp "$SCRIPT_DIR/nginx-sesterce-dashboard.conf" "$NGINX_DIR/"
+        
+        # Test and reload
+        sudo nginx -t && sudo nginx -s reload
+        
+        echo -e "${GREEN}✅ Port updated to 3025${NC}"
+    fi
+    
+    echo ""
+    echo "🌐 Access the dashboard at: http://localhost:3025"
+}
+
 # Function to rebuild the app
 rebuild_app() {
     echo -e "${GREEN}🏗️  Rebuilding React app...${NC}"
@@ -285,11 +337,14 @@ case "$1" in
     update)
         update_from_git
         ;;
+    update-port)
+        update_port
+        ;;
     test)
         test_api
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs|build|update|test}"
+        echo "Usage: $0 {start|stop|restart|status|logs|build|update|update-port|test}"
         echo ""
         echo "Commands:"
         echo "  start    - Start all services"
