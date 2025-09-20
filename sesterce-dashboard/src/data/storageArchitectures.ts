@@ -189,8 +189,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     id: 'ceph-nvme',
     name: 'Ceph All-NVMe Tier',
     category: 'balanced',
-    description: 'Open-source Ceph on all-NVMe hardware',
-    vendors: ['Red Hat Ceph', 'SUSE', 'Canonical'],
+    description: 'Ubuntu-based Ceph on all-NVMe hardware (Canonical supported)',
+    vendors: ['Canonical Ubuntu Ceph', 'SUSE Enterprise Storage', 'Proxmox Ceph'],
     performance: {
       throughputPerPB: '100 GB/s',
       iopsPerPB: '500K',
@@ -219,8 +219,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     id: 'ceph-hybrid',
     name: 'Ceph Hybrid NVMe/SSD',
     category: 'balanced',
-    description: 'Ceph with NVMe caching and SSD capacity',
-    vendors: ['Red Hat Ceph', 'SUSE', 'Canonical'],
+    description: 'Ubuntu Ceph with NVMe caching and SSD capacity (Canonical)',
+    vendors: ['Canonical Ubuntu Ceph', 'SUSE Enterprise Storage', 'Proxmox Ceph'],
     performance: {
       throughputPerPB: '50 GB/s',
       iopsPerPB: '200K',
@@ -250,8 +250,8 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     id: 'ceph-hdd',
     name: 'Ceph HDD with SSD Cache',
     category: 'cost-optimized',
-    description: 'High-capacity Ceph with SSD metadata/caching',
-    vendors: ['Red Hat Ceph', 'SUSE', 'Canonical'],
+    description: 'High-capacity Ubuntu Ceph with SSD metadata/caching (Canonical)',
+    vendors: ['Canonical Ubuntu Ceph', 'SUSE Enterprise Storage', 'Proxmox Ceph'],
     performance: {
       throughputPerPB: '10 GB/s',
       iopsPerPB: '10K',
@@ -348,8 +348,8 @@ export const recommendedCombinations: Record<string, {
   rationale: string;
 }> = {
   'vast-ceph-optimal': {
-    name: 'VAST + Ceph Multi-Tier (Recommended)',
-    description: 'Optimal balance of extreme performance and economics',
+    name: 'VAST + Ubuntu Ceph Multi-Tier (Recommended)',
+    description: 'Optimal balance of extreme performance and economics with Canonical Ubuntu Ceph',
     tiers: ['vast-universal', 'ceph-nvme', 'ceph-hybrid', 'ceph-hdd'],
     distribution: {
       'vast-universal': 25,
