@@ -210,6 +210,31 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
   
   const networkDetails = getNetworkingData();
   
+  // Add error handling for missing data
+  if (!networkDetails || !networkDetails.topology) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-200 pb-3">
+          Network Architecture Analysis
+        </h2>
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+          <p className="text-yellow-700">
+            Please run calculations first to see network architecture details.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Ensure switchSpec exists with default values
+  const switchSpec = networkDetails.switchSpec || {
+    name: fabricType === 'infiniband' ? 'Quantum-2 QM9700' : 'Spectrum-4 SN5600',
+    ports: 64,
+    speed: fabricType.includes('800') ? 800 : 400,
+    price: fabricType === 'infiniband' ? 250000 : 150000,
+    power: fabricType === 'infiniband' ? 2000 : 1800
+  };
+  
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-200 pb-3">
@@ -229,12 +254,12 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
           <div className="bg-white p-3 rounded-lg">
             <div className="text-xs text-gray-500">Leaf Switches (ToR)</div>
             <div className="text-xl font-bold">{networkDetails.topology.leafSwitches}</div>
-            <div className="text-xs text-gray-500">{networkDetails.switchSpec.name}</div>
+            <div className="text-xs text-gray-500">{switchSpec.name}</div>
           </div>
           <div className="bg-white p-3 rounded-lg">
             <div className="text-xs text-gray-500">Spine Switches</div>
             <div className="text-xl font-bold">{networkDetails.topology.spineSwitches}</div>
-            <div className="text-xs text-gray-500">{networkDetails.switchSpec.ports} ports @ {networkDetails.switchSpec.speed}G</div>
+            <div className="text-xs text-gray-500">{switchSpec.ports} ports @ {switchSpec.speed}G</div>
           </div>
           <div className="bg-white p-3 rounded-lg">
             <div className="text-xs text-gray-500">Core Switches</div>
@@ -290,7 +315,7 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
             <tr className="border-b border-gray-200">
               <td className="px-4 py-3">Switches (All Tiers)</td>
               <td className="px-4 py-3">{networkDetails.topology.totalSwitches.toLocaleString()}</td>
-              <td className="px-4 py-3">${networkDetails.switchSpec.price.toLocaleString()}</td>
+              <td className="px-4 py-3">${switchSpec.price.toLocaleString()}</td>
               <td className="px-4 py-3">${(networkDetails.costs.switches / 1000000).toFixed(2)}M</td>
               <td className="px-4 py-3">{(networkDetails.power.switches / 1000).toFixed(1)}</td>
             </tr>
@@ -338,7 +363,7 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
         <div className="bg-white rounded-lg shadow p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-2">Per-GPU Bandwidth</h4>
           <div className="text-2xl font-bold text-gray-900">{networkDetails.bandwidth.perGPU} Gbps</div>
-          <div className="text-xs text-gray-500">{networkDetails.topology.railsPerGPU} rails × {networkDetails.switchSpec.speed}G</div>
+          <div className="text-xs text-gray-500">{networkDetails.topology.railsPerGPU} rails × {switchSpec.speed}G</div>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-2">Aggregate Bandwidth</h4>
@@ -359,19 +384,19 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Switch Model:</span>
-                <span className="font-medium">{networkDetails.switchSpec.name}</span>
+                <span className="font-medium">{switchSpec.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Port Count:</span>
-                <span className="font-medium">{networkDetails.switchSpec.ports} ports</span>
+                <span className="font-medium">{switchSpec.ports} ports</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Port Speed:</span>
-                <span className="font-medium">{networkDetails.switchSpec.speed}G</span>
+                <span className="font-medium">{switchSpec.speed}G</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Switch Power:</span>
-                <span className="font-medium">{(networkDetails.switchSpec.power / 1000).toFixed(1)}kW</span>
+                <span className="font-medium">{(switchSpec.power / 1000).toFixed(1)}kW</span>
               </div>
             </div>
           </div>

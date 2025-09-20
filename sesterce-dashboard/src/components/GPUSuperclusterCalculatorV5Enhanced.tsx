@@ -318,6 +318,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         bisection: (coreSwitches * 64 * fabric.bandwidthPerGpu) / 8, // Gbps to GBps
         theoretical: numGPUs * fabric.bandwidthPerGpu * railsPerGPU / 8,
         perGPU: fabric.bandwidthPerGpu * railsPerGPU
+      },
+      switchSpec: {
+        name: fabricType === 'infiniband' ? 'Quantum-2 QM9700' : 'Spectrum-4 SN5600',
+        ports: 64,
+        speed: fabric.bandwidthPerGpu,
+        price: fabric.switchPrice,
+        power: 1800 // Estimated
       }
     };
   };
