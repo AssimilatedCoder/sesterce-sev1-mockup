@@ -95,7 +95,7 @@ start_services() {
     
     echo -e "${GREEN}✅ All services started${NC}"
     echo ""
-    echo "🌐 Access the secure dashboard at: http://localhost:2025"
+    echo "🌐 Access the secure dashboard at: http://localhost:3025"
 }
 
 # Function to stop services

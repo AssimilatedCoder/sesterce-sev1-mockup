@@ -62,7 +62,7 @@ This will:
 
 ### 3. Access Dashboard
 
-Open: http://localhost:7777
+Open: http://localhost:3025
 
 ## Deployment Steps for Ubuntu
 

@@ -163,7 +163,7 @@ update_nginx_config() {
 limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=10r/m;
 
 server {
-    listen 7777;
+    listen 3025;
     server_name _;
     
     # Increase maximum upload size
@@ -325,7 +325,7 @@ main() {
     echo "   Edit src/App.tsx to import GPUSuperclusterCalculatorSecure"
     echo ""
     echo "4. Access the secure dashboard at:"
-    echo "   http://localhost:7777"
+    echo "   http://localhost:3025"
     echo ""
     echo "🔐 API Secret stored in .env files - keep these secure!"
     echo ""
