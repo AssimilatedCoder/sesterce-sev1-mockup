@@ -13,7 +13,7 @@ import os
 app = Flask(__name__)
 
 # Configure CORS for your domain only
-CORS(app, origins=['http://localhost:7777', 'https://yourdomain.com'])
+CORS(app, origins=['http://localhost:2025', 'https://yourdomain.com'])
 
 # Secret key for API validation (change this!)
 API_SECRET = os.environ.get('CALCULATOR_API_SECRET', 'change-this-secret-key')

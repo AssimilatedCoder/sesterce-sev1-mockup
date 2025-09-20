@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Container } from './components/layout/Container';
 import { TabNavigation } from './components/features/TabNavigation';
 import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboardOriginal';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
+import { Login } from './components/Login';
 import { Activity, Calculator } from 'lucide-react';
 
-function AppContent() {
+interface AppContentProps {
+  onLogout: () => void;
+  currentUser: string;
+}
+
+function AppContent({ onLogout, currentUser }: AppContentProps) {
   const location = useLocation();
   const activeTab = location.pathname === '/calculator' ? 'calculator' : 'dashboard';
 
@@ -34,7 +40,7 @@ function AppContent() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
       </div>
       
-      <Header />
+      <Header onLogout={onLogout} currentUser={currentUser} />
       
       <main className="pt-16 relative z-10">
         {/* Tab Navigation */}
@@ -62,9 +68,37 @@ function AppContent() {
 }
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState('');
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const user = sessionStorage.getItem('sesterceUser');
+    if (user) {
+      setIsAuthenticated(true);
+      setCurrentUser(user);
+    }
+  }, []);
+
+  const handleLogin = (username: string) => {
+    setIsAuthenticated(true);
+    setCurrentUser(username);
+    sessionStorage.setItem('sesterceUser', username);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser('');
+    sessionStorage.removeItem('sesterceUser');
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <Router>
-      <AppContent />
+      <AppContent onLogout={handleLogout} currentUser={currentUser} />
     </Router>
   );
 }
