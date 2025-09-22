@@ -69,11 +69,11 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     vendor: 'Canonical',
     category: 'infrastructure',
     licensingModel: 'subscription',
-    costPerGPUPerYear: 1500, // $1,500/node/yr from pricing table
+    costPerGPUPerYear: 375, // $1,500/node/yr ÷ 4 GPUs per node (18 nodes per 72 GPU system)
     setupCost: 0,
     dependencies: [],
     requiredExpertise: 'basic',
-    notes: 'Enterprise 24/7/365 support, includes MAAS, Observability, Security'
+    notes: 'Enterprise 24/7/365 support, includes MAAS, Observability, Security ($1,500/node/yr)'
   },
   
   'ubuntu-pro-infra': {
@@ -82,11 +82,11 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     vendor: 'Canonical',
     category: 'infrastructure',
     licensingModel: 'subscription',
-    costPerGPUPerYear: 750, // $750/node/yr from pricing table
+    costPerGPUPerYear: 188, // $750/node/yr ÷ 4 GPUs per node (18 nodes per 72 GPU system)
     setupCost: 0,
     dependencies: [],
     requiredExpertise: 'basic',
-    notes: '24/7/365 infrastructure focus support'
+    notes: '24/7/365 infrastructure focus support ($750/node/yr)'
   },
   
   'canonical-maas': {
@@ -194,11 +194,11 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     vendor: 'Canonical',
     category: 'orchestration',
     licensingModel: 'subscription',
-    costPerGPUPerYear: 750, // $750/node/yr from pricing table
+    costPerGPUPerYear: 188, // $750/node/yr ÷ 4 GPUs per node (18 nodes per 72 GPU system)
     setupCost: 0,
     dependencies: [],
     requiredExpertise: 'intermediate',
-    notes: '24/7 support, closest to upstream, NVIDIA validated'
+    notes: '24/7 support, closest to upstream, NVIDIA validated ($750/node/yr)'
   },
   
   'spectro-palette': {
@@ -426,11 +426,11 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     vendor: 'Canonical',
     category: 'mlops',
     licensingModel: 'subscription',
-    costPerGPUPerYear: 1000, // $1,000/node/yr from pricing table
+    costPerGPUPerYear: 250, // $1,000/node/yr ÷ 4 GPUs per node (18 nodes per 72 GPU system)
     setupCost: 0,
     dependencies: ['kubeflow'],
     requiredExpertise: 'intermediate',
-    notes: '24/7 support via Canonical'
+    notes: '24/7 support via Canonical ($1,000/node/yr)'
   },
   
   'mlflow': {
@@ -452,11 +452,11 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     vendor: 'Canonical',
     category: 'mlops',
     licensingModel: 'subscription',
-    costPerGPUPerYear: 500, // $500/node/yr from pricing table
+    costPerGPUPerYear: 125, // $500/node/yr ÷ 4 GPUs per node (18 nodes per 72 GPU system)
     setupCost: 0,
     dependencies: ['mlflow'],
     requiredExpertise: 'basic',
-    notes: '24/7 support via Canonical'
+    notes: '24/7 support via Canonical ($500/node/yr)'
   },
   
   'wandb': {
@@ -635,7 +635,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'dcgm',
       'vault'
     ],
-    totalCostPerGPU: 8750, // Based on pricing table optimal config
+    totalCostPerGPU: 4313, // Corrected: Ubuntu Pro (375) + K8s (188) + NVIDIA AI Enterprise (3500) + MLOps (375)
     requiredFTEs: 2,
     deploymentTime: '1-2 days',
     maturityLevel: 'production',
@@ -659,7 +659,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'mlflow',
       'vault'
     ],
-    totalCostPerGPU: 6000, // Updated with accurate pricing
+    totalCostPerGPU: 3876, // Corrected: Ubuntu Pro Infra (188) + K8s (188) + NVIDIA AI Enterprise (3500)
     requiredFTEs: 2.5,
     deploymentTime: '1-2 days',
     maturityLevel: 'production',
