@@ -10,6 +10,7 @@ import { calculateStackCost } from '../data/softwareStacks';
 import { CalculatorTabRedesigned } from './tabs/CalculatorTabRedesigned';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
 import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhanced';
+import { SoftwareStackTab } from './tabs/SoftwareStackTab';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
@@ -438,7 +439,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       { name: '└─ Transceivers', unit: `$${networkFabrics[fabricType].transceiverPrice}/unit`, qty: network.counts.transceivers.toLocaleString(), total: network.costs.transceivers, pct: (network.costs.transceivers/totalCapex*100).toFixed(1) },
       { name: 'Data Center Infrastructure', unit: '$10M/MW', qty: `${totalPowerMW.toFixed(1)} MW`, total: datacenterCapex, pct: (datacenterCapex/totalCapex*100).toFixed(1) },
       { name: 'Cooling Infrastructure', unit: `$${coolingType === 'liquid' ? '400' : '300'}/kW`, qty: `${(gpuPowerMW*1000).toFixed(0)} kW`, total: coolingCapex, pct: (coolingCapex/totalCapex*100).toFixed(1) },
-      { name: 'Software & Licensing Setup', unit: `$${formatNumber(stackCost.upfrontCost / actualGPUs)}/GPU`, qty: actualGPUs.toLocaleString(), total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
+      { name: 'Software & Licensing Setup', unit: `${formatNumber(stackCost.upfrontCost / actualGPUs)}/GPU`, qty: actualGPUs.toLocaleString(), total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
     ];
     
     if (dpuCapex > 0) {
@@ -452,7 +453,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     }
     
     const opexBreakdown = [
-      { name: 'Power Consumption', amount: annualPowerCost, pct: (annualPowerCost/annualOpex*100).toFixed(1), notes: `${totalPowerMW.toFixed(1)} MW @ $${regionData.rate}/kWh` },
+      { name: 'Power Consumption', amount: annualPowerCost, pct: (annualPowerCost/annualOpex*100).toFixed(1), notes: `${totalPowerMW.toFixed(1)} MW @ ${formatNumber(regionData.rate)}/kWh` },
       { name: 'Cooling Operations', amount: annualCoolingOpex, pct: (annualCoolingOpex/annualOpex*100).toFixed(1), notes: `${coolingType.charAt(0).toUpperCase() + coolingType.slice(1)} cooling` },
       { name: 'Staff & Personnel', amount: annualStaff, pct: (annualStaff/annualOpex*100).toFixed(1), notes: `${Math.ceil(gpuPowerMW / 2)} DC + ${Math.ceil(actualGPUs / 5000)} GPU engineers` },
       { name: 'Hardware Maintenance', amount: annualMaintenance, pct: (annualMaintenance/annualOpex*100).toFixed(1), notes: `${maintenancePercent}% of hardware CAPEX` },
@@ -498,6 +499,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'calculator', label: 'Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
+    { id: 'software', label: 'Software Stack', icon: <Cpu className="w-4 h-4" /> },
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
     { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> },
@@ -654,6 +656,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'storage' && (
               <StorageTabProductionEnhanced config={config} results={results} />
+            )}
+            
+            {activeTab === 'software' && (
+              <SoftwareStackTab config={config} results={results} formatNumber={formatNumber} />
             )}
             
             {activeTab === 'cooling' && (

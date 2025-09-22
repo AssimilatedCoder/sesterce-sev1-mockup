@@ -518,7 +518,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
   'bytplus-integrated': {
     id: 'bytplus-integrated',
     name: 'BytePlus Integrated Platform',
-    description: 'Fully integrated European solution',
+    description: 'ByteDance integrated platform (Chinese vendor - compliance limitations)',
     targetScale: 'large',
     components: [
       'bytplus',
@@ -530,7 +530,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
     deploymentTime: '4-8 hours',
     maturityLevel: 'stable',
     vendorLockIn: 'medium',
-    complianceSupport: ['SecNumCloud', 'GDPR', 'SOC2']
+    complianceSupport: [] // ByteDance/TikTok - Chinese company, NOT suitable for European compliance
   },
   
   'opensource-optimized': {
@@ -597,7 +597,8 @@ export function recommendStack(requirements: {
 }): string {
   // Compliance-driven selection
   if (requirements.complianceRequirements.includes('SecNumCloud')) {
-    return 'bytplus-integrated';
+    // SecNumCloud requires European digital sovereignty - exclude Chinese vendors
+    return 'hybrid-balanced'; // European-friendly stack with Canonical/SUSE
   }
   
   // Budget-driven selection
