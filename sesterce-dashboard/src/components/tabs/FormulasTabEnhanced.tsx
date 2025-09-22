@@ -295,6 +295,96 @@ export const FormulasTabEnhanced: React.FC = () => {
           <li>• All formulas cross-validated with real-world deployment data</li>
         </ul>
       </div>
+
+      {/* Software Stack Selection and Cost Optimization */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-indigo-500">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Software Stack Selection & Optimization</h2>
+        
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Stack Selection Algorithm</h3>
+            <div className="font-mono text-sm text-gray-700">
+              <div>{"// Decision tree for intelligent stack selection"}</div>
+              <div className="mt-2">{"function recommendSoftwareStack(requirements) {"}</div>
+              <div>{"  if (requirements.compliance.includes('SecNumCloud')) {"}</div>
+              <div>{"    return bytePlusStack; // European compliance"}</div>
+              <div>{"  }"}</div>
+              <div className="mt-2">{"  if (budget === 'low' && expertise === 'advanced') {"}</div>
+              <div>{"    return hybridOpenSourceStack; // Cost optimized"}</div>
+              <div>{"  }"}</div>
+              <div className="mt-2">{"  if (supportNeeds === 'enterprise') {"}</div>
+              <div>{"    if (vendorPreference === 'nvidia') {"}</div>
+              <div>{"      return nvidiaStack; // Performance optimized"}</div>
+              <div>{"    }"}</div>
+              <div>{"    return enterpriseStack; // Full support"}</div>
+              <div>{"  }"}</div>
+              <div>{"  // Default based on scale"}</div>
+              <div>{"  return gpuCount > 10000 ? omniaStack : hybridStack;"}</div>
+              <div>{"}"}</div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Software Stack Cost Calculation</h3>
+            <div className="font-mono text-sm text-gray-700">
+              <div>{"// Calculate total cost of ownership for software stack"}</div>
+              <div>upfront_cost = Σ(component.setupCost)</div>
+              <div>annual_licensing = Σ(component.costPerGPU × gpuCount)</div>
+              <div>annual_support = Σ(component.supportCost)</div>
+              <div>annual_operational = requiredFTEs × $150,000</div>
+              <div className="mt-2">total_annual_cost = annual_licensing + annual_support + annual_operational</div>
+              <div>three_year_tco = upfront_cost + (total_annual_cost × 3)</div>
+              <div>five_year_tco = upfront_cost + (total_annual_cost × 5)</div>
+              <div>cost_per_gpu_per_year = total_annual_cost / gpuCount</div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Stack Optimization Trade-offs</h3>
+            <div className="font-mono text-sm text-gray-700">
+              <div>{"// Analyze cost-benefit trade-offs"}</div>
+              <div>{"function analyzeTradeoffs(currentStack, alternatives) {"}</div>
+              <div>{"  for (const alt of alternatives) {"}</div>
+              <div>{"    additionalCost = alt.cost - currentStack.cost;"}</div>
+              <div>{"    benefits = calculateBenefits(alt, currentStack);"}</div>
+              <div>{"    roi = benefits.value / additionalCost;"}</div>
+              <div className="mt-2">{"    if (roi > 1.5) {"}</div>
+              <div>{"      recommendations.push({"}</div>
+              <div>{"        alternative: alt.name,"}</div>
+              <div>{"        additionalCost: additionalCost,"}</div>
+              <div>{"        roi: roi,"}</div>
+              <div>{"        recommendation: roi > 2 ? 'strongly consider' : 'consider'"}</div>
+              <div>{"      });"}</div>
+              <div>{"    }"}</div>
+              <div>{"  }"}</div>
+              <div>{"}"}</div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Pre-defined Stack Options</h3>
+            <div className="space-y-2 text-sm">
+              <div><strong>Dell Omnia Enterprise:</strong> $3,989/GPU/year - Open source focused, Dell optimized</div>
+              <div><strong>NVIDIA-Centric Performance:</strong> $5,667/GPU/year - Maximum performance, full support</div>
+              <div><strong>BytePlus Integrated:</strong> €3,934/GPU/year - Turnkey solution, EU compliance</div>
+              <div><strong>Hybrid Open-Source:</strong> $65/GPU/year - Cost optimized, requires expertise</div>
+              <div><strong>Full Enterprise:</strong> $8,358/GPU/year - Maximum support, all components</div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded border border-blue-200">
+            <h3 className="font-semibold mb-2 text-blue-900">Key Considerations</h3>
+            <ul className="list-disc list-inside text-sm space-y-1 text-blue-800">
+              <li>Software costs scale linearly with GPU count</li>
+              <li>Open source requires 2-4x more FTE engineers</li>
+              <li>Enterprise stacks include 24x7 support SLAs</li>
+              <li>Compliance requirements may limit options</li>
+              <li>Multi-tenancy adds $500-1000/GPU/year</li>
+              <li>GPU utilization improvements can justify higher costs</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

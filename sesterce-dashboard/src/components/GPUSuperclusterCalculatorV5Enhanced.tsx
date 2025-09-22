@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Cpu, HardDrive, Network, Thermometer,
-  FileText, BookOpen
+  FileText, BookOpen, Code
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
@@ -14,7 +14,10 @@ import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
+import { SoftwareStackTab } from './tabs/SoftwareStackTab';
 import { formatNumber } from '../utils/formatters';
+import { BudgetLevel, ExpertiseLevel, SupportLevel } from '../types/softwareStack';
+import { recommendSoftwareStack, calculateStackCosts, optimizeStackSelection } from '../utils/softwareStackSelector';
 
 // Region rates with more comprehensive data
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
@@ -125,6 +128,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     'ceph-hdd': 20
   });
   const [storagePreset, setStoragePreset] = useState('vast-ceph-optimal');
+  
+  // Software stack configuration state
+  const [swBudget, setSwBudget] = useState<BudgetLevel>('medium');
+  const [swExpertise, setSwExpertise] = useState<ExpertiseLevel>('intermediate');
+  const [swSupportNeeds, setSwSupportNeeds] = useState<SupportLevel>('business');
+  const [swMultiTenancy, setSwMultiTenancy] = useState(false);
+  const [swCompliance, setSwCompliance] = useState(false);
+  const [swStack, setSwStack] = useState('auto');
   
   // Results state
   const [results, setResults] = useState<any>(null);
@@ -375,8 +386,26 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     // Data center infrastructure
     const datacenterCapex = totalPowerMW * 10000000; // $10M/MW
     
-    // Software and licensing
-    const softwareCapex = actualGPUs * 6500; // $6,500/GPU (for actual GPUs)
+    // Software stack selection and costs
+    const stackRequirements = {
+      gpuCount: actualGPUs,
+      budget: swBudget,
+      expertise: swExpertise,
+      supportNeeds: swSupportNeeds,
+      complianceRequirements: swCompliance ? ['SecNumCloud'] : [],
+      primaryUseCase: workloadTraining > 50 ? 'training' as const : 
+                     workloadInference > 50 ? 'inference' as const : 'mixed' as const,
+      multiTenancy: swMultiTenancy,
+      vendorPreference: 'nvidia' as const
+    };
+    
+    const selectedStack = swStack === 'auto' 
+      ? recommendSoftwareStack(stackRequirements)
+      : require('../data/softwareStackData').softwareStacks[swStack];
+    
+    const stackCosts = calculateStackCosts(selectedStack, actualGPUs);
+    const softwareCapex = stackCosts.upfrontCost;
+    const softwareOpex = stackCosts.totalAnnualCost;
     
     // Total CAPEX
     const totalCapex = gpuCapex + storage.total + network.total + coolingCapex + 
@@ -387,11 +416,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const annualStaff = (Math.ceil(gpuPowerMW / 2) * 166000 + Math.ceil(actualGPUs / 5000) * 200000) * staffMultiplier;
     const annualMaintenance = (gpuCapex + network.total + storage.total) * (maintenancePercent / 100);
     const annualBandwidth = actualGPUs * 600; // $600/GPU/year (for actual GPUs)
-    const annualLicenses = actualGPUs * 500; // $500/GPU/year (for actual GPUs)
     const storageOpex = totalStorage * 1000000 * 0.015 * 12; // $0.015/GB/month
     
     const annualOpex = annualPowerCost + annualCoolingOpex + annualStaff + 
-                      annualMaintenance + annualBandwidth + annualLicenses + storageOpex;
+                      annualMaintenance + annualBandwidth + softwareOpex + storageOpex;
     
     // Cost per GPU hour (based on actual GPUs)
     const annualGpuHours = actualGPUs * 8760 * (utilization / 100);
@@ -423,7 +451,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       { name: '└─ Transceivers', unit: `$${networkFabrics[fabricType].transceiverPrice}/unit`, qty: network.counts.transceivers.toLocaleString(), total: network.costs.transceivers, pct: (network.costs.transceivers/totalCapex*100).toFixed(1) },
       { name: 'Data Center Infrastructure', unit: '$10M/MW', qty: `${totalPowerMW.toFixed(1)} MW`, total: datacenterCapex, pct: (datacenterCapex/totalCapex*100).toFixed(1) },
       { name: 'Cooling Infrastructure', unit: `$${coolingType === 'liquid' ? '400' : '300'}/kW`, qty: `${(gpuPowerMW*1000).toFixed(0)} kW`, total: coolingCapex, pct: (coolingCapex/totalCapex*100).toFixed(1) },
-      { name: 'Software & Licensing', unit: '$6,500/GPU', qty: actualGPUs.toLocaleString(), total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
+      { name: 'Software Stack Setup', unit: selectedStack.name, qty: `${selectedStack.components.length} components`, total: softwareCapex, pct: (softwareCapex/totalCapex*100).toFixed(1) }
     ];
     
     if (dpuCapex > 0) {
@@ -443,7 +471,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       { name: 'Hardware Maintenance', amount: annualMaintenance, pct: (annualMaintenance/annualOpex*100).toFixed(1), notes: `${maintenancePercent}% of hardware CAPEX` },
       { name: 'Storage Operations', amount: storageOpex, pct: (storageOpex/annualOpex*100).toFixed(1), notes: `$0.015/GB/month` },
       { name: 'Network Bandwidth', amount: annualBandwidth, pct: (annualBandwidth/annualOpex*100).toFixed(1), notes: '$600/GPU/year' },
-      { name: 'Software Licenses', amount: annualLicenses, pct: (annualLicenses/annualOpex*100).toFixed(1), notes: '$500/GPU/year' }
+      { name: 'Software Stack', amount: softwareOpex, pct: (softwareOpex/annualOpex*100).toFixed(1), notes: `${selectedStack.name} - ${selectedStack.requiredFTEs} FTEs` }
     ];
     
     setResults({
@@ -459,6 +487,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       opexBreakdown,
       storage,
       network,
+      softwareStack: {
+        selected: selectedStack,
+        costs: stackCosts,
+        requirements: stackRequirements
+      },
       details: {
         numRacks,
         numSwitches: network.counts.totalSwitches,
@@ -480,6 +513,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'calculator', label: 'Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
+    { id: 'software', label: 'Software Stack', icon: <Code className="w-4 h-4" /> },
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
     { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> },
@@ -522,7 +556,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     tenantSmall,
     selectedStorageTiers,
     storageTierDistribution,
-    storagePreset
+    storagePreset,
+    swBudget,
+    swExpertise,
+    swSupportNeeds,
+    swMultiTenancy,
+    swCompliance,
+    swStack
   };
 
   return (
@@ -613,6 +653,12 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 setSelectedStorageTiers={setSelectedStorageTiers}
                 setStorageTierDistribution={setStorageTierDistribution}
                 setStoragePreset={setStoragePreset}
+                setSwBudget={setSwBudget}
+                setSwExpertise={setSwExpertise}
+                setSwSupportNeeds={setSwSupportNeeds}
+                setSwMultiTenancy={setSwMultiTenancy}
+                setSwCompliance={setSwCompliance}
+                setSwStack={setSwStack}
                 coolingRequired={coolingRequired}
                 calculate={calculate}
                 results={results}
@@ -626,6 +672,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'storage' && (
               <StorageTabProductionEnhanced config={config} results={results} />
+            )}
+            
+            {activeTab === 'software' && (
+              <SoftwareStackTab results={results} />
             )}
             
             {activeTab === 'cooling' && (

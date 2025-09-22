@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Zap, AlertTriangle, Network, HardDrive, Settings,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, Code, Users, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
+import { softwareStacks } from '../../data/softwareStackData';
+import { 
+  StackRequirements, 
+  BudgetLevel, 
+  ExpertiseLevel, 
+  SupportLevel 
+} from '../../types/softwareStack';
+import { recommendSoftwareStack, calculateStackCosts } from '../../utils/softwareStackSelector';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -44,6 +52,13 @@ interface CalculatorTabRedesignedProps {
   setSelectedStorageTiers: (value: string[]) => void;
   setStorageTierDistribution: (value: Record<string, number>) => void;
   setStoragePreset: (value: string) => void;
+  // Software stack props
+  setSwBudget: (value: BudgetLevel) => void;
+  setSwExpertise: (value: ExpertiseLevel) => void;
+  setSwSupportNeeds: (value: SupportLevel) => void;
+  setSwMultiTenancy: (value: boolean) => void;
+  setSwCompliance: (value: boolean) => void;
+  setSwStack: (value: string) => void;
   coolingRequired: boolean;
   calculate: () => void;
   results: any;
@@ -95,6 +110,12 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   setSelectedStorageTiers,
   setStorageTierDistribution,
   setStoragePreset,
+  setSwBudget,
+  setSwExpertise,
+  setSwSupportNeeds,
+  setSwMultiTenancy,
+  setSwCompliance,
+  setSwStack,
   coolingRequired,
   calculate,
   results,
@@ -861,6 +882,126 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             </div>
           </div>
         )}
+      </div>
+
+      {/* Software Stack Configuration */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Code className="w-4 h-4 text-indigo-500" />
+          Software Stack Selection
+        </h3>
+        
+        <div className="space-y-4">
+          {/* Stack Requirements */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Budget Level</label>
+              <select 
+                value={config.swBudget || 'medium'}
+                onChange={(e) => setSwBudget(e.target.value as BudgetLevel)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="low">Low (Cost-Optimized)</option>
+                <option value="medium">Medium (Balanced)</option>
+                <option value="high">High (Performance)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Team Expertise</label>
+              <select 
+                value={config.swExpertise || 'intermediate'}
+                onChange={(e) => setSwExpertise(e.target.value as ExpertiseLevel)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="basic">Basic (GUI Preferred)</option>
+                <option value="intermediate">Intermediate (Mixed)</option>
+                <option value="advanced">Advanced (CLI Expert)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Support Needs</label>
+              <select 
+                value={config.swSupportNeeds || 'business'}
+                onChange={(e) => setSwSupportNeeds(e.target.value as SupportLevel)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="community">Community (Best Effort)</option>
+                <option value="business">Business (8x5 Support)</option>
+                <option value="enterprise">Enterprise (24x7 SLA)</option>
+              </select>
+            </div>
+          </div>
+          
+          {/* Additional Options */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="multiTenancy"
+                checked={config.swMultiTenancy || false}
+                onChange={(e) => setSwMultiTenancy(e.target.checked)}
+                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <label htmlFor="multiTenancy" className="ml-2 text-sm font-medium text-gray-700">
+                Multi-Tenancy Required
+              </label>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="compliance"
+                checked={config.swCompliance || false}
+                onChange={(e) => setSwCompliance(e.target.checked)}
+                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <label htmlFor="compliance" className="ml-2 text-sm font-medium text-gray-700">
+                Compliance Requirements (SecNumCloud)
+              </label>
+            </div>
+          </div>
+          
+          {/* Stack Selection */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Software Stack</label>
+            <select 
+              value={config.swStack || 'auto'}
+              onChange={(e) => setSwStack(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="auto">Auto-Select (Based on Requirements)</option>
+              <option value="omnia">Dell Omnia Enterprise ($3,989/GPU/yr)</option>
+              <option value="nvidia">NVIDIA-Centric Performance ($5,667/GPU/yr)</option>
+              <option value="byteplus">BytePlus Integrated (€3,934/GPU/yr)</option>
+              <option value="hybrid">Hybrid Open-Source ($65/GPU/yr)</option>
+              <option value="enterprise">Full Enterprise ($8,358/GPU/yr)</option>
+            </select>
+          </div>
+          
+          {/* Stack Details */}
+          {config.swStack && config.swStack !== 'auto' && softwareStacks[config.swStack] && (
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <h4 className="font-semibold text-sm mb-2">{softwareStacks[config.swStack].name}</h4>
+              <p className="text-xs text-gray-600 mb-2">{softwareStacks[config.swStack].description}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="font-medium">Setup Time:</span> {softwareStacks[config.swStack].setupTime}
+                </div>
+                <div>
+                  <span className="font-medium">Required FTEs:</span> {softwareStacks[config.swStack].requiredFTEs}
+                </div>
+                <div>
+                  <span className="font-medium">Cost per GPU:</span> ${softwareStacks[config.swStack].totalCostPerGPU.toLocaleString()}/year
+                </div>
+                <div>
+                  <span className="font-medium">Components:</span> {softwareStacks[config.swStack].components.length}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Calculate Button */}
