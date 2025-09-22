@@ -717,7 +717,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 >
                   {Object.entries(softwareStacks).map(([id, stack]) => (
                     <option key={id} value={id}>
-                      {stack.name} (${stack.totalCostPerGPU}/GPU/yr)
+                      {stack.name} (~${stack.totalCostPerGPU}/GPU equiv/yr)
                     </option>
                   ))}
                 </select>
@@ -834,8 +834,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         <span className="block font-semibold">{formatNumber(stackCost.totalTCO)}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Per GPU/Year:</span>
+                        <span className="text-gray-600">Per GPU Equiv/Year:</span>
                         <span className="block font-semibold">{formatNumber(stackCost.perGPUCost)}</span>
+                        <span className="text-xs text-gray-500">*Canonical priced per-node</span>
                       </div>
                     </div>
                   );

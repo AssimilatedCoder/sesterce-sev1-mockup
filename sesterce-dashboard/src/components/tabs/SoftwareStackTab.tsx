@@ -177,7 +177,10 @@ export const SoftwareStackTab: React.FC<SoftwareStackTabProps> = ({
                   </h4>
                   <div className="text-right">
                     <div className="text-sm font-bold text-gray-900">
-                      {stackCostCalc ? formatNumber(stackCostCalc.perGPUCost) : `~${formatNumber(stack.totalCostPerGPU)}`}/GPU/yr
+                      {stackCostCalc ? formatNumber(stackCostCalc.perGPUCost) : `~${formatNumber(stack.totalCostPerGPU)}`}/GPU equiv/yr
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      *Canonical: per-node pricing
                     </div>
                     <div className="text-xs text-gray-600">
                       {stack.requiredFTEs} FTEs
