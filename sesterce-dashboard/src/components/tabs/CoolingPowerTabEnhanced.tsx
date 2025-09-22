@@ -197,10 +197,10 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-yellow-800 mb-1">Important Notice</h4>
-            <p className="text-sm text-yellow-700">
-              This TCO calculator does not yet include accurate, customer specific, Software Support and/or Licensing costs. 
-              Assumptions used are based on Nvidia references per GPU and can be optimized using alternative SW stacks - e.g. OMNIA, Palette, etc.
+            <h4 className="text-sm font-semibold text-green-800 mb-1">Software Stack Pricing</h4>
+            <p className="text-sm text-green-700">
+              Software stack costs are now fully integrated into the TCO calculation. 
+              Choose from NVIDIA Enterprise, Dell Omnia, Open Source, or Hybrid stacks.
             </p>
           </div>
         </div>

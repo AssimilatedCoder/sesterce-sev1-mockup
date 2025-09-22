@@ -45,10 +45,10 @@ export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhanced
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-yellow-800 mb-1">Important Notice</h4>
-            <p className="text-sm text-yellow-700">
-              This TCO calculator does not yet include accurate, customer specific, Software Support and/or Licensing costs. 
-              Assumptions used are based on Nvidia references per GPU and can be optimized using alternative SW stacks - e.g. OMNIA, Palette, etc.
+            <h4 className="text-sm font-semibold text-green-800 mb-1">Software Stack Pricing</h4>
+            <p className="text-sm text-green-700">
+              Software costs are now calculated dynamically based on your selected stack configuration. 
+              Total software TCO includes licensing, support contracts, and required FTE engineers.
             </p>
           </div>
         </div>

@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Zap, AlertTriangle, Network, HardDrive, Settings,
-  ChevronDown, ChevronUp, Code, Users, DollarSign
+  ChevronDown, ChevronUp, Package, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
 import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
-import { softwareStacks } from '../../data/softwareStackData';
-import { 
-  StackRequirements, 
-  BudgetLevel, 
-  ExpertiseLevel, 
-  SupportLevel 
-} from '../../types/softwareStack';
-import { recommendSoftwareStack, calculateStackCosts } from '../../utils/softwareStackSelector';
+import { softwareStacks, recommendStack, calculateStackCost } from '../../data/softwareStacks';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -53,12 +46,11 @@ interface CalculatorTabRedesignedProps {
   setStorageTierDistribution: (value: Record<string, number>) => void;
   setStoragePreset: (value: string) => void;
   // Software stack props
-  setSwBudget: (value: BudgetLevel) => void;
-  setSwExpertise: (value: ExpertiseLevel) => void;
-  setSwSupportNeeds: (value: SupportLevel) => void;
-  setSwMultiTenancy: (value: boolean) => void;
-  setSwCompliance: (value: boolean) => void;
-  setSwStack: (value: string) => void;
+  setSoftwareStack: (value: string) => void;
+  setSupportTier: (value: 'community' | 'business' | 'enterprise') => void;
+  setBudget: (value: 'low' | 'medium' | 'high' | 'unlimited') => void;
+  setExpertise: (value: 'basic' | 'intermediate' | 'advanced') => void;
+  setComplianceRequirements: (value: string[]) => void;
   coolingRequired: boolean;
   calculate: () => void;
   results: any;
@@ -110,12 +102,11 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   setSelectedStorageTiers,
   setStorageTierDistribution,
   setStoragePreset,
-  setSwBudget,
-  setSwExpertise,
-  setSwSupportNeeds,
-  setSwMultiTenancy,
-  setSwCompliance,
-  setSwStack,
+  setSoftwareStack,
+  setSupportTier,
+  setBudget,
+  setExpertise,
+  setComplianceRequirements,
   coolingRequired,
   calculate,
   results,
@@ -124,6 +115,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   const spec = gpuSpecs[config.gpuModel];
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     storage: true,
+    software: true,
     networking: true,
     advanced: false
   });
@@ -229,10 +221,10 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-yellow-800 mb-1">Important Notice</h4>
-            <p className="text-sm text-yellow-700">
-              This TCO calculator does not yet include accurate, customer specific, Software Support and/or Licensing costs. 
-              Assumptions used are based on Nvidia references per GPU and can be optimized using alternative SW stacks - e.g. OMNIA, Palette, etc.
+            <h4 className="text-sm font-semibold text-green-800 mb-1">Software Stack Pricing</h4>
+            <p className="text-sm text-green-700">
+              This TCO calculator now includes dynamic software stack pricing with multiple pre-configured options. 
+              Select your preferred stack in the Software Stack Configuration section above. Prices reflect real-world licensing costs and FTE requirements.
             </p>
           </div>
         </div>
@@ -702,6 +694,193 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         )}
       </div>
 
+      {/* Software Stack Configuration */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h3 
+          className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
+          onClick={() => toggleSection('software')}
+        >
+          <Package className="w-4 h-4 text-indigo-500" />
+          Software Stack Configuration
+          {expandedSections.software ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+        </h3>
+        
+        {expandedSections.software && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Software Stack</label>
+                <select 
+                  value={config.softwareStack || 'hybrid-balanced'}
+                  onChange={(e) => setSoftwareStack(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  {Object.entries(softwareStacks).map(([id, stack]) => (
+                    <option key={id} value={id}>
+                      {stack.name} (${stack.totalCostPerGPU}/GPU/yr)
+                    </option>
+                  ))}
+                </select>
+                <span className="text-xs text-gray-500 mt-1 block">
+                  {softwareStacks[config.softwareStack || 'hybrid-balanced']?.description}
+                </span>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Support Tier</label>
+                <select 
+                  value={config.supportTier || 'business'}
+                  onChange={(e) => setSupportTier(e.target.value as any)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="community">Community Support (Lowest Cost)</option>
+                  <option value="business">Business Support (Recommended)</option>
+                  <option value="enterprise">Enterprise Support (24/7 SLA)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Budget Priority</label>
+                <select 
+                  value={config.budget || 'medium'}
+                  onChange={(e) => setBudget(e.target.value as any)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="low">Cost Optimized</option>
+                  <option value="medium">Balanced</option>
+                  <option value="high">Performance</option>
+                  <option value="unlimited">Maximum Performance</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Team Expertise</label>
+                <select 
+                  value={config.expertise || 'intermediate'}
+                  onChange={(e) => setExpertise(e.target.value as any)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="basic">Basic (Prefer Managed)</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced (Can Handle OSS)</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Primary Use Case</label>
+                <select 
+                  value={config.primaryUseCase || 'mixed'}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="training">AI Training</option>
+                  <option value="inference">Inference</option>
+                  <option value="mixed">Mixed Workloads</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Compliance Requirements</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {['SOC2', 'HIPAA', 'ISO27001', 'SecNumCloud', 'GDPR', 'FedRAMP', 'PCI-DSS', 'None'].map(compliance => (
+                  <label key={compliance} className="flex items-center text-sm">
+                    <input
+                      type="checkbox"
+                      checked={(config.complianceRequirements || []).includes(compliance)}
+                      onChange={(e) => {
+                        const current = config.complianceRequirements || [];
+                        if (e.target.checked) {
+                          setComplianceRequirements([...current, compliance]);
+                        } else {
+                          setComplianceRequirements(current.filter((c: string) => c !== compliance));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-green-600 focus:ring-green-500 mr-2"
+                    />
+                    {compliance}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Stack Cost Breakdown */}
+            {config.softwareStack && config.numGPUs > 0 && (
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Software Stack Cost Analysis
+                </h4>
+                {(() => {
+                  const stackCost = calculateStackCost(
+                    config.softwareStack || 'hybrid-balanced',
+                    config.numGPUs,
+                    3,
+                    config.supportTier || 'business'
+                  );
+                  return (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      <div>
+                        <span className="text-gray-600">Setup Cost:</span>
+                        <span className="block font-semibold">${formatNumber(stackCost.upfrontCost)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Annual Cost:</span>
+                        <span className="block font-semibold">${formatNumber(stackCost.annualCost)}/yr</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">3-Year TCO:</span>
+                        <span className="block font-semibold">${formatNumber(stackCost.totalTCO)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Per GPU/Year:</span>
+                        <span className="block font-semibold">${formatNumber(stackCost.perGPUCost)}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* Recommended Stack Based on Requirements */}
+            {config.numGPUs > 0 && (
+              <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <h4 className="text-xs font-semibold text-green-800 mb-1 flex items-center gap-2">
+                  <Zap className="w-3 h-3" />
+                  AI-Recommended Stack
+                </h4>
+                {(() => {
+                  const recommended = recommendStack({
+                    gpuCount: config.numGPUs,
+                    budget: config.budget || 'medium',
+                    expertise: config.expertise || 'intermediate',
+                    supportNeeds: config.supportTier || 'business',
+                    complianceRequirements: config.complianceRequirements || [],
+                    primaryUseCase: config.primaryUseCase || 'mixed',
+                    multiTenancy: (config.tenantWhale || 0) + (config.tenantMedium || 0) + (config.tenantSmall || 0) > 0
+                  });
+                  const recommendedStack = softwareStacks[recommended];
+                  return (
+                    <p className="text-xs text-green-700">
+                      Based on your requirements, we recommend: <strong>{recommendedStack.name}</strong>
+                      {config.softwareStack !== recommended && (
+                        <button
+                          onClick={() => setSoftwareStack(recommended)}
+                          className="ml-2 text-green-600 underline hover:text-green-800"
+                        >
+                          Apply Recommendation
+                        </button>
+                      )}
+                    </p>
+                  );
+                })()}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
       {/* Networking Configuration */}
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 
@@ -882,126 +1061,6 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             </div>
           </div>
         )}
-      </div>
-
-      {/* Software Stack Configuration */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <Code className="w-4 h-4 text-indigo-500" />
-          Software Stack Selection
-        </h3>
-        
-        <div className="space-y-4">
-          {/* Stack Requirements */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Budget Level</label>
-              <select 
-                value={config.swBudget || 'medium'}
-                onChange={(e) => setSwBudget(e.target.value as BudgetLevel)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="low">Low (Cost-Optimized)</option>
-                <option value="medium">Medium (Balanced)</option>
-                <option value="high">High (Performance)</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Team Expertise</label>
-              <select 
-                value={config.swExpertise || 'intermediate'}
-                onChange={(e) => setSwExpertise(e.target.value as ExpertiseLevel)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="basic">Basic (GUI Preferred)</option>
-                <option value="intermediate">Intermediate (Mixed)</option>
-                <option value="advanced">Advanced (CLI Expert)</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Support Needs</label>
-              <select 
-                value={config.swSupportNeeds || 'business'}
-                onChange={(e) => setSwSupportNeeds(e.target.value as SupportLevel)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="community">Community (Best Effort)</option>
-                <option value="business">Business (8x5 Support)</option>
-                <option value="enterprise">Enterprise (24x7 SLA)</option>
-              </select>
-            </div>
-          </div>
-          
-          {/* Additional Options */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="multiTenancy"
-                checked={config.swMultiTenancy || false}
-                onChange={(e) => setSwMultiTenancy(e.target.checked)}
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-              />
-              <label htmlFor="multiTenancy" className="ml-2 text-sm font-medium text-gray-700">
-                Multi-Tenancy Required
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="compliance"
-                checked={config.swCompliance || false}
-                onChange={(e) => setSwCompliance(e.target.checked)}
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-              />
-              <label htmlFor="compliance" className="ml-2 text-sm font-medium text-gray-700">
-                Compliance Requirements (SecNumCloud)
-              </label>
-            </div>
-          </div>
-          
-          {/* Stack Selection */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Software Stack</label>
-            <select 
-              value={config.swStack || 'auto'}
-              onChange={(e) => setSwStack(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="auto">Auto-Select (Based on Requirements)</option>
-              <option value="omnia">Dell Omnia Enterprise ($3,989/GPU/yr)</option>
-              <option value="nvidia">NVIDIA-Centric Performance ($5,667/GPU/yr)</option>
-              <option value="byteplus">BytePlus Integrated (€3,934/GPU/yr)</option>
-              <option value="hybrid">Hybrid Open-Source ($65/GPU/yr)</option>
-              <option value="enterprise">Full Enterprise ($8,358/GPU/yr)</option>
-            </select>
-          </div>
-          
-          {/* Stack Details */}
-          {config.swStack && config.swStack !== 'auto' && softwareStacks[config.swStack] && (
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <h4 className="font-semibold text-sm mb-2">{softwareStacks[config.swStack].name}</h4>
-              <p className="text-xs text-gray-600 mb-2">{softwareStacks[config.swStack].description}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="font-medium">Setup Time:</span> {softwareStacks[config.swStack].setupTime}
-                </div>
-                <div>
-                  <span className="font-medium">Required FTEs:</span> {softwareStacks[config.swStack].requiredFTEs}
-                </div>
-                <div>
-                  <span className="font-medium">Cost per GPU:</span> ${softwareStacks[config.swStack].totalCostPerGPU.toLocaleString()}/year
-                </div>
-                <div>
-                  <span className="font-medium">Components:</span> {softwareStacks[config.swStack].components.length}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Calculate Button */}
