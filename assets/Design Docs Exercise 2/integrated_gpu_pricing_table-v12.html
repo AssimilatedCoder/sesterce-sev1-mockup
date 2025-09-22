@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Software Stack Pricing Table - On-Premise Enterprise Edition</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tr:hover {
+            background-color: #f7fafc;
+        }
+        
+        .category-header {
+            background: #f0f4f8;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        .price {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .license-type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .license-perpetual { background: #ddd6fe; color: #6d28d9; }
+        .license-subscription { background: #fed7aa; color: #c2410c; }
+        .license-opensource { background: #bbf7d0; color: #14532d; }
+        .license-freemium { background: #bfdbfe; color: #1e3a8a; }
+        .license-managed { background: #fce7f3; color: #9f1239; }
+        
+        .total-row {
+            background: #e8f5e9;
+            font-weight: bold;
+        }
+        
+        .summary-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        h2 {
+            color: #4a5568;
+            font-size: 1.4em;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="table-container">
+        <h1>GPU Supercluster Software Stack Pricing Matrix - On-Premise Enterprise 24/7 Support</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">Component Category</th>
+                    <th width="18%">Software/Vendor</th>
+                    <th width="12%">License Model</th>
+                    <th width="15%">Annual Price Range</th>
+                    <th width="12%">Per GPU Cost</th>
+                    <th width="28%">Notes & Dependencies</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Infrastructure Automation -->
+                <tr class="category-header">
+                    <td colspan="6">🔧 INFRASTRUCTURE AUTOMATION & PROVISIONING</td>
+                </tr>
+                <tr>
+                    <td rowspan="10">Bare Metal Management</td>
+                    <td>Dell Omnia</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Apache 2.0, Dell support: $50K-200K/yr</td>
+                </tr>
+                <tr>
+                    <td>Canonical MAAS</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$75K/yr</td>
+                    <td>$0-65</td>
+                    <td>Enterprise support via Ubuntu Pro</td>
+                </tr>
+                <tr>
+                    <td>Ubuntu Pro + Support</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$1,500/node/yr</td>
+                    <td>$1,500</td>
+                    <td>24/7/365 enterprise support</td>
+                </tr>
+                <tr>
+                    <td>Ubuntu Pro (Infra-only)</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$750/node/yr</td>
+                    <td>$750</td>
+                    <td>24/7/365, infrastructure focus</td>
+                </tr>
+                <tr>
+                    <td>BytePlus (ByteDance)</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$80K-400K/yr</td>
+                    <td>$70-350</td>
+                    <td>Chinese vendor - sovereignty issues for EU</td>
+                </tr>
+                <tr>
+                    <td>xCAT</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Eclipse Public License</td>
+                </tr>
+                <tr>
+                    <td>Foreman</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Red Hat Satellite: $10K-50K/yr</td>
+                </tr>
+                <tr>
+                    <td>Ironic (OpenStack)</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Apache 2.0</td>
+                </tr>
+                <tr>
+                    <td>Tinkerbell</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>CNCF project</td>
+                </tr>
+                <tr>
+                    <td>Metal3</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Kubernetes-native bare metal</td>
+                </tr>
+                
+                <!-- Configuration Management -->
+                <tr>
+                    <td rowspan="5">Configuration Management</td>
+                    <td>Ansible Tower</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$14K-150K/yr</td>
+                    <td>$12-130</td>
+                    <td>Standard: $14K, Premium: $47K</td>
+                </tr>
+                <tr>
+                    <td>Terraform Cloud</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$20K-200K/yr</td>
+                    <td>$17-174</td>
+                    <td>Team: $20/user/mo, Business: custom</td>
+                </tr>
+                <tr>
+                    <td>Puppet Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$120-200/node/yr</td>
+                    <td>$120-200</td>
+                    <td>Includes compliance features</td>
+                </tr>
+                <tr>
+                    <td>Chef Automate</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$137/node/yr</td>
+                    <td>$137</td>
+                    <td>Progress Chef pricing</td>
+                </tr>
+                <tr>
+                    <td>SaltStack</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE-$100K/yr</td>
+                    <td>$0-87</td>
+                    <td>VMware Aria for enterprise</td>
+                </tr>
+                
+                <!-- Container Orchestration -->
+                <tr class="category-header">
+                    <td colspan="6">☸️ CONTAINER ORCHESTRATION & MANAGEMENT</td>
+                </tr>
+                <tr>
+                    <td rowspan="8">Kubernetes Distribution</td>
+                    <td>Vanilla K8s</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Requires 2-3 FTE (~$300-450K/yr)</td>
+                </tr>
+                <tr>
+                    <td>Canonical Kubernetes</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$750/node/yr</td>
+                    <td>$750</td>
+                    <td>24/7 support, closest to upstream</td>
+                </tr>
+                <tr>
+                    <td>RKE2 (Rancher)</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$100K/yr</td>
+                    <td>$0-87</td>
+                    <td>Rancher Prime: ~$1K/node/yr</td>
+                </tr>
+                <tr>
+                    <td>OpenShift</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500-10K/node/yr</td>
+                    <td>$500-10K</td>
+                    <td>Red Hat enterprise support</td>
+                </tr>
+                <tr>
+                    <td>VMware Tanzu</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$600-3K/node/yr</td>
+                    <td>$600-3K</td>
+                    <td>Part of vSphere suite</td>
+                </tr>
+                <tr>
+                    <td>D2iQ Konvoy</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500-1.5K/node/yr</td>
+                    <td>$500-1,500</td>
+                    <td>On-prem focused K8s</td>
+                </tr>
+                <tr>
+                    <td>Spectro Cloud Palette</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$100K-500K/yr</td>
+                    <td>$87-434</td>
+                    <td>Multi-cluster management</td>
+                </tr>
+                <tr>
+                    <td>K3s</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Lightweight K8s, Rancher/SUSE</td>
+                </tr>
+                
+                <!-- GPU Management -->
+                <tr class="category-header">
+                    <td colspan="6">🎮 GPU MANAGEMENT & SCHEDULING</td>
+                </tr>
+                <tr>
+                    <td rowspan="8">GPU Software Stack</td>
+                    <td>NVIDIA AI Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$3,500-5K/GPU/yr</td>
+                    <td>$3,500-5,000</td>
+                    <td>Required for GB200 support</td>
+                </tr>
+                <tr>
+                    <td>NVIDIA Base Command</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$200K/yr</td>
+                    <td>$0-174</td>
+                    <td>Free up to 8 GPUs/node</td>
+                </tr>
+                <tr>
+                    <td>NVIDIA GPU Operator</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Included in NVAIE</td>
+                </tr>
+                <tr>
+                    <td>Run:ai</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500-1K/GPU/yr</td>
+                    <td>$500-1,000</td>
+                    <td>Advanced GPU scheduling</td>
+                </tr>
+                <tr>
+                    <td>AMD ROCm</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>AMD hardware only</td>
+                </tr>
+                <tr>
+                    <td>Volcano Scheduler</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>K8s native, gang scheduling</td>
+                </tr>
+                <tr>
+                    <td>Apache YuniKorn</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Apache 2.0</td>
+                </tr>
+                <tr>
+                    <td>Kueue</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>K8s SIG project</td>
+                </tr>
+                
+                <!-- MLOps Platform -->
+                <tr class="category-header">
+                    <td colspan="6">🤖 AI/ML OPERATIONS PLATFORM</td>
+                </tr>
+                <tr>
+                    <td rowspan="12">MLOps Stack</td>
+                    <td>Kubeflow (OSS)</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>CNCF project</td>
+                </tr>
+                <tr>
+                    <td>Kubeflow Enterprise Support</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$1,000/node/yr</td>
+                    <td>$1,000</td>
+                    <td>24/7 support via Canonical</td>
+                </tr>
+                <tr>
+                    <td>MLFlow (OSS)</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Databricks project</td>
+                </tr>
+                <tr>
+                    <td>MLFlow Enterprise Support</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500/node/yr</td>
+                    <td>$500</td>
+                    <td>24/7 support via Canonical</td>
+                </tr>
+                <tr>
+                    <td>Apache Spark Support</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500/node/yr</td>
+                    <td>$500</td>
+                    <td>24/7 support via Canonical</td>
+                </tr>
+                <tr>
+                    <td>Weights & Biases</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$200-500/user/mo</td>
+                    <td>Variable</td>
+                    <td>Experiment tracking SaaS</td>
+                </tr>
+                <tr>
+                    <td>Seldon Core</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$300-600/node/yr</td>
+                    <td>$300-600</td>
+                    <td>Model serving</td>
+                </tr>
+                <tr>
+                    <td>DataRobot</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$75K-500K/yr</td>
+                    <td>$65-434</td>
+                    <td>AutoML platform</td>
+                </tr>
+                <tr>
+                    <td>H2O.ai</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$250K/yr</td>
+                    <td>$0-217</td>
+                    <td>AutoML, enterprise features</td>
+                </tr>
+                <tr>
+                    <td>Neptune.ai</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$50-450/user/mo</td>
+                    <td>Variable</td>
+                    <td>Metadata store</td>
+                </tr>
+                <tr>
+                    <td>Valohai</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500-2K/user/mo</td>
+                    <td>Variable</td>
+                    <td>MLOps platform</td>
+                </tr>
+                <tr>
+                    <td>ClearML</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$150K/yr</td>
+                    <td>$0-130</td>
+                    <td>MLOps platform</td>
+                </tr>
+                
+                <!-- Monitoring -->
+                <tr class="category-header">
+                    <td colspan="6">📈 MONITORING & OBSERVABILITY</td>
+                </tr>
+                <tr>
+                    <td rowspan="12">Monitoring Stack</td>
+                    <td>Prometheus + Grafana</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Grafana Enterprise: $50-100/user/mo</td>
+                </tr>
+                <tr>
+                    <td>Canonical Observability Stack</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">Included w/ Ubuntu Pro</td>
+                    <td>$0</td>
+                    <td>Prometheus, Grafana, Loki, Tempo</td>
+                </tr>
+                <tr>
+                    <td>NVIDIA DCGM</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>GPU-specific metrics</td>
+                </tr>
+                <tr>
+                    <td>Datadog</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$1.2K-2.4K/GPU/yr</td>
+                    <td>$1,200-2,400</td>
+                    <td>$100-200/host/month</td>
+                </tr>
+                <tr>
+                    <td>New Relic</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$0.30/GB ingested</td>
+                    <td>$500-1,500</td>
+                    <td>100GB free tier</td>
+                </tr>
+                <tr>
+                    <td>Splunk</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$150-500/GB/day</td>
+                    <td>$1,000-3,000</td>
+                    <td>Volume-based pricing</td>
+                </tr>
+                <tr>
+                    <td>Elastic Stack</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$125/node/mo</td>
+                    <td>$0-1,500</td>
+                    <td>Elasticsearch, Kibana, Beats</td>
+                </tr>
+                <tr>
+                    <td>InfluxDB Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$300/node/yr</td>
+                    <td>$300</td>
+                    <td>Time series, Canonical support</td>
+                </tr>
+                <tr>
+                    <td>Kubecost</td>
+                    <td><span class="license-freemium">Freemium</span></td>
+                    <td class="price">FREE-$50K/yr</td>
+                    <td>$0-43</td>
+                    <td>GPU cost tracking</td>
+                </tr>
+                <tr>
+                    <td>OpenCost</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>CNCF project</td>
+                </tr>
+                <tr>
+                    <td>Dynatrace</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$2.1K-4.2K/GPU/yr</td>
+                    <td>$2,100-4,200</td>
+                    <td>Full-stack observability</td>
+                </tr>
+                <tr>
+                    <td>AppDynamics</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$1.8K-3.6K/GPU/yr</td>
+                    <td>$1,800-3,600</td>
+                    <td>Application performance</td>
+                </tr>
+                
+                <!-- Storage -->
+                <tr class="category-header">
+                    <td colspan="6">💾 STORAGE SYSTEMS</td>
+                </tr>
+                <tr>
+                    <td rowspan="13">Storage Solutions</td>
+                    <td>VAST Data</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$0.01-0.03/GB/mo</td>
+                    <td>$1,000-5,000</td>
+                    <td>~$200/TB/yr</td>
+                </tr>
+                <tr>
+                    <td>DDN EXAScaler</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$150K-1M/yr</td>
+                    <td>$130-870</td>
+                    <td>Based on capacity</td>
+                </tr>
+                <tr>
+                    <td>WekaFS</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$0.02-0.05/GB/mo</td>
+                    <td>$2,000-5,000</td>
+                    <td>Performance tier</td>
+                </tr>
+                <tr>
+                    <td>Ceph (OSS)</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Community version</td>
+                </tr>
+                <tr>
+                    <td>Ceph Enterprise Support</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$750/node/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 support via Canonical</td>
+                </tr>
+                <tr>
+                    <td>Ceph Extra Capacity</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$100/TB/yr</td>
+                    <td>Variable</td>
+                    <td>For capacity >384TB/node</td>
+                </tr>
+                <tr>
+                    <td>Red Hat Ceph Storage</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$1,000-2,000/node/yr</td>
+                    <td>Variable</td>
+                    <td>Red Hat enterprise support</td>
+                </tr>
+                <tr>
+                    <td>GlusterFS</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Red Hat support available</td>
+                </tr>
+                <tr>
+                    <td>NetApp ONTAP</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$100K-500K/yr</td>
+                    <td>$87-434</td>
+                    <td>Enterprise NAS/SAN</td>
+                </tr>
+                <tr>
+                    <td>MinIO Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$10K/node/yr</td>
+                    <td>$100</td>
+                    <td>Object storage</td>
+                </tr>
+                <tr>
+                    <td>Portworx Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$2.5K/node/yr</td>
+                    <td>$2,500</td>
+                    <td>Container-native storage</td>
+                </tr>
+                <tr>
+                    <td>IBM Storage Scale</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500-1.5K/TB/yr</td>
+                    <td>Variable</td>
+                    <td>Formerly GPFS</td>
+                </tr>
+                <tr>
+                    <td>Pure Storage FlashBlade</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$0.02-0.04/GB/mo</td>
+                    <td>$2,000-4,000</td>
+                    <td>All-flash arrays</td>
+                </tr>
+                
+                <!-- Databases -->
+                <tr class="category-header">
+                    <td colspan="6">🗄️ DATABASE & MESSAGING SYSTEMS</td>
+                </tr>
+                <tr>
+                    <td rowspan="10">Database Stack</td>
+                    <td>PostgreSQL Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$600/instance/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 support via Canonical</td>
+                </tr>
+                <tr>
+                    <td>MySQL Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$600/instance/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 HA support via Canonical</td>
+                </tr>
+                <tr>
+                    <td>MongoDB Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$1,000/instance/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 NoSQL support</td>
+                </tr>
+                <tr>
+                    <td>Kafka Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$800/broker/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 streaming support</td>
+                </tr>
+                <tr>
+                    <td>Redis Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$400/instance/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 cache support</td>
+                </tr>
+                <tr>
+                    <td>OpenSearch Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$800/node/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 search support</td>
+                </tr>
+                <tr>
+                    <td>CockroachDB Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$2K/core/yr</td>
+                    <td>Variable</td>
+                    <td>Distributed SQL</td>
+                </tr>
+                <tr>
+                    <td>ScyllaDB Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$50K/node/yr</td>
+                    <td>Variable</td>
+                    <td>NoSQL, Cassandra compatible</td>
+                </tr>
+                <tr>
+                    <td>TiDB Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$3K/node/yr</td>
+                    <td>Variable</td>
+                    <td>MySQL compatible</td>
+                </tr>
+                <tr>
+                    <td>Confluent Platform</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$5K-10K/broker/yr</td>
+                    <td>Variable</td>
+                    <td>Kafka enterprise distribution</td>
+                </tr>
+                
+                <!-- Security & Compliance -->
+                <tr class="category-header">
+                    <td colspan="6">🔒 SECURITY & COMPLIANCE</td>
+                </tr>
+                <tr>
+                    <td rowspan="8">Security Stack</td>
+                    <td>Ubuntu Pro Security</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">Included w/ Ubuntu Pro</td>
+                    <td>$0</td>
+                    <td>FIPS, CIS, DISA-STIG included</td>
+                </tr>
+                <tr>
+                    <td>HashiCorp Vault Enterprise</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$600/instance/yr</td>
+                    <td>Variable</td>
+                    <td>24/7 secrets management</td>
+                </tr>
+                <tr>
+                    <td>Falco</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Runtime security, CNCF</td>
+                </tr>
+                <tr>
+                    <td>Prisma Cloud</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$300/node/yr</td>
+                    <td>$300</td>
+                    <td>Container security, Palo Alto</td>
+                </tr>
+                <tr>
+                    <td>Aqua Security Platform</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$400/node/yr</td>
+                    <td>$400</td>
+                    <td>Cloud native security</td>
+                </tr>
+                <tr>
+                    <td>Sysdig Secure</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$500/node/yr</td>
+                    <td>$500</td>
+                    <td>Runtime security + compliance</td>
+                </tr>
+                <tr>
+                    <td>StackRox (RHACS)</td>
+                    <td><span class="license-subscription">Subscription</span></td>
+                    <td class="price">$350/node/yr</td>
+                    <td>$350</td>
+                    <td>Red Hat K8s security</td>
+                </tr>
+                <tr>
+                    <td>OPA (Open Policy Agent)</td>
+                    <td><span class="license-opensource">Open Source</span></td>
+                    <td class="price">FREE</td>
+                    <td>$0</td>
+                    <td>Policy engine, CNCF</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="table-container" style="margin-top: 30px;">
+        <h2>Optimal On-Premise Enterprise Stack Configuration (1152 GPUs)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Selected Software</th>
+                    <th>Annual Cost</th>
+                    <th>Per GPU Cost</th>
+                    <th>Justification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Base OS</td>
+                    <td>Ubuntu Pro + 24/7 Support</td>
+                    <td>$1.73M</td>
+                    <td>$1,500</td>
+                    <td>Enterprise 24/7/365 support</td>
+                </tr>
+                <tr>
+                    <td>Bare Metal</td>
+                    <td>Canonical MAAS</td>
+                    <td>Included</td>
+                    <td>$0</td>
+                    <td>On-prem bare metal management</td>
+                </tr>
+                <tr>
+                    <td>IaC</td>
+                    <td>Terraform Cloud</td>
+                    <td>$50K-200K</td>
+                    <td>$43-174</td>
+                    <td>On-prem GitOps automation</td>
+                </tr>
+                <tr>
+                    <td>Kubernetes</td>
+                    <td>Canonical Kubernetes</td>
+                    <td>$864K</td>
+                    <td>$750</td>
+                    <td>On-prem K8s, NVIDIA validated</td>
+                </tr>
+                <tr>
+                    <td>GPU Stack</td>
+                    <td>NVIDIA AI Enterprise</td>
+                    <td>$4.0M-5.76M</td>
+                    <td>$3,500-5,000</td>
+                    <td>Required for GB200</td>
+                </tr>
+                <tr>
+                    <td>Scheduler</td>
+                    <td>Volcano + Kueue</td>
+                    <td>FREE</td>
+                    <td>$0</td>
+                    <td>Gang scheduling for AI</td>
+                </tr>
+                <tr>
+                    <td>MLOps</td>
+                    <td>Kubeflow + MLFlow (Enterprise)</td>
+                    <td>$1.73M</td>
+                    <td>$1,500</td>
+                    <td>24/7 support for both</td>
+                </tr>
+                <tr>
+                    <td>Monitoring</td>
+                    <td>Canonical Observability Stack</td>
+                    <td>Included</td>
+                    <td>$0</td>
+                    <td>Included with Ubuntu Pro</td>
+                </tr>
+                <tr>
+                    <td>Storage</td>
+                    <td>Ceph Enterprise + VAST Data</td>
+                    <td>$2.0M-6.0M</td>
+                    <td>$1,750-5,200</td>
+                    <td>Hybrid performance/capacity</td>
+                </tr>
+                <tr>
+                    <td>Databases</td>
+                    <td>PostgreSQL/MongoDB Enterprise</td>
+                    <td>$100K</td>
+                    <td>$87</td>
+                    <td>24/7 support</td>
+                </tr>
+                <tr>
+                    <td>Security</td>
+                    <td>Ubuntu Pro Security + Vault</td>
+                    <td>$50K</td>
+                    <td>$43</td>
+                    <td>FIPS, compliance, secrets</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="2"><strong>TOTAL</strong></td>
+                    <td><strong>$10.5M-16.4M</strong></td>
+                    <td><strong>$9,154-14,254</strong></td>
+                    <td>Full enterprise 24/7 stack</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="table-container" style="margin-top: 30px;">
+        <h2>Stack Comparison Summary (3-Year TCO)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stack Option</th>
+                    <th>Year 1</th>
+                    <th>Year 2</th>
+                    <th>Year 3</th>
+                    <th>Total TCO</th>
+                    <th>Per GPU/Year</th>
+                    <th>Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pure Open-Source</td>
+                    <td>$4.5M</td>
+                    <td>$4.2M</td>
+                    <td>$4.2M</td>
+                    <td>$12.9M</td>
+                    <td>$3,733</td>
+                    <td>On-prem dev/PoC</td>
+                </tr>
+                <tr>
+                    <td>Minimal Enterprise</td>
+                    <td>$6.8M</td>
+                    <td>$6.3M</td>
+                    <td>$6.3M</td>
+                    <td>$19.4M</td>
+                    <td>$5,613</td>
+                    <td>Small on-prem production</td>
+                </tr>
+                <tr>
+                    <td>Canonical Standard</td>
+                    <td>$8.5M</td>
+                    <td>$7.9M</td>
+                    <td>$7.9M</td>
+                    <td>$24.3M</td>
+                    <td>$7,031</td>
+                    <td>Standard datacenter</td>
+                </tr>
+                <tr style="background: #e8f5e9;">
+                    <td><strong>Canonical Enterprise 24/7</strong></td>
+                    <td><strong>$10.5M</strong></td>
+                    <td><strong>$9.8M</strong></td>
+                    <td><strong>$9.8M</strong></td>
+                    <td><strong>$30.1M</strong></td>
+                    <td><strong>$8,710</strong></td>
+                    <td><strong>On-prem mission critical</strong></td>
+                </tr>
+                <tr>
+                    <td>Premium Multi-Vendor</td>
+                    <td>$14.2M</td>
+                    <td>$13.5M</td>
+                    <td>$13.5M</td>
+                    <td>$41.2M</td>
+                    <td>$11,921</td>
+                    <td>Enterprise datacenter</td>
+                </tr>
+                <tr>
+                    <td>Fully Managed</td>
+                    <td>$16.5M</td>
+                    <td>$15.8M</td>
+                    <td>$15.8M</td>
+                    <td>$48.1M</td>
+                    <td>$13,919</td>
+                    <td>Outsourced datacenter ops</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="summary-section">
+        <h2>📊 Key On-Premise Enterprise Insights</h2>
+        <ul>
+            <li><strong>Enterprise 24/7 Support:</strong> Ubuntu Pro at $1,500/node/yr includes MAAS, Observability, Security</li>
+            <li><strong>Infrastructure Focus:</strong> Ubuntu Pro (Infra-only) at $750/node/yr for base infrastructure</li>
+            <li><strong>On-Premise Kubernetes:</strong> Canonical Kubernetes $750/node/yr for 24/7 enterprise support</li>
+            <li><strong>MLOps Enterprise:</strong> Kubeflow $1,000/node, MLFlow $500/node with 24/7 support</li>
+            <li><strong>Storage Enterprise:</strong> Ceph $750/node with support up to 384TB, $100/TB beyond</li>
+            <li><strong>Database Support:</strong> $600-1,000/instance for PostgreSQL, MySQL, MongoDB with 24/7</li>
+            <li><strong>Total Stack Cost:</strong> $9,154-14,254/GPU/year for full on-premise enterprise 24/7 support</li>
+            <li><strong>3-Year TCO:</strong> $30.1M ($8,710/GPU/year) for mission-critical on-premise deployments</li>
+        </ul>
+    </div>
+</body>
+</html>

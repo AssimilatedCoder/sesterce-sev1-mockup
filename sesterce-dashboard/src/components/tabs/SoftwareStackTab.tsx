@@ -16,7 +16,7 @@ export const SoftwareStackTab: React.FC<SoftwareStackTabProps> = ({
   results,
   formatNumber
 }) => {
-  const currentStack = softwareStacks[config.softwareStack || 'hybrid-balanced'];
+  const currentStack = softwareStacks[config.softwareStack || 'canonical-enterprise'];
   const stackCost = results?.details?.softwareStackCost;
 
   return (
@@ -157,7 +157,7 @@ export const SoftwareStackTab: React.FC<SoftwareStackTabProps> = ({
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {Object.entries(softwareStacks).map(([stackId, stack]) => {
-            const isSelected = stackId === (config.softwareStack || 'hybrid-balanced');
+            const isSelected = stackId === (config.softwareStack || 'canonical-enterprise');
             const stackCostCalc = config.numGPUs > 0 ? 
               calculateStackCost(stackId, config.numGPUs, 3, config.supportTier || 'business') : null;
             

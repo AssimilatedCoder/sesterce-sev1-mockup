@@ -36,7 +36,7 @@ export interface SoftwareStack {
 
 // Software Component Catalog
 export const softwareComponents: Record<string, SoftwareComponent> = {
-  // Infrastructure Automation
+  // Infrastructure Automation & OS
   'dell-omnia': {
     id: 'dell-omnia',
     name: 'Dell Omnia',
@@ -63,6 +63,32 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     notes: 'Enterprise support for Omnia deployments'
   },
   
+  'ubuntu-pro-full': {
+    id: 'ubuntu-pro-full',
+    name: 'Ubuntu Pro + 24/7 Support',
+    vendor: 'Canonical',
+    category: 'infrastructure',
+    licensingModel: 'subscription',
+    costPerGPUPerYear: 1500, // $1,500/node/yr from pricing table
+    setupCost: 0,
+    dependencies: [],
+    requiredExpertise: 'basic',
+    notes: 'Enterprise 24/7/365 support, includes MAAS, Observability, Security'
+  },
+  
+  'ubuntu-pro-infra': {
+    id: 'ubuntu-pro-infra',
+    name: 'Ubuntu Pro (Infrastructure)',
+    vendor: 'Canonical',
+    category: 'infrastructure',
+    licensingModel: 'subscription',
+    costPerGPUPerYear: 750, // $750/node/yr from pricing table
+    setupCost: 0,
+    dependencies: [],
+    requiredExpertise: 'basic',
+    notes: '24/7/365 infrastructure focus support'
+  },
+  
   'canonical-maas': {
     id: 'canonical-maas',
     name: 'Canonical MAAS',
@@ -73,12 +99,7 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     setupCost: 0,
     dependencies: [],
     requiredExpertise: 'intermediate',
-    supportTiers: {
-      community: 0,
-      business: 65, // $750/server/year
-      enterprise: 130
-    },
-    notes: 'Free core, Ubuntu Advantage for support'
+    notes: 'Free core, included with Ubuntu Pro'
   },
   
   'bytplus': {
@@ -173,11 +194,11 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     vendor: 'Canonical',
     category: 'orchestration',
     licensingModel: 'subscription',
-    costPerGPUPerYear: 450, // Mid-range estimate
+    costPerGPUPerYear: 750, // $750/node/yr from pricing table
     setupCost: 0,
     dependencies: [],
     requiredExpertise: 'intermediate',
-    notes: 'Ubuntu Advantage pricing'
+    notes: '24/7 support, closest to upstream, NVIDIA validated'
   },
   
   'spectro-palette': {
@@ -317,7 +338,7 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
   // Monitoring & Observability
   'prometheus-grafana': {
     id: 'prometheus-grafana',
-    name: 'Prometheus + Grafana',
+    name: 'Prometheus + Grafana (OSS)',
     vendor: 'CNCF/Grafana Labs',
     category: 'monitoring',
     licensingModel: 'opensource',
@@ -326,6 +347,19 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     dependencies: [],
     requiredExpertise: 'intermediate',
     notes: 'Grafana Enterprise: $50-100/user/mo available'
+  },
+  
+  'canonical-observability': {
+    id: 'canonical-observability',
+    name: 'Canonical Observability Stack',
+    vendor: 'Canonical',
+    category: 'monitoring',
+    licensingModel: 'subscription',
+    costPerGPUPerYear: 0, // Included with Ubuntu Pro
+    setupCost: 0,
+    dependencies: ['ubuntu-pro-full'],
+    requiredExpertise: 'basic',
+    notes: 'Prometheus, Grafana, Loki, Tempo - included with Ubuntu Pro'
   },
   
   'dcgm': {
@@ -375,7 +409,7 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
   // MLOps Platforms
   'kubeflow': {
     id: 'kubeflow',
-    name: 'Kubeflow',
+    name: 'Kubeflow (OSS)',
     vendor: 'Google/CNCF',
     category: 'mlops',
     licensingModel: 'opensource',
@@ -386,9 +420,22 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     notes: 'Apache 2.0, requires K8s expertise'
   },
   
+  'kubeflow-enterprise': {
+    id: 'kubeflow-enterprise',
+    name: 'Kubeflow Enterprise Support',
+    vendor: 'Canonical',
+    category: 'mlops',
+    licensingModel: 'subscription',
+    costPerGPUPerYear: 1000, // $1,000/node/yr from pricing table
+    setupCost: 0,
+    dependencies: ['kubeflow'],
+    requiredExpertise: 'intermediate',
+    notes: '24/7 support via Canonical'
+  },
+  
   'mlflow': {
     id: 'mlflow',
-    name: 'MLflow',
+    name: 'MLflow (OSS)',
     vendor: 'Databricks',
     category: 'mlops',
     licensingModel: 'opensource',
@@ -397,6 +444,19 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     dependencies: [],
     requiredExpertise: 'intermediate',
     notes: 'Apache 2.0, Databricks hosted version available'
+  },
+  
+  'mlflow-enterprise': {
+    id: 'mlflow-enterprise',
+    name: 'MLflow Enterprise Support',
+    vendor: 'Canonical',
+    category: 'mlops',
+    licensingModel: 'subscription',
+    costPerGPUPerYear: 500, // $500/node/yr from pricing table
+    setupCost: 0,
+    dependencies: ['mlflow'],
+    requiredExpertise: 'basic',
+    notes: '24/7 support via Canonical'
   },
   
   'wandb': {
@@ -559,13 +619,37 @@ export const softwareStacks: Record<string, SoftwareStack> = {
     complianceSupport: []
   },
   
+  'canonical-enterprise': {
+    id: 'canonical-enterprise',
+    name: 'Canonical Enterprise 24/7 Stack',
+    description: 'Full enterprise 24/7 support stack based on Ubuntu Pro',
+    targetScale: 'large',
+    components: [
+      'ubuntu-pro-full',
+      'canonical-k8s',
+      'nvidia-ai-enterprise',
+      'volcano',
+      'kubeflow-enterprise',
+      'mlflow-enterprise',
+      'canonical-observability',
+      'dcgm',
+      'vault'
+    ],
+    totalCostPerGPU: 8750, // Based on pricing table optimal config
+    requiredFTEs: 2,
+    deploymentTime: '1-2 days',
+    maturityLevel: 'production',
+    vendorLockIn: 'low',
+    complianceSupport: ['SOC2', 'HIPAA', 'FIPS', 'CIS', 'DISA-STIG']
+  },
+  
   'hybrid-balanced': {
     id: 'hybrid-balanced',
     name: 'Hybrid Balanced Stack',
     description: 'Balance of cost, performance, and support',
     targetScale: 'large',
     components: [
-      'canonical-maas',
+      'ubuntu-pro-infra',
       'canonical-k8s',
       'nvidia-ai-enterprise',
       'volcano',
@@ -575,7 +659,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'mlflow',
       'vault'
     ],
-    totalCostPerGPU: 3650, // Reduced without storage hardware costs
+    totalCostPerGPU: 6000, // Updated with accurate pricing
     requiredFTEs: 2.5,
     deploymentTime: '1-2 days',
     maturityLevel: 'production',
@@ -610,6 +694,11 @@ export function recommendStack(requirements: {
     return 'nvidia-maximum';
   }
   
+  // Enterprise support needs
+  if (requirements.supportNeeds === 'enterprise' && requirements.gpuCount >= 1000) {
+    return 'canonical-enterprise'; // Best enterprise 24/7 support
+  }
+  
   // Vendor preference
   if (requirements.vendorPreference === 'dell') {
     return 'omnia-enterprise';
@@ -629,7 +718,7 @@ export function recommendStack(requirements: {
   }
   
   // Default balanced approach
-  return 'hybrid-balanced';
+  return 'canonical-enterprise';
 }
 
 // Calculate actual costs including dependencies

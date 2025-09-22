@@ -129,7 +129,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [storagePreset, setStoragePreset] = useState('vast-ceph-optimal');
   
   // Software stack configuration state
-  const [softwareStack, setSoftwareStack] = useState('hybrid-balanced');
+  const [softwareStack, setSoftwareStack] = useState('canonical-enterprise');
   const [supportTier, setSupportTier] = useState<'community' | 'business' | 'enterprise'>('business');
   const [budget, setBudget] = useState<'low' | 'medium' | 'high' | 'unlimited'>('medium');
   const [expertise, setExpertise] = useState<'basic' | 'intermediate' | 'advanced'>('intermediate');
