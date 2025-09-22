@@ -753,26 +753,11 @@ export function calculateStackCost(
     const component = softwareComponents[componentId];
     if (!component) return;
     
-    // For per-node pricing (Canonical components), calculate based on nodes, not GPUs
-    let componentAnnualCost;
-    if (['ubuntu-pro-full', 'ubuntu-pro-infra', 'canonical-k8s', 'kubeflow-enterprise', 'mlflow-enterprise', 'canonical-observability'].includes(componentId)) {
-      // These are per-node pricing: calculate nodes first (4 GPUs per node in GB200 NVL72)
-      const nodeCount = Math.ceil(gpuCount / 4);
-      const actualNodeCost = component.costPerGPUPerYear * 4; // Convert back to per-node cost
-      componentAnnualCost = actualNodeCost * nodeCount;
-    } else {
-      // Standard per-GPU pricing
-      componentAnnualCost = component.costPerGPUPerYear * gpuCount;
-    }
+    let componentAnnualCost = component.costPerGPUPerYear * gpuCount;
     
     // Apply support tier pricing if available
     if (component.supportTiers && supportTier !== 'community') {
-      if (['ubuntu-pro-full', 'ubuntu-pro-infra', 'canonical-k8s', 'kubeflow-enterprise', 'mlflow-enterprise'].includes(componentId)) {
-        const nodeCount = Math.ceil(gpuCount / 4);
-        componentAnnualCost = component.supportTiers[supportTier] * 4 * nodeCount; // Per-node tier pricing
-      } else {
-        componentAnnualCost = component.supportTiers[supportTier] * gpuCount; // Per-GPU tier pricing
-      }
+      componentAnnualCost = component.supportTiers[supportTier] * gpuCount;
     }
     
     upfrontCost += component.setupCost;
