@@ -823,19 +823,19 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                       <div>
                         <span className="text-gray-600">Setup Cost:</span>
-                        <span className="block font-semibold">${formatNumber(stackCost.upfrontCost)}</span>
+                        <span className="block font-semibold">{formatNumber(stackCost.upfrontCost)}</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Annual Cost:</span>
-                        <span className="block font-semibold">${formatNumber(stackCost.annualCost)}/yr</span>
+                        <span className="block font-semibold">{formatNumber(stackCost.annualCost)}/yr</span>
                       </div>
                       <div>
                         <span className="text-gray-600">3-Year TCO:</span>
-                        <span className="block font-semibold">${formatNumber(stackCost.totalTCO)}</span>
+                        <span className="block font-semibold">{formatNumber(stackCost.totalTCO)}</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Per GPU/Year:</span>
-                        <span className="block font-semibold">${formatNumber(stackCost.perGPUCost)}</span>
+                        <span className="block font-semibold">{formatNumber(stackCost.perGPUCost)}</span>
                       </div>
                     </div>
                   );
