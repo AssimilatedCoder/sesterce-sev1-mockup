@@ -247,6 +247,7 @@ export const FormulasTabEnhanced: React.FC = () => {
 
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-bold mb-2">Example Stack Costs (1,152 GPUs):</div>
+            <div className="text-red-600 mb-2">NOTE: Storage hardware costs calculated separately in Storage section</div>
             <div>{"// Open Source Optimized:"}</div>
             <div className="ml-4">Software: $0/GPU/yr (OSS licenses)</div>
             <div className="ml-4">FTEs: 4 engineers × $150K = $600K/yr</div>
@@ -255,14 +256,14 @@ export const FormulasTabEnhanced: React.FC = () => {
             <div>{"// Dell Omnia Enterprise:"}</div>
             <div className="ml-4">NVIDIA AI Enterprise: $3,500/GPU/yr</div>
             <div className="ml-4">Dell Support: $174/GPU/yr</div>
-            <div className="ml-4">Other components: ~$126/GPU/yr</div>
+            <div className="ml-4">Other components: ~$26/GPU/yr</div>
             <div className="ml-4">FTEs: 2 engineers × $150K = $300K/yr</div>
-            <div className="ml-4">Total: ~$3,800/GPU/yr</div>
+            <div className="ml-4">Total: ~$3,700/GPU/yr</div>
             <div></div>
             <div>{"// NVIDIA Maximum Performance:"}</div>
-            <div className="ml-4">All components: ~$5,800/GPU/yr</div>
+            <div className="ml-4">All components: ~$3,300/GPU/yr</div>
             <div className="ml-4">FTEs: 3 engineers × $150K = $450K/yr</div>
-            <div className="ml-4">Total: ~$6,200/GPU/yr</div>
+            <div className="ml-4">Total: ~$3,700/GPU/yr</div>
           </div>
         </div>
       </div>

@@ -412,57 +412,23 @@ export const softwareComponents: Record<string, SoftwareComponent> = {
     notes: 'Teams pricing, usage-based'
   },
   
-  // Storage Software
-  'vast-data': {
-    id: 'vast-data',
-    name: 'VAST Data Universal Storage',
-    vendor: 'VAST Data',
+  // Storage Management Software (not storage hardware)
+  'ceph-management': {
+    id: 'ceph-management',
+    name: 'Ceph Management Tools',
+    vendor: 'Canonical/Red Hat',
     category: 'storage',
-    licensingModel: 'subscription',
-    costPerGPUPerYear: 2500, // Based on capacity
-    setupCost: 0,
-    dependencies: [],
-    requiredExpertise: 'intermediate',
-    notes: 'Capacity-based pricing, ~$200/TB/yr'
-  },
-  
-  'weka': {
-    id: 'weka',
-    name: 'WekaFS',
-    vendor: 'WEKA',
-    category: 'storage',
-    licensingModel: 'subscription',
-    costPerGPUPerYear: 3500, // Performance tier
-    setupCost: 50000,
-    dependencies: [],
-    requiredExpertise: 'intermediate',
-    notes: 'Performance tier pricing'
-  },
-  
-  'ddn-exascaler': {
-    id: 'ddn-exascaler',
-    name: 'DDN EXAScaler',
-    vendor: 'DDN',
-    category: 'storage',
-    licensingModel: 'subscription',
-    costPerGPUPerYear: 500, // $575K/1152 GPUs
-    setupCost: 100000,
-    dependencies: [],
-    requiredExpertise: 'intermediate',
-    notes: 'Based on capacity and performance'
-  },
-  
-  'ceph': {
-    id: 'ceph',
-    name: 'Ceph Storage',
-    vendor: 'Ceph Foundation',
-    category: 'storage',
-    licensingModel: 'opensource',
+    licensingModel: 'freemium',
     costPerGPUPerYear: 0,
     setupCost: 0,
     dependencies: [],
     requiredExpertise: 'advanced',
-    notes: 'LGPL, Canonical/Red Hat support available'
+    supportTiers: {
+      community: 0,
+      business: 50, // Canonical support
+      enterprise: 100 // Red Hat support
+    },
+    notes: 'Management and monitoring tools for Ceph clusters'
   },
   
   // Security Components
@@ -515,9 +481,9 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'prometheus-grafana',
       'dcgm',
       'kubeflow',
-      'ceph'
+      'ceph-management'
     ],
-    totalCostPerGPU: 3800,
+    totalCostPerGPU: 3700, // Reduced without storage hardware costs
     requiredFTEs: 2,
     deploymentTime: '2-4 hours',
     maturityLevel: 'production',
@@ -539,10 +505,9 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'run-ai',
       'dcgm',
       'datadog',
-      'wandb',
-      'vast-data'
+      'wandb'
     ],
-    totalCostPerGPU: 6200,
+    totalCostPerGPU: 3700, // Reduced without storage hardware costs
     requiredFTEs: 3,
     deploymentTime: '1-2 days',
     maturityLevel: 'production',
@@ -558,9 +523,9 @@ export const softwareStacks: Record<string, SoftwareStack> = {
     components: [
       'bytplus',
       'nvidia-ai-enterprise',
-      'ceph'
+      'ceph-management'
     ],
-    totalCostPerGPU: 4260,
+    totalCostPerGPU: 3760, // Reduced without storage hardware costs
     requiredFTEs: 1,
     deploymentTime: '4-8 hours',
     maturityLevel: 'stable',
@@ -583,7 +548,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'dcgm',
       'mlflow',
       'kubeflow',
-      'ceph',
+      'ceph-management',
       'falco'
     ],
     totalCostPerGPU: 500,
@@ -608,10 +573,9 @@ export const softwareStacks: Record<string, SoftwareStack> = {
       'dcgm',
       'elastic-stack',
       'mlflow',
-      'weka',
       'vault'
     ],
-    totalCostPerGPU: 4200,
+    totalCostPerGPU: 3650, // Reduced without storage hardware costs
     requiredFTEs: 2.5,
     deploymentTime: '1-2 days',
     maturityLevel: 'production',
