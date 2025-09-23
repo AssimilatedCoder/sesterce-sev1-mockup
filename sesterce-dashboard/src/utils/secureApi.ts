@@ -9,10 +9,15 @@ class SecureApiClient {
     if (baseUrl) {
       this.baseUrl = baseUrl;
     } else {
-      // Always use direct API access for simple server setup
-      // Check if we're on the same host
-      const host = window.location.hostname;
-      this.baseUrl = `http://${host}:7779/api`;
+      // Smart detection: try Nginx proxy first, fallback to direct API
+      if (window.location.port === '3025') {
+        // If accessing on port 3025, try Nginx proxy first
+        this.baseUrl = '/api';
+      } else {
+        // Direct API access for development or when not using Nginx
+        const host = window.location.hostname;
+        this.baseUrl = `http://${host}:7779/api`;
+      }
     }
     this.loadToken();
   }

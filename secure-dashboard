@@ -107,10 +107,13 @@ start_services() {
     # Start API first
     start_api
     
-    # Start Nginx
+    # Start Nginx with proper configuration
     if command -v nginx >/dev/null 2>&1; then
+        # Update the config with correct path
+        sed "s|root /home/ubuntu/Projects/sesterce-sev1-mockup/sesterce-dashboard/build;|root $BUILD_DIR;|g" "$NGINX_CONF" > /tmp/sesterce-dashboard.conf
+        
         # Copy our config to sites-available and enable it
-        sudo cp "$NGINX_CONF" /etc/nginx/sites-available/sesterce-dashboard
+        sudo cp /tmp/sesterce-dashboard.conf /etc/nginx/sites-available/sesterce-dashboard
         sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/sesterce-dashboard
         
         # Remove default site if it exists
@@ -125,10 +128,25 @@ start_services() {
                 sudo systemctl reload nginx
                 echo "✅ Nginx reloaded with secure configuration"
             fi
+            
+            # Verify Nginx is listening on port 3025
+            sleep 2
+            if netstat -tlnp 2>/dev/null | grep -q ":3025.*nginx" || ss -tlnp 2>/dev/null | grep -q ":3025.*nginx"; then
+                echo "✅ Nginx confirmed listening on port 3025"
+            else
+                echo "⚠️  Nginx may not be listening on port 3025"
+                echo "🔍 Checking nginx status..."
+                sudo systemctl status nginx --no-pager -l
+            fi
         else
             echo "❌ Nginx configuration test failed"
+            echo "🔍 Nginx config errors:"
+            sudo nginx -t
             return 1
         fi
+        
+        # Clean up temp file
+        rm -f /tmp/sesterce-dashboard.conf
     else
         echo "❌ Nginx not found. Please install nginx."
         return 1
