@@ -121,6 +121,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
     networking: true,
     advanced: false
   });
+  const [touchedTiers, setTouchedTiers] = useState<string[]>([]);
 
   // Initialize storage configuration
   useEffect(() => {
@@ -326,7 +327,14 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
         {/* Service Tier Distribution (moved here) */}
         <div className="service-tier-distribution mt-4 p-3 bg-gray-100 rounded border border-gray-200">
-          <h4 className="text-xs font-semibold text-gray-800 mb-1">Service Tier Distribution</h4>
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="text-xs font-semibold text-gray-800">Service Tier Distribution</h4>
+            <button
+              type="button"
+              onClick={() => { setTierDistribution({ tier1: 30, tier2: 35, tier3: 25, tier4: 10 }); setTouchedTiers([]); }}
+              className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+            >Reset</button>
+          </div>
           <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of customer types. Total must equal 100%.</p>
           {(() => {
             const items = [
@@ -339,25 +347,43 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             const defaults: any = { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
             const td = config.tierDistribution || defaults;
 
+            const normalizeKeep = (updated: any, keepKey: string) => {
+              const keys = ['tier1','tier2','tier3','tier4'];
+              let total = keys.reduce((s, k) => s + (updated[k] || 0), 0);
+              if (total === 100) return updated;
+              const delta = 100 - total;
+              const otherKeys = keys.filter(k => k !== keepKey);
+              const sumOthers = otherKeys.reduce((s, k) => s + (updated[k] || 0), 0);
+              if (sumOthers <= 0) {
+                const share = delta / otherKeys.length;
+                otherKeys.forEach(k => { updated[k] = Math.max(0, Math.min(100, (updated[k] || 0) + share)); });
+              } else {
+                otherKeys.forEach(k => {
+                  const proportion = (updated[k] || 0) / sumOthers;
+                  updated[k] = Math.max(0, Math.min(100, (updated[k] || 0) + delta * proportion));
+                });
+              }
+              ['tier1','tier2','tier3','tier4'].forEach(k => { updated[k] = Number(Math.max(0, Math.min(100, updated[k] || 0)).toFixed(1)); });
+              return updated;
+            };
+
             const handleChange = (tierId: string, value: number) => {
+              if (!touchedTiers.includes(tierId)) {
+                setTouchedTiers(prev => [...prev, tierId]);
+              }
+              const keys = ['tier1','tier2','tier3','tier4'];
               const current = td;
               const oldValue = (current as any)[tierId] || 0;
               const diff = value - oldValue;
-              const otherKeys = ['tier1','tier2','tier3','tier4'].filter(k => k !== tierId);
-              const sumOthers = otherKeys.reduce((s, k) => s + (current as any)[k], 0);
+              const untouched = keys.filter(k => k !== tierId && !touchedTiers.includes(k));
+              const adjustable = untouched.length > 0 ? untouched : keys.filter(k => k !== tierId);
               const updated: any = { ...current, [tierId]: value };
-              if (sumOthers > 0) {
-                otherKeys.forEach(k => {
-                  const proportion = (current as any)[k] / sumOthers;
-                  updated[k] = Math.max(0, (current as any)[k] - diff * proportion);
-                });
-              }
-              const total = ['tier1','tier2','tier3','tier4'].reduce((s, k) => s + (updated[k] || 0), 0);
-              if (total !== 100 && total > 0) {
-                ['tier1','tier2','tier3','tier4'].forEach(k => { updated[k] = (updated[k] / total) * 100; });
-              }
-              ['tier1','tier2','tier3','tier4'].forEach(k => { updated[k] = Math.max(0, Math.min(100, Number(updated[k].toFixed(1)))); });
-              setTierDistribution(updated);
+              const share = adjustable.length > 0 ? (-diff / adjustable.length) : 0;
+              adjustable.forEach(k => {
+                updated[k] = Math.max(0, Math.min(100, ((current as any)[k] || 0) + share));
+              });
+              const normalized = normalizeKeep(updated, tierId);
+              setTierDistribution(normalized);
             };
 
             return (
