@@ -4,8 +4,17 @@ class SecureApiClient {
   private baseUrl: string;
   private token: string | null = null;
 
-  constructor(baseUrl: string = '/api') {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl?: string) {
+    // Auto-detect API URL based on environment
+    if (baseUrl) {
+      this.baseUrl = baseUrl;
+    } else if (window.location.port === '3025') {
+      // If accessing on port 3025, try Nginx proxy first, fallback to direct
+      this.baseUrl = '/api';
+    } else {
+      // Direct API access for development or simple server
+      this.baseUrl = 'http://localhost:7779/api';
+    }
     this.loadToken();
   }
 

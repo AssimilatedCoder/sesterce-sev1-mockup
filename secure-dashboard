@@ -71,12 +71,25 @@ start_services() {
     
     # Start Nginx
     if command -v nginx >/dev/null 2>&1; then
-        if ! pgrep nginx > /dev/null; then
-            sudo nginx -c "$NGINX_CONF"
-            echo "✅ Nginx started with secure configuration"
+        # Copy our config to sites-available and enable it
+        sudo cp "$NGINX_CONF" /etc/nginx/sites-available/sesterce-dashboard
+        sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/sesterce-dashboard
+        
+        # Remove default site if it exists
+        sudo rm -f /etc/nginx/sites-enabled/default
+        
+        # Test configuration
+        if sudo nginx -t; then
+            if ! pgrep nginx > /dev/null; then
+                sudo systemctl start nginx
+                echo "✅ Nginx started with secure configuration"
+            else
+                sudo systemctl reload nginx
+                echo "✅ Nginx reloaded with secure configuration"
+            fi
         else
-            sudo nginx -s reload -c "$NGINX_CONF"
-            echo "✅ Nginx reloaded with secure configuration"
+            echo "❌ Nginx configuration test failed"
+            return 1
         fi
     else
         echo "❌ Nginx not found. Please install nginx."
@@ -103,9 +116,12 @@ stop_services() {
     stop_api
     
     if pgrep nginx > /dev/null; then
-        sudo nginx -s quit
+        sudo systemctl stop nginx
         echo "✅ Nginx stopped"
     fi
+    
+    # Remove our site configuration
+    sudo rm -f /etc/nginx/sites-enabled/sesterce-dashboard
     
     echo "✅ All services stopped"
 }
