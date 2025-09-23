@@ -25,15 +25,15 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'jwt-secret-key-change-in-production')
 # Secure user database (hashed passwords)
 USERS = {
     'Youssef': {
-        'password_hash': hashlib.sha256('Sesterce2025_SECURE_v2'.encode()).hexdigest(),
+        'password_hash': hashlib.sha256('Y0da!777'.encode()).hexdigest(),
         'role': 'user'
     },
     'Maciej': {
-        'password_hash': hashlib.sha256('PathFinder2025_SECURE_v2'.encode()).hexdigest(),
+        'password_hash': hashlib.sha256('H0th#88!'.encode()).hexdigest(),
         'role': 'user'
     },
     'admin': {
-        'password_hash': hashlib.sha256('Arno7747_SECURE_v2'.encode()).hexdigest(),
+        'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
         'role': 'admin'
     }
 }

@@ -57,10 +57,10 @@
 ```
 
 ### **New Login Credentials**
-**IMPORTANT**: Passwords have been updated for security:
-- **Youssef**: `Sesterce2025_SECURE_v2`
-- **Maciej**: `PathFinder2025_SECURE_v2`
-- **admin**: `Arno7747_SECURE_v2`
+**IMPORTANT**: Passwords have been updated for security (Star Wars themed):
+- **Youssef**: `Y0da!777`
+- **Maciej**: `H0th#88!`
+- **admin**: `Vader@66`
 
 ## 🔍 **SECURITY FEATURES IMPLEMENTED**
 

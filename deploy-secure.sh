@@ -233,9 +233,9 @@ start_services() {
     echo "🛡️  Security: JWT Authentication + Server-side calculations"
     echo ""
     echo "📊 Login with your credentials:"
-    echo "   • Youssef / Sesterce2025_SECURE_v2"
-    echo "   • Maciej / PathFinder2025_SECURE_v2" 
-    echo "   • admin / Arno7747_SECURE_v2"
+    echo "   • Youssef / Y0da!777"
+    echo "   • Maciej / H0th#88!" 
+    echo "   • admin / Vader@66"
     echo ""
     echo "🔐 All passwords are now hashed and secure!"
 }
