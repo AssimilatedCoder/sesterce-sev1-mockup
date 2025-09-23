@@ -61,14 +61,41 @@ else
     echo "✅ React build is up to date"
 fi
 
-# Start API server
-echo "🔒 Starting secure API server..."
+# Start API server (ensure single instance and port free)
+echo "🔒 Ensuring secure API server is running on port 7779..."
 cd "$SCRIPT_DIR"
 source venv/bin/activate
-python calculator-api.py &
-API_PID=$!
-echo $API_PID > api.pid
-echo "✅ API server started on http://localhost:7779 (PID: $API_PID)"
+
+# If something else is holding 7779, stop it
+if ss -tln 2>/dev/null | grep -q ":7779\s"; then
+  echo "⚠️  Port 7779 in use. Attempting to free it..."
+  # Try to kill our prior API instance if tracked
+  if [ -f api.pid ]; then
+    OLD_PID=$(cat api.pid)
+    if kill -0 "$OLD_PID" 2>/dev/null; then
+      kill "$OLD_PID" 2>/dev/null || true
+      sleep 1
+    fi
+    rm -f api.pid
+  fi
+  # If still bound, kill whatever is on the port
+  PIDS=$(ss -tlnp 2>/dev/null | awk '/:7779 / {print $NF}' | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | sort -u)
+  for P in $PIDS; do
+    kill "$P" 2>/dev/null || true
+  done
+  sleep 1
+fi
+
+# Start only if not already listening
+if ! ss -tln 2>/dev/null | grep -q ":7779\s"; then
+  echo "🚀 Starting API on 127.0.0.1:7779..."
+  python calculator-api.py &
+  API_PID=$!
+  echo $API_PID > api.pid
+  echo "✅ API server started on http://localhost:7779 (PID: $API_PID)"
+else
+  echo "✅ API already listening on 127.0.0.1:7779"
+fi
 
 # Start Nginx
 echo "🌐 Starting Nginx web server..."
@@ -106,14 +133,14 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
         
         # CORS headers for API
-        add_header Access-Control-Allow-Origin "http://localhost:3025";
+        add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
         add_header Access-Control-Allow-Headers "Content-Type, Authorization";
         add_header Access-Control-Allow-Credentials true;
         
         # Handle preflight requests
         if (\$request_method = 'OPTIONS') {
-            add_header Access-Control-Allow-Origin "http://localhost:3025";
+            add_header Access-Control-Allow-Origin *;
             add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
             add_header Access-Control-Allow-Headers "Content-Type, Authorization";
             add_header Access-Control-Max-Age 1728000;
@@ -150,21 +177,28 @@ server {
 }
 EOF
 
-# Copy config and start Nginx
+# Copy config and start Nginx (open firewall and ensure correct state)
 sudo cp "$NGINX_CONF" /etc/nginx/sites-available/sesterce-dashboard
 sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/sesterce-dashboard
 
 # Remove default site
 sudo rm -f /etc/nginx/sites-enabled/default
 
+# Open firewall for 3025 (ignore errors if ufw not present)
+if command -v ufw >/dev/null 2>&1; then
+  sudo ufw allow 3025/tcp >/dev/null 2>&1 || true
+fi
+
 # Test configuration
 if sudo nginx -t; then
-    if ! pgrep nginx > /dev/null; then
-        sudo systemctl start nginx
+    # Prefer systemd state to decide
+    if ! systemctl is-active --quiet nginx; then
+        sudo systemctl enable nginx >/dev/null 2>&1 || true
+        sudo systemctl restart nginx || sudo systemctl start nginx
         echo "✅ Nginx started"
     else
-        sudo systemctl reload nginx
-        echo "✅ Nginx reloaded"
+        sudo systemctl restart nginx || sudo systemctl reload nginx
+        echo "✅ Nginx restarted"
     fi
     
     # Verify Nginx is listening
@@ -173,6 +207,8 @@ if sudo nginx -t; then
         echo "✅ Nginx confirmed listening on port 3025"
     else
         echo "⚠️  Warning: Nginx may not be listening on port 3025"
+        echo "🔍 Nginx status:"
+        sudo systemctl status nginx --no-pager -l || true
     fi
 else
     echo "❌ Nginx configuration test failed"
