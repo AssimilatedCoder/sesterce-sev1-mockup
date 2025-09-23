@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 GPU SuperCluster Calculator API
-Secure backend service for TCO calculations
+Secure backend service for TCO calculations with JWT authentication
 """
 
 from flask import Flask, request, jsonify
@@ -9,14 +9,34 @@ from flask_cors import CORS
 import hashlib
 import time
 import os
+import jwt
+from datetime import datetime, timedelta
+from functools import wraps
 
 app = Flask(__name__)
 
 # Configure CORS for your domain only
 CORS(app, origins=['http://localhost:3025', 'https://yourdomain.com'])
 
-# Secret key for API validation (change this!)
-API_SECRET = os.environ.get('CALCULATOR_API_SECRET', 'change-this-secret-key')
+# Secret keys
+API_SECRET = os.environ.get('CALCULATOR_API_SECRET', 'change-this-secret-key-in-production')
+JWT_SECRET = os.environ.get('JWT_SECRET', 'jwt-secret-key-change-in-production')
+
+# Secure user database (hashed passwords)
+USERS = {
+    'Youssef': {
+        'password_hash': hashlib.sha256('Sesterce2025_SECURE_v2'.encode()).hexdigest(),
+        'role': 'user'
+    },
+    'Maciej': {
+        'password_hash': hashlib.sha256('PathFinder2025_SECURE_v2'.encode()).hexdigest(),
+        'role': 'user'
+    },
+    'admin': {
+        'password_hash': hashlib.sha256('Arno7747_SECURE_v2'.encode()).hexdigest(),
+        'role': 'admin'
+    }
+}
 
 # Rate limiting (simple implementation)
 request_times = {}
@@ -33,6 +53,103 @@ def check_rate_limit(client_ip):
     else:
         request_times[client_ip] = [current_time]
     return True
+
+# JWT Authentication functions
+def generate_token(username, role):
+    """Generate JWT token for authenticated user"""
+    payload = {
+        'username': username,
+        'role': role,
+        'exp': datetime.utcnow() + timedelta(hours=24),
+        'iat': datetime.utcnow()
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
+def verify_token(token):
+    """Verify JWT token and return user info"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+def require_auth(f):
+    """Decorator to require authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'error': 'No token provided'}), 401
+        
+        if token.startswith('Bearer '):
+            token = token[7:]
+        
+        user_info = verify_token(token)
+        if not user_info:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+        
+        request.user = user_info
+        return f(*args, **kwargs)
+    return decorated_function
+
+def require_admin(f):
+    """Decorator to require admin role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not hasattr(request, 'user') or request.user.get('role') != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Authentication endpoints
+@app.route('/api/login', methods=['POST'])
+def login():
+    """Secure login endpoint"""
+    client_ip = request.remote_addr
+    
+    # Rate limiting
+    if not check_rate_limit(client_ip):
+        return jsonify({'error': 'Rate limit exceeded. Try again later.'}), 429
+    
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({'error': 'Username and password required'}), 400
+    
+    username = data['username']
+    password = data['password']
+    
+    # Check user exists
+    if username not in USERS:
+        time.sleep(1)  # Prevent timing attacks
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    # Verify password
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    if password_hash != USERS[username]['password_hash']:
+        time.sleep(1)  # Prevent timing attacks
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    # Generate JWT token
+    token = generate_token(username, USERS[username]['role'])
+    
+    return jsonify({
+        'token': token,
+        'username': username,
+        'role': USERS[username]['role'],
+        'expires_in': 86400  # 24 hours
+    })
+
+@app.route('/api/verify', methods=['POST'])
+@require_auth
+def verify_token_endpoint():
+    """Verify token validity"""
+    return jsonify({
+        'valid': True,
+        'username': request.user['username'],
+        'role': request.user['role']
+    })
 
 # GPU specifications (hidden from client)
 GPU_SPECS = {
@@ -110,6 +227,7 @@ def validate_request(data):
     return data['signature'] == expected_sig
 
 @app.route('/api/calculate', methods=['POST'])
+@require_auth
 def calculate():
     # Rate limiting
     client_ip = request.remote_addr
