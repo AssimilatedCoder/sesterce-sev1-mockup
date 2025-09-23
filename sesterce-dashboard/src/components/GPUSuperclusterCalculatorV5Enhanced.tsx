@@ -527,6 +527,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       opexBreakdown,
       storage,
       network,
+      // Individual CAPEX components for breakdown display
+      gpuCapex,
+      networkCapex: network.total,
+      storageCapex: storage.total,
+      coolingCapex,
+      datacenterCapex,
+      softwareCapex,
       details: {
         numRacks,
         numSwitches: network.counts.totalSwitches,

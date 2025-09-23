@@ -170,16 +170,17 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     mandatory: true
   },
 
-  // Enterprise Security Infrastructure
+  // Enterprise Security Infrastructure (Scaled for cluster size)
   {
     id: 'firewalls_perimeter',
-    name: 'Perimeter Firewalls',
+    name: 'Perimeter Firewalls (HA)',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
-    baseCost: 500000, // High-throughput firewalls
-    annualCost: 100000, // Licenses, support
-    description: 'High-performance perimeter firewalls (100G+ throughput)',
-    vendor: 'Palo Alto/Fortinet/Checkpoint',
+    baseCost: 800000, // High-throughput firewalls with HA
+    annualCost: 160000, // Licenses, support (20% annual)
+    scalingFactor: 0.02, // +2% per 10k GPUs for additional throughput
+    description: 'High-performance perimeter firewalls (400G+ throughput, HA pair)',
+    vendor: 'Palo Alto PA-7080/Fortinet FG-6300F/Checkpoint 26000',
     mandatory: true
   },
   {
@@ -187,9 +188,11 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Internal Segmentation Firewalls',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
-    baseCost: 300000,
-    annualCost: 75000,
-    description: 'Internal network segmentation and micro-segmentation',
+    baseCost: 450000, // Multiple internal firewalls
+    annualCost: 90000, // 20% annual maintenance
+    scalingFactor: 0.03, // +3% per 10k GPUs for more segments
+    description: 'Internal network segmentation and micro-segmentation (VM-Series/virtual)',
+    vendor: 'Palo Alto VM-Series/Fortinet FortiGate-VM',
     mandatory: true
   },
   {
@@ -197,10 +200,11 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Deep Packet Inspection (DPI)',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
-    baseCost: 800000,
-    annualCost: 200000,
-    description: 'Network traffic analysis, threat detection, compliance monitoring',
-    vendor: 'Gigamon/Ixia/Netscout',
+    baseCost: 1200000, // High-end DPI appliances
+    annualCost: 300000, // Software licenses, support
+    scalingFactor: 0.05, // +5% per 10k GPUs for traffic volume
+    description: 'Network traffic analysis, threat detection, compliance monitoring (100G+ capacity)',
+    vendor: 'Gigamon GigaVUE/Ixia Vision/Netscout nGeniusONE',
     mandatory: true
   },
   {
@@ -208,34 +212,49 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Intrusion Detection/Prevention',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
-    baseCost: 400000,
-    annualCost: 120000,
-    description: 'Network and host-based intrusion detection and prevention',
-    vendor: 'Snort/Suricata/Splunk',
+    baseCost: 600000, // Enterprise IDS/IPS systems
+    annualCost: 180000, // Signatures, support
+    scalingFactor: 0.04, // +4% per 10k GPUs
+    description: 'Network and host-based intrusion detection and prevention (high-throughput)',
+    vendor: 'Snort3/Suricata/Splunk Attack Analyzer',
     mandatory: true
   },
   {
     id: 'siem_platform',
-    name: 'SIEM Platform',
+    name: 'SIEM Platform (Enterprise)',
+    category: 'security_infrastructure',
+    costModel: 'per_cluster',
+    baseCost: 500000, // SIEM infrastructure
+    annualCost: 800000, // High licensing costs (data ingestion based)
+    scalingFactor: 0.08, // +8% per 10k GPUs (more logs)
+    description: 'Security information and event management platform (enterprise scale)',
+    vendor: 'Splunk Enterprise Security/IBM QRadar/Micro Focus ArcSight',
+    mandatory: true
+  },
+  {
+    id: 'security_orchestration',
+    name: 'SOAR Platform',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
     baseCost: 300000,
-    annualCost: 400000, // High licensing costs
-    description: 'Security information and event management platform',
-    vendor: 'Splunk/QRadar/ArcSight',
+    annualCost: 150000,
+    scalingFactor: 0.02,
+    description: 'Security Orchestration, Automation and Response platform',
+    vendor: 'Phantom/Demisto/Swimlane',
     mandatory: true
   },
 
   // PKI and Certificate Management
   {
     id: 'pki_infrastructure',
-    name: 'PKI Infrastructure',
+    name: 'PKI Infrastructure (Enterprise)',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
-    baseCost: 150000,
-    annualCost: 50000,
-    description: 'Public key infrastructure, certificate authority, HSMs',
-    vendor: 'Entrust/DigiCert/Venafi',
+    baseCost: 250000, // HSMs, CA infrastructure
+    annualCost: 75000, // Maintenance, certificates
+    scalingFactor: 0.01, // +1% per 10k GPUs
+    description: 'Public key infrastructure, certificate authority, HSMs (enterprise grade)',
+    vendor: 'Entrust PKI/DigiCert CertCentral/Venafi TPP',
     mandatory: true
   },
   {
@@ -243,33 +262,37 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Certificate Lifecycle Management',
     category: 'security_infrastructure',
     costModel: 'per_cluster',
-    baseCost: 100000,
-    annualCost: 80000,
-    description: 'Automated certificate provisioning, rotation, monitoring',
-    vendor: 'Venafi/Keyfactor',
+    baseCost: 180000,
+    annualCost: 120000, // High automation licensing
+    scalingFactor: 0.02,
+    description: 'Automated certificate provisioning, rotation, monitoring (enterprise scale)',
+    vendor: 'Venafi Trust Protection Platform/Keyfactor Command',
     mandatory: true
   },
 
-  // Backup and Disaster Recovery
+  // Backup and Disaster Recovery (Scaled for data volume)
   {
     id: 'backup_infrastructure',
-    name: 'Backup Infrastructure',
+    name: 'Enterprise Backup Infrastructure',
     category: 'backup_dr',
     costModel: 'per_cluster',
-    baseCost: 2000000, // Backup appliances, tape libraries
-    annualCost: 400000, // Tape media, cloud storage
-    description: 'Enterprise backup systems, tape libraries, cloud backup',
-    vendor: 'Veeam/Commvault/NetBackup',
+    baseCost: 3000000, // Backup appliances, dedup, tape libraries
+    annualCost: 600000, // Tape media, cloud storage, licenses
+    scalingFactor: 0.15, // +15% per 10k GPUs (more data)
+    description: 'Enterprise backup systems with deduplication, tape libraries, cloud backup',
+    vendor: 'Veeam Backup & Replication/Commvault/Veritas NetBackup',
     mandatory: true
   },
   {
     id: 'disaster_recovery_site',
-    name: 'Disaster Recovery Site',
+    name: 'Disaster Recovery Site (Hot Standby)',
     category: 'backup_dr',
     costModel: 'per_cluster',
-    baseCost: 5000000, // Secondary site setup
-    annualCost: 1000000, // Site operations, replication
-    description: 'Secondary datacenter for disaster recovery and business continuity',
+    baseCost: 8000000, // Secondary site setup (20% of primary)
+    annualCost: 2000000, // Site operations, replication, staff
+    scalingFactor: 0.20, // +20% per 10k GPUs (proportional DR capacity)
+    description: 'Hot standby datacenter for disaster recovery and business continuity',
+    vendor: 'Multi-vendor (mirrors primary site)',
     mandatory: false
   },
   {
@@ -277,33 +300,49 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Backup Network Infrastructure',
     category: 'backup_dr',
     costModel: 'per_cluster',
-    baseCost: 500000,
-    annualCost: 100000,
-    description: 'Dedicated backup network, WAN acceleration, replication links',
+    baseCost: 800000, // Dedicated backup network
+    annualCost: 160000, // WAN links, acceleration appliances
+    scalingFactor: 0.10, // +10% per 10k GPUs (more backup traffic)
+    description: 'Dedicated backup network, WAN acceleration, replication links (10G+ capacity)',
+    vendor: 'Riverbed/Silver Peak/Cisco',
+    mandatory: true
+  },
+  {
+    id: 'backup_storage',
+    name: 'Backup Storage (Disk + Tape)',
+    category: 'backup_dr',
+    costModel: 'per_cluster',
+    baseCost: 1500000, // Backup storage arrays
+    annualCost: 300000, // Storage maintenance, tape media
+    scalingFactor: 0.25, // +25% per 10k GPUs (backup data grows significantly)
+    description: 'Backup storage arrays, tape libraries, long-term retention',
+    vendor: 'Dell EMC Data Domain/HPE StoreOnce/IBM TS4500',
     mandatory: true
   },
 
-  // Cloud Platform Infrastructure
+  // Cloud Platform Infrastructure (Scaled for AI/ML workloads)
   {
     id: 'kafka_cluster',
-    name: 'Apache Kafka Cluster',
+    name: 'Apache Kafka Cluster (HA)',
     category: 'platform_services',
     costModel: 'per_cluster',
-    baseCost: 300000, // Kafka nodes, ZooKeeper
-    annualCost: 150000, // Support, monitoring
-    description: 'Message streaming platform for data pipelines and event processing',
-    vendor: 'Confluent/Apache',
+    baseCost: 500000, // Kafka nodes, ZooKeeper, Schema Registry
+    annualCost: 250000, // Confluent Platform licenses, support
+    scalingFactor: 0.08, // +8% per 10k GPUs (more data streams)
+    description: 'High-throughput message streaming platform for ML data pipelines and event processing',
+    vendor: 'Confluent Platform/Apache Kafka',
     mandatory: true
   },
   {
     id: 'spark_cluster',
-    name: 'Apache Spark Cluster',
+    name: 'Apache Spark Cluster (GPU-enabled)',
     category: 'platform_services',
     costModel: 'per_cluster',
-    baseCost: 400000, // Spark nodes, HDFS storage
-    annualCost: 200000,
-    description: 'Big data processing and analytics platform',
-    vendor: 'Databricks/Apache',
+    baseCost: 800000, // Spark nodes with GPU support, HDFS
+    annualCost: 400000, // Databricks/support licenses
+    scalingFactor: 0.12, // +12% per 10k GPUs (more compute nodes)
+    description: 'GPU-accelerated big data processing and ML training platform',
+    vendor: 'Databricks Runtime ML/Apache Spark with Rapids',
     mandatory: true
   },
   {
@@ -311,67 +350,97 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Elasticsearch/OpenSearch Cluster',
     category: 'platform_services',
     costModel: 'per_cluster',
-    baseCost: 250000,
-    annualCost: 180000,
-    description: 'Search and analytics engine for logs, metrics, and data',
-    vendor: 'Elastic/AWS',
+    baseCost: 400000, // ES cluster with ML features
+    annualCost: 300000, // Elastic Stack licenses
+    scalingFactor: 0.10, // +10% per 10k GPUs (more logs/metrics)
+    description: 'Search and analytics engine for logs, metrics, ML model monitoring',
+    vendor: 'Elastic Stack/OpenSearch with ML Commons',
     mandatory: true
   },
   {
     id: 'redis_cluster',
-    name: 'Redis Cluster',
+    name: 'Redis Enterprise Cluster',
     category: 'platform_services',
     costModel: 'per_cluster',
-    baseCost: 150000,
-    annualCost: 100000,
-    description: 'In-memory data structure store for caching and session management',
-    vendor: 'Redis Labs',
+    baseCost: 300000, // Redis Enterprise with modules
+    annualCost: 200000, // Enterprise licenses
+    scalingFactor: 0.06, // +6% per 10k GPUs (more caching needs)
+    description: 'In-memory data store with ML modules for feature stores and caching',
+    vendor: 'Redis Enterprise with RedisAI/RedisML',
     mandatory: true
   },
   {
     id: 'postgresql_cluster',
-    name: 'PostgreSQL HA Cluster',
+    name: 'PostgreSQL HA Cluster (ML-optimized)',
     category: 'platform_services',
     costModel: 'per_cluster',
-    baseCost: 200000,
-    annualCost: 120000,
-    description: 'High-availability relational database cluster',
-    vendor: 'PostgreSQL/EnterpriseDB',
+    baseCost: 350000, // PostgreSQL with ML extensions
+    annualCost: 210000, // EnterpriseDB licenses, support
+    scalingFactor: 0.04, // +4% per 10k GPUs
+    description: 'High-availability relational database with ML extensions (pgvector, MADlib)',
+    vendor: 'EnterpriseDB/PostgreSQL with ML extensions',
+    mandatory: true
+  },
+  {
+    id: 'mlflow_platform',
+    name: 'MLflow Enterprise Platform',
+    category: 'platform_services',
+    costModel: 'per_cluster',
+    baseCost: 400000, // MLflow tracking, registry, serving
+    annualCost: 300000, // Databricks MLflow licenses
+    scalingFactor: 0.15, // +15% per 10k GPUs (more ML experiments)
+    description: 'ML lifecycle management platform for experiment tracking and model registry',
+    vendor: 'Databricks MLflow/Open Source MLflow',
+    mandatory: true
+  },
+  {
+    id: 'kubeflow_platform',
+    name: 'Kubeflow ML Platform',
+    category: 'platform_services',
+    costModel: 'per_cluster',
+    baseCost: 300000, // Kubeflow pipelines, notebooks
+    annualCost: 150000, // Support, additional components
+    scalingFactor: 0.10, // +10% per 10k GPUs
+    description: 'Kubernetes-native ML platform for pipelines, training, and serving',
+    vendor: 'Google Cloud AI Platform/Open Source Kubeflow',
     mandatory: true
   },
 
-  // Network Management and Orchestration
+  // Network Management and Orchestration (Scaled for cluster complexity)
   {
     id: 'ufm_platform',
-    name: 'UFM (Unified Fabric Manager)',
+    name: 'UFM (Unified Fabric Manager) Enterprise',
     category: 'network_management',
     costModel: 'per_cluster',
-    baseCost: 200000,
-    annualCost: 100000,
-    description: 'InfiniBand fabric management and monitoring platform',
-    vendor: 'NVIDIA/Mellanox',
+    baseCost: 400000, // UFM Enterprise with advanced features
+    annualCost: 200000, // Support, updates
+    scalingFactor: 0.05, // +5% per 10k GPUs (more fabric complexity)
+    description: 'InfiniBand fabric management, monitoring, and optimization platform (enterprise)',
+    vendor: 'NVIDIA UFM Enterprise/Mellanox',
     mandatory: false // Only for InfiniBand deployments
   },
   {
     id: 'netris_platform',
-    name: 'Netris Network Automation',
+    name: 'Netris Network Automation Platform',
     category: 'network_management',
     costModel: 'per_cluster',
-    baseCost: 300000,
-    annualCost: 150000,
-    description: 'Network automation, orchestration, and intent-based networking',
-    vendor: 'Netris',
+    baseCost: 500000, // Netris Controller, agents
+    annualCost: 250000, // Licenses, support
+    scalingFactor: 0.06, // +6% per 10k GPUs (more switches to manage)
+    description: 'Intent-based network automation, orchestration, and self-healing networking',
+    vendor: 'Netris Systems',
     mandatory: false
   },
   {
     id: 'network_monitoring',
-    name: 'Network Monitoring Platform',
+    name: 'Enterprise Network Monitoring',
     category: 'network_management',
     costModel: 'per_cluster',
-    baseCost: 400000,
-    annualCost: 200000,
-    description: 'Comprehensive network monitoring, analytics, and troubleshooting',
-    vendor: 'SolarWinds/PRTG/Datadog',
+    baseCost: 600000, // Comprehensive monitoring stack
+    annualCost: 300000, // Licenses, support
+    scalingFactor: 0.08, // +8% per 10k GPUs (more devices to monitor)
+    description: 'Comprehensive network monitoring, analytics, AI-driven troubleshooting',
+    vendor: 'SolarWinds NPM/Datadog Network Monitoring/ThousandEyes',
     mandatory: true
   },
   {
@@ -379,45 +448,109 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
     name: 'Network Configuration Management',
     category: 'network_management',
     costModel: 'per_cluster',
-    baseCost: 250000,
-    annualCost: 125000,
-    description: 'Automated network configuration, compliance, and change management',
-    vendor: 'Ansible/Napalm/Nornir',
+    baseCost: 400000, // Automation platform
+    annualCost: 200000, // Red Hat Ansible licenses, support
+    scalingFactor: 0.04, // +4% per 10k GPUs
+    description: 'Automated network configuration, compliance, change management, GitOps',
+    vendor: 'Red Hat Ansible Network/Napalm/Nornir',
+    mandatory: true
+  },
+  {
+    id: 'network_security_monitoring',
+    name: 'Network Security Monitoring',
+    category: 'network_management',
+    costModel: 'per_cluster',
+    baseCost: 500000, // NSM platform
+    annualCost: 250000, // Licenses, threat intelligence
+    scalingFactor: 0.06, // +6% per 10k GPUs (more traffic to analyze)
+    description: 'Network security monitoring, threat hunting, traffic analysis',
+    vendor: 'Zeek/Suricata/Security Onion',
+    mandatory: true
+  },
+  {
+    id: 'network_orchestration',
+    name: 'SDN Controller Platform',
+    category: 'network_management',
+    costModel: 'per_cluster',
+    baseCost: 350000, // SDN controllers
+    annualCost: 175000, // Support, licenses
+    scalingFactor: 0.05, // +5% per 10k GPUs
+    description: 'Software-defined networking controllers for dynamic network provisioning',
+    vendor: 'OpenDaylight/ONOS/Cisco ACI',
     mandatory: true
   },
 
-  // Monitoring and Observability
+  // Monitoring and Observability (Enterprise-scale)
   {
     id: 'prometheus_grafana',
-    name: 'Prometheus/Grafana Stack',
+    name: 'Prometheus/Grafana Enterprise Stack',
     category: 'monitoring',
     costModel: 'per_cluster',
-    baseCost: 200000,
-    annualCost: 150000,
-    description: 'Metrics collection, storage, and visualization platform',
-    vendor: 'Grafana Labs',
+    baseCost: 400000, // Enterprise Grafana, HA Prometheus
+    annualCost: 300000, // Grafana Enterprise licenses
+    scalingFactor: 0.10, // +10% per 10k GPUs (more metrics)
+    description: 'Enterprise metrics collection, storage, and visualization platform with HA',
+    vendor: 'Grafana Labs Enterprise/Prometheus HA',
     mandatory: true
   },
   {
     id: 'jaeger_tracing',
-    name: 'Distributed Tracing (Jaeger)',
+    name: 'Distributed Tracing Platform',
     category: 'monitoring',
     costModel: 'per_cluster',
-    baseCost: 100000,
-    annualCost: 75000,
-    description: 'Distributed tracing for microservices and ML pipelines',
-    vendor: 'Jaeger/CNCF',
+    baseCost: 200000, // Jaeger with enterprise storage
+    annualCost: 150000, // Support, storage costs
+    scalingFactor: 0.08, // +8% per 10k GPUs (more traces)
+    description: 'Distributed tracing for microservices, ML pipelines, and GPU workloads',
+    vendor: 'Jaeger/OpenTelemetry/Zipkin',
     mandatory: true
   },
   {
     id: 'alertmanager',
-    name: 'Alert Management Platform',
+    name: 'Enterprise Alert Management',
     category: 'monitoring',
     costModel: 'per_cluster',
-    baseCost: 150000,
-    annualCost: 100000,
-    description: 'Intelligent alerting, escalation, and incident management',
-    vendor: 'PagerDuty/Opsgenie',
+    baseCost: 300000, // PagerDuty/Opsgenie enterprise
+    annualCost: 200000, // Enterprise licenses
+    scalingFactor: 0.04, // +4% per 10k GPUs (more alert sources)
+    description: 'Intelligent alerting, escalation, incident management with ML-driven insights',
+    vendor: 'PagerDuty/Atlassian Opsgenie/Splunk On-Call',
+    mandatory: true
+  },
+  {
+    id: 'apm_platform',
+    name: 'Application Performance Monitoring',
+    category: 'monitoring',
+    costModel: 'per_cluster',
+    baseCost: 350000, // APM platform
+    annualCost: 280000, // Per-host licensing
+    scalingFactor: 0.12, // +12% per 10k GPUs (more applications)
+    description: 'Application performance monitoring for ML workloads and microservices',
+    vendor: 'Datadog APM/New Relic/AppDynamics',
+    mandatory: true
+  },
+  {
+    id: 'log_management',
+    name: 'Centralized Log Management',
+    category: 'monitoring',
+    costModel: 'per_cluster',
+    baseCost: 400000, // Log aggregation platform
+    annualCost: 500000, // Data ingestion costs
+    scalingFactor: 0.15, // +15% per 10k GPUs (exponential log growth)
+    description: 'Centralized log collection, analysis, and retention for compliance',
+    vendor: 'Splunk Enterprise/Elastic Stack/Sumo Logic',
+    mandatory: true
+  },
+  {
+    id: 'gpu_monitoring',
+    name: 'GPU Monitoring & Analytics',
+    category: 'monitoring',
+    costModel: 'per_cluster',
+    baseCost: 250000, // Specialized GPU monitoring
+    annualCost: 125000, // NVIDIA licenses, support
+    scalingFactor: 0.20, // +20% per 10k GPUs (linear with GPU count)
+    description: 'Specialized GPU utilization, memory, and performance monitoring',
+    vendor: 'NVIDIA DCGM/Prometheus GPU Exporter/Run:AI',
     mandatory: true
   }
 ];
