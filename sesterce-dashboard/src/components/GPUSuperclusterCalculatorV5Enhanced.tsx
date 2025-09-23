@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Cpu, HardDrive, Network, Thermometer,
-  FileText, BookOpen, DollarSign
+  FileText, BookOpen, DollarSign, TrendingUp, Package
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
@@ -14,6 +14,8 @@ import { SoftwareStackTab } from './tabs/SoftwareStackTab';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ServicePricingTab } from './tabs/ServicePricingTab';
+import { FinancialAnalyticsTab } from './tabs/FinancialAnalyticsTab';
+import { CapexBreakdownTab } from './tabs/CapexBreakdownTab';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
@@ -547,6 +549,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   const tabs = [
     { id: 'calculator', label: 'Calculator', icon: <Calculator className="w-4 h-4" /> },
+    { id: 'financial', label: 'Revenue & EBITDA', icon: <TrendingUp className="w-4 h-4" /> },
+    { id: 'capex', label: 'Complete CAPEX', icon: <Package className="w-4 h-4" /> },
     { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
     { id: 'pricing', label: 'Service Pricing', icon: <DollarSign className="w-4 h-4" /> },
@@ -704,6 +708,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 results={results}
                 formatNumber={formatNumber}
               />
+            )}
+            
+            {activeTab === 'financial' && (
+              <FinancialAnalyticsTab config={config} results={results} />
+            )}
+            
+            {activeTab === 'capex' && (
+              <CapexBreakdownTab config={config} results={results} />
             )}
             
             {activeTab === 'networking' && (
