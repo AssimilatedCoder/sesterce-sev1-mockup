@@ -9,9 +9,9 @@ BUILD_DIR="$REACT_DIR/build"
 NGINX_CONF="$SCRIPT_DIR/nginx-sesterce-dashboard.conf"
 API_PID_FILE="$SCRIPT_DIR/api.pid"
 
-# Load environment variables
+# Load environment variables (skip comments and empty lines)
 if [ -f "$SCRIPT_DIR/.env" ]; then
-    export $(cat "$SCRIPT_DIR/.env" | xargs)
+    export $(grep -v '^#' "$SCRIPT_DIR/.env" | grep -v '^$' | xargs)
 fi
 
 start_api() {
