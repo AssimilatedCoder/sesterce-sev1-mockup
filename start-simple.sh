@@ -10,7 +10,24 @@ BUILD_DIR="$REACT_DIR/build"
 echo "🚀 Starting Sesterce Calculator (Simple Mode)..."
 
 # Check if build directory exists and is recent
-if [ ! -d "$BUILD_DIR" ] || [ "$REACT_DIR/src" -nt "$BUILD_DIR" ] || [ "$REACT_DIR/package.json" -nt "$BUILD_DIR" ]; then
+# Also check if git has newer commits than the build
+NEEDS_BUILD=false
+
+if [ ! -d "$BUILD_DIR" ]; then
+    echo "🔍 Build directory missing"
+    NEEDS_BUILD=true
+elif [ "$REACT_DIR/src" -nt "$BUILD_DIR" ]; then
+    echo "🔍 Source files newer than build"
+    NEEDS_BUILD=true
+elif [ "$REACT_DIR/package.json" -nt "$BUILD_DIR" ]; then
+    echo "🔍 Package.json newer than build"
+    NEEDS_BUILD=true
+elif [ -d ".git" ] && [ "$(git log -1 --format=%ct)" -gt "$(stat -c %Y "$BUILD_DIR" 2>/dev/null || echo 0)" ]; then
+    echo "🔍 Git commits newer than build"
+    NEEDS_BUILD=true
+fi
+
+if [ "$NEEDS_BUILD" = true ]; then
     echo "🔄 Building React application..."
     cd "$REACT_DIR"
     
