@@ -188,21 +188,21 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [results, setResults] = useState<any>(null);
 
   // Get GPU specifications
-  const spec = gpuSpecs[gpuModel];
+  const spec = gpuSpecs[gpuModel] || gpuSpecs['gb200'];
   const coolingRequired = spec.coolingOptions.length === 1 && spec.coolingOptions[0] === 'liquid';
 
   // Update cooling type and rails when GPU model changes
   useEffect(() => {
-    if (spec.coolingOptions.length === 1) {
+    if (spec?.coolingOptions?.length === 1) {
       setCoolingType(spec.coolingOptions[0]);
     }
     // Set default rails per GPU based on model
-    if (gpuModel.startsWith('gb')) {
+    if ((gpuModel || '').startsWith('gb')) {
       setRailsPerGPU(9);
     } else {
       setRailsPerGPU(8);
     }
-  }, [gpuModel, spec.coolingOptions]);
+  }, [gpuModel, spec?.coolingOptions]);
 
   // Calculate storage costs using vendor-specific pricing
   const calculateStorageCosts = () => {
@@ -392,8 +392,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const regionData = regionRates[region];
     
     // Calculate actual systems needed (can't buy partial systems)
-    const systemsNeeded = Math.ceil(numGPUs / spec.rackSize);
-    const actualGPUs = systemsNeeded * spec.rackSize;
+    const safeRackSize = spec?.rackSize || 8;
+    const systemsNeeded = Math.ceil(numGPUs / safeRackSize);
+    const actualGPUs = systemsNeeded * safeRackSize;
     
     // GPU costs - use override if provided, but calculate based on actual GPUs in complete systems
     const gpuUnitPrice = gpuPriceOverride ? parseFloat(gpuPriceOverride) : spec.unitPrice;
@@ -407,9 +408,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     
     // Power calculations using design document specifications
     const systemsTotal = systemsNeeded; // Use the systems we calculated above
-    const rackPowerTotal = systemsTotal * (spec.rackPower || spec.powerPerGPU * spec.rackSize);
+    const rackPowerTotal = systemsTotal * (spec?.rackPower || (spec?.powerPerGPU || 1000) * safeRackSize);
     const gpuPowerMW = rackPowerTotal / 1000000; // Use actual rack power from design doc
-    const pueValue = pueOverride ? parseFloat(pueOverride) : (spec.pue[coolingType] || regionData.pue);
+    const pueValue = pueOverride ? parseFloat(pueOverride) : ((spec?.pue || {})[coolingType] || regionData.pue);
     
     // DPU power if enabled (per design doc: 4 DPUs per NVL72 system at 150W each)
     const dpuCount = enableBluefield ? 
@@ -536,7 +537,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         requestedGPUs: numGPUs,
         actualGPUs: actualGPUs,
         systemsNeeded: systemsTotal,
-        gpusPerSystem: spec.rackSize,
+        gpusPerSystem: safeRackSize,
         softwareStack: softwareStack,
         softwareStackCost: stackCost,
         supportTier: supportTier
