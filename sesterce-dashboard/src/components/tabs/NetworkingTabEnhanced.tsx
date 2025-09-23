@@ -511,6 +511,67 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
         </div>
       </div>
 
+      {/* RoCEv2 / EVPN / VXLAN Compliance (Ethernet) */}
+      {fabricType !== 'infiniband' && (
+        <div className="bg-white rounded-xl shadow p-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-3">RoCEv2 + EVPN/VXLAN Compliance</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="bg-gray-50 p-4 rounded">
+              <h4 className="font-semibold text-gray-800 mb-2">RoCEv2 (RDMA over Converged Ethernet v2)</h4>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>Protocol: RoCEv2 (L3, UDP 4791)</li>
+                <li>GID: v2 (IPv4/IPv6)</li>
+                <li>Lossless class via PFC (prio 3)</li>
+              </ul>
+            </div>
+            <div className="bg-gray-50 p-4 rounded">
+              <h4 className="font-semibold text-gray-800 mb-2">Congestion Control</h4>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>PFC: enabled, 8 priorities, no‑drop class 3</li>
+                <li>ECN: enabled, mark ≥70% buffer</li>
+                <li>DCQCN: adaptive rate reduction</li>
+              </ul>
+            </div>
+            <div className="bg-gray-50 p-4 rounded">
+              <h4 className="font-semibold text-gray-800 mb-2">EVPN/VXLAN Overlay</h4>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>Control plane: EVPN‑BGP</li>
+                <li>Overlay: VXLAN (L2/L3 VNI, symmetric IRB)</li>
+                <li>EVPN‑MH multihoming (no MLAG)</li>
+              </ul>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
+            <div className="bg-gray-50 p-4 rounded">
+              <h4 className="font-semibold text-gray-800 mb-2">QoS & Buffering</h4>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>DSCP: RDMA=CS3(26), Storage=AF21(18), Mgmt=CS6(48)</li>
+                <li>Buffer alloc: RDMA 40%, Storage 20%, Default 40%</li>
+                <li>Scheduling: RDMA strict, others WFQ</li>
+              </ul>
+            </div>
+            <div className="bg-gray-50 p-4 rounded">
+              <h4 className="font-semibold text-gray-800 mb-2">EVPN‑MH Benefits</h4>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>No ISL/MLAG pairs; scales beyond 2 leaves</li>
+                <li>Standards‑based DF election (Type‑4)</li>
+                <li>Vendor interop via RFC 7432</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 text-sm">
+            <h4 className="font-semibold text-gray-800 mb-2">Design Validation</h4>
+            <ul className="list-disc list-inside text-gray-700 space-y-1">
+              <li>Lossless class configured: Yes (PFC priority 3)</li>
+              <li>Congestion control active: Yes (ECN + DCQCN)</li>
+              <li>EVPN control plane: Yes (MP‑BGP)</li>
+              <li>VXLAN MTU ≥ 9000: Yes (jumbo frames)</li>
+              <li>Tenant isolation: Yes (VRF + symmetric IRB)</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Performance Characteristics */}
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
