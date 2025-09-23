@@ -255,8 +255,8 @@ python calculator-api.py              # Backend: port 7779
 ```
 
 ## 🔑 Authentication
-- **Admin**: `admin` / `Vader@66`
-- **Users**: `Youssef` / `Y0da!777`, `Maciej` / `H0th#88!`
+- Contact system administrator for login credentials
+- JWT-based authentication with role-based access control
 
 ---
 
