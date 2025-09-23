@@ -32,9 +32,19 @@ if [ "$NEEDS_BUILD" = true ]; then
     cd "$REACT_DIR"
     
     # Install dependencies if needed
-    if [ ! -d "node_modules" ]; then
+    if [ ! -d "node_modules" ] || [ ! -f "node_modules/.package-lock.json" ]; then
         echo "📦 Installing Node.js dependencies..."
-        npm install
+        
+        # Clean install to avoid conflicts
+        rm -rf node_modules/ package-lock.json 2>/dev/null || true
+        
+        # Install without audit fixes to prevent breaking changes
+        npm install --no-audit --no-fund
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ npm install failed"
+            exit 1
+        fi
     fi
     
     # Build the app

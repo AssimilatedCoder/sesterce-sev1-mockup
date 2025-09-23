@@ -73,8 +73,20 @@ start_services() {
         
         # Install dependencies if needed
         if [ ! -d "node_modules" ]; then
-            echo "📦 Installing Node.js dependencies..."
-            npm install
+            echo "📦 Installing Node.js dependencies (safe mode)..."
+            
+            # Install without audit fixes to prevent breaking changes
+            npm install --no-audit --no-fund
+            
+            if [ $? -ne 0 ]; then
+                echo "⚠️  Standard install failed, trying with legacy peer deps..."
+                npm install --legacy-peer-deps --no-audit --no-fund
+                
+                if [ $? -ne 0 ]; then
+                    echo "❌ npm install failed"
+                    return 1
+                fi
+            fi
         fi
         
         # Build the app

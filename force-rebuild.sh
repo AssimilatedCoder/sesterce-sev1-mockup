@@ -19,9 +19,29 @@ echo "🗑️  Removing old build..."
 rm -rf build/
 rm -rf node_modules/.cache/ 2>/dev/null || true
 
-# Install/update dependencies
-echo "📦 Installing dependencies..."
-npm install
+# Install/update dependencies safely
+echo "📦 Installing dependencies (safe mode)..."
+
+# Restore original package files if they exist in git
+if [ -f "../.git/HEAD" ]; then
+    echo "🔄 Restoring original package.json from git..."
+    git checkout HEAD -- package.json package-lock.json 2>/dev/null || true
+fi
+
+# Clean install without audit fixes
+npm install --no-audit --no-fund
+
+if [ $? -ne 0 ]; then
+    echo "❌ npm install failed, trying alternative approach..."
+    
+    # Fallback: try with legacy peer deps
+    npm install --legacy-peer-deps --no-audit --no-fund
+    
+    if [ $? -ne 0 ]; then
+        echo "❌ All npm install attempts failed"
+        exit 1
+    fi
+fi
 
 # Force clean build
 echo "🏗️  Building with latest API routing..."

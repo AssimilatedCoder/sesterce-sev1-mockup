@@ -77,10 +77,24 @@ print_status "Environment variables generated"
 print_info "Building secure React application..."
 cd sesterce-dashboard
 
-# Install Node dependencies if needed
+# Install Node dependencies safely
 if [ ! -d "node_modules" ]; then
-    print_info "Installing Node.js dependencies..."
-    npm install
+    print_info "Installing Node.js dependencies (safe mode)..."
+    
+    # Install without audit fixes to prevent breaking changes
+    npm install --no-audit --no-fund
+    
+    if [ $? -ne 0 ]; then
+        print_warning "Standard install failed, trying with legacy peer deps..."
+        npm install --legacy-peer-deps --no-audit --no-fund
+        
+        if [ $? -ne 0 ]; then
+            print_error "npm install failed"
+            exit 1
+        fi
+    fi
+    
+    print_status "Node.js dependencies installed safely"
 fi
 
 # Build production version with security optimizations
