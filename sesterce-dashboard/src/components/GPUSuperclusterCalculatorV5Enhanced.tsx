@@ -71,8 +71,19 @@ const networkFabrics: Record<string, {
 };
 
 const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
+  // Get current user from session storage (set by login)
+  const currentUser = sessionStorage.getItem('currentUser');
+  const isAdmin = currentUser === 'admin';
+  
   // State management
   const [activeTab, setActiveTab] = useState('calculator');
+  
+  // Redirect non-admin users away from admin-only tabs
+  React.useEffect(() => {
+    if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise')) {
+      setActiveTab('calculator');
+    }
+  }, [activeTab, isAdmin]);
   
   // Configuration state
   const [gpuModel, setGpuModel] = useState('gb200');
@@ -503,8 +514,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
     { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
-    { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
+    // Admin-only tabs
+    ...(isAdmin ? [
+      { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
+      { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
+    ] : [])
   ];
 
   const config = {
@@ -674,11 +688,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
               <ReferencesTab />
             )}
             
-            {activeTab === 'design' && (
+            {activeTab === 'design' && isAdmin && (
               <DesignTab config={config} results={results} />
             )}
-            
-            {activeTab === 'exercise' && (
+
+            {activeTab === 'exercise' && isAdmin && (
               <DesignExerciseTab />
             )}
           </div>
