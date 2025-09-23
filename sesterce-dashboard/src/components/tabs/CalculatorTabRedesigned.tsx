@@ -347,43 +347,83 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             const defaults: any = { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
             const td = config.tierDistribution || defaults;
 
-            const normalizeKeep = (updated: any, keepKey: string) => {
-              const keys = ['tier1','tier2','tier3','tier4'];
-              let total = keys.reduce((s, k) => s + (updated[k] || 0), 0);
-              if (total === 100) return updated;
-              const delta = 100 - total;
-              const otherKeys = keys.filter(k => k !== keepKey);
-              const sumOthers = otherKeys.reduce((s, k) => s + (updated[k] || 0), 0);
-              if (sumOthers <= 0) {
-                const share = delta / otherKeys.length;
-                otherKeys.forEach(k => { updated[k] = Math.max(0, Math.min(100, (updated[k] || 0) + share)); });
-              } else {
-                otherKeys.forEach(k => {
-                  const proportion = (updated[k] || 0) / sumOthers;
-                  updated[k] = Math.max(0, Math.min(100, (updated[k] || 0) + delta * proportion));
-                });
-              }
-              ['tier1','tier2','tier3','tier4'].forEach(k => { updated[k] = Number(Math.max(0, Math.min(100, updated[k] || 0)).toFixed(1)); });
-              return updated;
-            };
-
             const handleChange = (tierId: string, value: number) => {
+              // Track first-touch order
               if (!touchedTiers.includes(tierId)) {
                 setTouchedTiers(prev => [...prev, tierId]);
               }
+
               const keys = ['tier1','tier2','tier3','tier4'];
-              const current = td;
-              const oldValue = (current as any)[tierId] || 0;
-              const diff = value - oldValue;
+              const current: any = { ...td };
+              const oldValue = current[tierId] || 0;
+              let target = Math.max(0, Math.min(100, value));
+              let diff = target - oldValue;
+
+              // Determine adjustable keys: only untouched ones (excluding current).
               const untouched = keys.filter(k => k !== tierId && !touchedTiers.includes(k));
               const adjustable = untouched.length > 0 ? untouched : keys.filter(k => k !== tierId);
-              const updated: any = { ...current, [tierId]: value };
-              const share = adjustable.length > 0 ? (-diff / adjustable.length) : 0;
-              adjustable.forEach(k => {
-                updated[k] = Math.max(0, Math.min(100, ((current as any)[k] || 0) + share));
-              });
-              const normalized = normalizeKeep(updated, tierId);
-              setTierDistribution(normalized);
+              if (adjustable.length === 0) {
+                // No degrees of freedom; keep original
+                return;
+              }
+
+              const epsilon = 1e-6;
+
+              if (diff > 0) {
+                // Need to take from adjustable equally without going below 0
+                let remaining = diff;
+                let pool = adjustable.slice();
+                while (remaining > epsilon && pool.length > 0) {
+                  const share = remaining / pool.length;
+                  let takenThisRound = 0;
+                  const nextPool: string[] = [];
+                  for (const k of pool) {
+                    const take = Math.min(share, current[k]);
+                    current[k] = Number(Math.max(0, current[k] - take).toFixed(1));
+                    takenThisRound += take;
+                    if (current[k] > 0) nextPool.push(k);
+                  }
+                  if (takenThisRound <= epsilon) break;
+                  remaining -= takenThisRound;
+                  pool = nextPool;
+                }
+                const actuallyTaken = diff - Math.max(0, remaining);
+                target = oldValue + actuallyTaken;
+                current[tierId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+              } else if (diff < 0) {
+                // Need to give to adjustable equally without exceeding 100
+                let remaining = -diff;
+                let pool = adjustable.slice();
+                while (remaining > epsilon && pool.length > 0) {
+                  const share = remaining / pool.length;
+                  let givenThisRound = 0;
+                  const nextPool: string[] = [];
+                  for (const k of pool) {
+                    const headroom = 100 - current[k];
+                    const give = Math.min(share, headroom);
+                    current[k] = Number(Math.min(100, current[k] + give).toFixed(1));
+                    givenThisRound += give;
+                    if (current[k] < 100) nextPool.push(k);
+                  }
+                  if (givenThisRound <= epsilon) break;
+                  remaining -= givenThisRound;
+                  pool = nextPool;
+                }
+                const actuallyGiven = -diff - Math.max(0, remaining);
+                target = oldValue - actuallyGiven;
+                current[tierId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+              } else {
+                // No change
+                return;
+              }
+
+              // Fix rounding error to ensure sum = 100 by adjusting the last adjustable (or any other if none)
+              const sum = keys.reduce((s, k) => s + (current[k] || 0), 0);
+              const delta = Number((100 - sum).toFixed(1));
+              const adjustKey = adjustable.find(k => k !== tierId) || adjustable[0] || keys.find(k => k !== tierId) || tierId;
+              current[adjustKey] = Number(Math.max(0, Math.min(100, (current[adjustKey] || 0) + delta)).toFixed(1));
+
+              setTierDistribution(current);
             };
 
             return (
