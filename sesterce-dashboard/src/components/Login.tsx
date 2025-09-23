@@ -13,6 +13,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   // Static users
   const users = [
     { username: 'Youssef', password: 'Sesterce2025' },
+    { username: 'Maciej', password: 'PathFinder2025' },
     { username: 'admin', password: 'Arno7747' }
   ];
 
