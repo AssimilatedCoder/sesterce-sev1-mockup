@@ -9,6 +9,7 @@ import { softwareStacks, recommendStack, calculateStackCost } from '../../data/s
 
 interface CalculatorTabRedesignedProps {
   config: any;
+  setTierDistribution: (value: { tier1: number; tier2: number; tier3: number; tier4: number }) => void;
   setGpuModel: (value: string) => void;
   setNumGPUs: (value: number) => void;
   setCoolingType: (value: string) => void;
@@ -102,6 +103,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   setSelectedStorageTiers,
   setStorageTierDistribution,
   setStoragePreset,
+  setTierDistribution,
   setSoftwareStack,
   setSupportTier,
   setBudget,
@@ -227,6 +229,70 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               Select your preferred stack in the Software Stack Configuration section above. Prices reflect real-world licensing costs and FTE requirements.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Service Tier Distribution (New) */}
+      <div className="service-tier-distribution mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-800 mb-1">Service Tier Distribution</h3>
+        <p className="text-xs text-gray-600 mb-3">Adjust the percentage mix of customer types using your GPU cluster. Total must equal 100%.</p>
+
+        {[
+          { id: 'tier1', label: 'Tier 1: Bare Metal GPU Access', desc: 'Advanced ML teams requiring direct hardware access' },
+          { id: 'tier2', label: 'Tier 2: Orchestrated Kubernetes', desc: 'Enterprise teams with managed K8s environments' },
+          { id: 'tier3', label: 'Tier 3: Managed MLOps Platform', desc: 'Turnkey AI/ML platform with pre-integrated tools' },
+          { id: 'tier4', label: 'Tier 4: Inference-as-a-Service', desc: 'Serverless inference endpoints with auto-scaling' }
+        ].map((t) => (
+          <div key={t.id} className="tier-slider-container mb-3 p-3 bg-white rounded border border-gray-200">
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t.label}</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={config.tierDistribution?.[t.id] ?? (t.id==='tier1'?30:t.id==='tier2'?35:t.id==='tier3'?25:10)}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                const current = config.tierDistribution || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
+                const oldValue = (current as any)[t.id] || 0;
+                const diff = value - oldValue;
+                const otherKeys = ['tier1','tier2','tier3','tier4'].filter(k => k !== t.id);
+                const sumOthers = otherKeys.reduce((s, k) => s + (current as any)[k], 0);
+                const updated: any = { ...current, [t.id]: value };
+                if (sumOthers > 0) {
+                  otherKeys.forEach(k => {
+                    const proportion = (current as any)[k] / sumOthers;
+                    updated[k] = Math.max(0, (current as any)[k] - diff * proportion);
+                  });
+                }
+                const total = ['tier1','tier2','tier3','tier4'].reduce((s, k) => s + (updated[k] || 0), 0);
+                if (total !== 100 && total > 0) {
+                  ['tier1','tier2','tier3','tier4'].forEach(k => {
+                    updated[k] = (updated[k] / total) * 100;
+                  });
+                }
+                // Round for display neatness
+                ['tier1','tier2','tier3','tier4'].forEach(k => { updated[k] = Math.max(0, Math.min(100, Number(updated[k].toFixed(1)))); });
+                setTierDistribution(updated);
+              }}
+              className="w-full"
+            />
+            <div className="flex items-center gap-2 text-sm">
+              <span className="percentage-display font-semibold text-blue-600">{((config.tierDistribution?.[t.id] ?? 0)).toFixed ? (config.tierDistribution?.[t.id] as any).toFixed(1) : (config.tierDistribution?.[t.id] ?? 0)}%</span>
+              <span className="tier-description text-xs text-gray-500">{t.desc}</span>
+            </div>
+          </div>
+        ))}
+        <div className="text-xs text-gray-700">
+          Total: {(() => {
+            const td = config.tierDistribution || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
+            const total = (td.tier1 + td.tier2 + td.tier3 + td.tier4);
+            return `${total.toFixed ? total.toFixed(1) : total}%`;
+          })()}
+          {(() => {
+            const td = config.tierDistribution || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
+            const total = td.tier1 + td.tier2 + td.tier3 + td.tier4;
+            return Math.abs(total - 100) > 0.1 ? <span className="text-red-600 ml-1">(Total must equal 100%)</span> : null;
+          })()}
         </div>
       </div>
 

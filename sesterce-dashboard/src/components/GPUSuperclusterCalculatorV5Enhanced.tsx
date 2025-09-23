@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Cpu, HardDrive, Network, Thermometer,
-  FileText, BookOpen
+  FileText, BookOpen, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
@@ -13,6 +13,7 @@ import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhance
 import { SoftwareStackTab } from './tabs/SoftwareStackTab';
 import { CoolingPowerTabEnhanced } from './tabs/CoolingPowerTabEnhanced';
 import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
+import { ServicePricingTab } from './tabs/ServicePricingTab';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
@@ -149,6 +150,39 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [budget, setBudget] = useState<'low' | 'medium' | 'high' | 'unlimited'>('medium');
   const [expertise, setExpertise] = useState<'basic' | 'intermediate' | 'advanced'>('intermediate');
   const [complianceRequirements, setComplianceRequirements] = useState<string[]>([]);
+
+  // Service tier pricing distribution and modifiers
+  const [tierDistribution, setTierDistribution] = useState<{ tier1: number; tier2: number; tier3: number; tier4: number }>(() => {
+    try {
+      const saved = localStorage.getItem('sesterceTierDistribution');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
+  });
+
+  const [serviceModifiers, setServiceModifiers] = useState<{ 
+    storage: { extreme: boolean; high: boolean; balanced: boolean; cost: boolean };
+    compliance: { hipaa: boolean; fedramp: boolean; secnum: boolean; airgap: boolean };
+    sustainability: { renewable: boolean; carbon: boolean; netzero: boolean };
+  }>(() => {
+    try {
+      const saved = localStorage.getItem('sesterceServiceModifiers');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      storage: { extreme: false, high: false, balanced: true, cost: false },
+      compliance: { hipaa: false, fedramp: false, secnum: false, airgap: false },
+      sustainability: { renewable: true, carbon: false, netzero: false }
+    };
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('sesterceTierDistribution', JSON.stringify(tierDistribution)); } catch {}
+  }, [tierDistribution]);
+
+  useEffect(() => {
+    try { localStorage.setItem('sesterceServiceModifiers', JSON.stringify(serviceModifiers)); } catch {}
+  }, [serviceModifiers]);
   
   // Results state
   const [results, setResults] = useState<any>(null);
@@ -514,6 +548,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'calculator', label: 'Calculator', icon: <Calculator className="w-4 h-4" /> },
     { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
+    { id: 'pricing', label: 'Service Pricing', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'software', label: 'Software Stack', icon: <Cpu className="w-4 h-4" /> },
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
@@ -532,6 +567,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     region,
     utilization,
     depreciation,
+    tierDistribution,
     totalStorage,
     storageArchitecture,
     hotPercent,
@@ -621,6 +657,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             {activeTab === 'calculator' && (
               <CalculatorTabRedesigned
                 config={config}
+                setTierDistribution={setTierDistribution}
                 setGpuModel={setGpuModel}
                 setNumGPUs={setNumGPUs}
                 setCoolingType={setCoolingType}
@@ -676,6 +713,18 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
               <StorageTabProductionEnhanced config={config} results={results} />
             )}
             
+            {activeTab === 'pricing' && (
+              <ServicePricingTab
+                config={config}
+                results={results}
+                formatNumber={formatNumber}
+                tierDistribution={tierDistribution}
+                serviceModifiers={serviceModifiers}
+                setTierDistribution={setTierDistribution}
+                setServiceModifiers={setServiceModifiers}
+              />
+            )}
+
             {activeTab === 'software' && (
               <SoftwareStackTab config={config} results={results} formatNumber={formatNumber} />
             )}
