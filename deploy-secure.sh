@@ -83,9 +83,16 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Build production version
+# Build production version with security optimizations
+print_info "Building optimized production bundle..."
 GENERATE_SOURCEMAP=false npm run build
-print_status "React application built"
+
+if [ $? -eq 0 ]; then
+    print_status "React application built successfully"
+else
+    print_error "React build failed"
+    exit 1
+fi
 
 cd ..
 

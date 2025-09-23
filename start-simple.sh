@@ -4,9 +4,36 @@
 # Uses a simple HTTP server for static files
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$SCRIPT_DIR/sesterce-dashboard/build"
+REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+BUILD_DIR="$REACT_DIR/build"
 
 echo "🚀 Starting Sesterce Calculator (Simple Mode)..."
+
+# Check if build directory exists and is recent
+if [ ! -d "$BUILD_DIR" ] || [ "$REACT_DIR/src" -nt "$BUILD_DIR" ] || [ "$REACT_DIR/package.json" -nt "$BUILD_DIR" ]; then
+    echo "🔄 Building React application..."
+    cd "$REACT_DIR"
+    
+    # Install dependencies if needed
+    if [ ! -d "node_modules" ]; then
+        echo "📦 Installing Node.js dependencies..."
+        npm install
+    fi
+    
+    # Build the app
+    GENERATE_SOURCEMAP=false npm run build
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ React build completed"
+    else
+        echo "❌ React build failed"
+        exit 1
+    fi
+    
+    cd "$SCRIPT_DIR"
+else
+    echo "✅ React build is up to date"
+fi
 
 # Start API server
 echo "🔒 Starting secure API server..."

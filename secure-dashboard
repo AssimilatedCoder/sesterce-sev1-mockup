@@ -66,6 +66,32 @@ stop_api() {
 start_services() {
     echo "🚀 Starting secure Sesterce dashboard services..."
     
+    # Check if React build is needed
+    if [ ! -d "$BUILD_DIR" ] || [ "$REACT_DIR/src" -nt "$BUILD_DIR" ] || [ "$REACT_DIR/package.json" -nt "$BUILD_DIR" ]; then
+        echo "🔄 Building React application..."
+        cd "$REACT_DIR"
+        
+        # Install dependencies if needed
+        if [ ! -d "node_modules" ]; then
+            echo "📦 Installing Node.js dependencies..."
+            npm install
+        fi
+        
+        # Build the app
+        GENERATE_SOURCEMAP=false npm run build
+        
+        if [ $? -eq 0 ]; then
+            echo "✅ React build completed"
+        else
+            echo "❌ React build failed"
+            return 1
+        fi
+        
+        cd "$SCRIPT_DIR"
+    else
+        echo "✅ React build is up to date"
+    fi
+    
     # Start API first
     start_api
     
