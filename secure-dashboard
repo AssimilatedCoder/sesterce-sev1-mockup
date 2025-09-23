@@ -11,7 +11,9 @@ API_PID_FILE="$SCRIPT_DIR/api.pid"
 
 # Load environment variables (skip comments and empty lines)
 if [ -f "$SCRIPT_DIR/.env" ]; then
-    export $(grep -v '^#' "$SCRIPT_DIR/.env" | grep -v '^$' | xargs)
+    set -a
+    source <(grep -v '^#' "$SCRIPT_DIR/.env" | grep -v '^$')
+    set +a
 fi
 
 start_api() {
