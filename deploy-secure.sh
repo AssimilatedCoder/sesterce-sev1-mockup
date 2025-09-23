@@ -43,9 +43,16 @@ if ! command -v pip3 &> /dev/null; then
     exit 1
 fi
 
-# Install Python dependencies
+# Create virtual environment and install Python dependencies
+print_info "Setting up Python virtual environment..."
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+    print_status "Virtual environment created"
+fi
+
+source venv/bin/activate
 print_info "Installing Python dependencies..."
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 print_status "Python dependencies installed"
 
 # Generate secure environment variables
@@ -144,8 +151,8 @@ start_api() {
         fi
     fi
     
-    # Start API server in background
-    python3 calculator-api.py &
+    # Start API server in background (using virtual environment)
+    source "$SCRIPT_DIR/venv/bin/activate" && python calculator-api.py &
     API_PID=$!
     echo $API_PID > "$API_PID_FILE"
     

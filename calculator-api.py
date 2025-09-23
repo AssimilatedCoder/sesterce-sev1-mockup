@@ -10,7 +10,7 @@ import hashlib
 import time
 import os
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 
 app = Flask(__name__)
@@ -60,8 +60,8 @@ def generate_token(username, role):
     payload = {
         'username': username,
         'role': role,
-        'exp': datetime.utcnow() + timedelta(hours=24),
-        'iat': datetime.utcnow()
+        'exp': datetime.now(timezone.utc) + timedelta(hours=24),
+        'iat': datetime.now(timezone.utc)
     }
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 
