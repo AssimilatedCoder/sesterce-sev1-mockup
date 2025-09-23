@@ -1,317 +1,266 @@
-# SEV-1 War Room Dashboard — Nvidia SuperPod (RoCEv2 + VAST NVMe-oF)
+# Sesterce GPU SuperCluster Calculator
 
-A realistic Grafana-style dashboard mockup for incident management in AI training infrastructure, simulating a SEV-1 incident caused by aggressive prefetch rollout in EMEA Pod-2.
+A production-grade calculator for designing, costing, and monetizing large-scale GPU clusters (10,000–200,000 GPUs) based on NVIDIA GB200/GB300 NVL72 systems. Features sophisticated networking algorithms, dynamic service tier pricing, and comprehensive TCO analysis with transparent calculation logic.
 
-## 🎯 Overview
+## 🏗️ Architecture Overview
 
-This dashboard simulates a real-world SEV-1 incident showing:
-- **Queue wait times** jumping from 7min → 31min (SLO breach)
-- **GPU utilization** dropping from 86% → 54%
-- **ECN mark rates** spiking from 0.2% → 4.8%
-- **NVMe-oF P99 latency** rising from 0.38ms → 2.8ms
-- **Cross-domain correlation** showing the complete incident cascade
+```mermaid
+graph TB
+    subgraph "Frontend (React/TypeScript)"
+        UI[User Interface]
+        State[State Management]
+        Calc[Client Calculations]
+    end
+    
+    subgraph "Backend (Flask/Python)"
+        Auth[JWT Authentication]
+        API[Secure API Endpoints]
+        Logic[Server-side Logic]
+    end
+    
+    subgraph "Infrastructure"
+        Nginx[Nginx Reverse Proxy]
+        SSL[Security Headers]
+    end
+    
+    UI --> State
+    State --> Calc
+    Calc --> API
+    API --> Auth
+    Auth --> Logic
+    Nginx --> UI
+    Nginx --> API
+    SSL --> Nginx
+```
 
-## 📋 Prerequisites
+## 🧮 Core Calculation Engine
 
-- **Python 3.7+** (for the HTTP server)
-- **Modern web browser** (Chrome, Firefox, Safari, Edge)
-- **No additional dependencies** required
+### End-to-End Calculation Flow
 
-## 🚀 Quick Start
+```mermaid
+flowchart TD
+    A[User Inputs] --> B{GPU Model Selection}
+    B --> C[System Sizing Algorithm]
+    C --> D[Power & Cooling Calculations]
+    C --> E[Network Architecture Selection]
+    E --> F[Switch & Cable Sizing]
+    F --> G[DPU Requirements]
+    C --> H[Storage Network Sizing]
+    D --> I[OPEX Calculations]
+    F --> J[Network CAPEX]
+    G --> J
+    H --> K[Storage CAPEX/OPEX]
+    I --> L[Total TCO]
+    J --> L
+    K --> L
+    L --> M[$/GPU-hour Baseline]
+    M --> N[Service Tier Pricing]
+    N --> O[Revenue & ROI Analysis]
+    
+    style A fill:#e1f5fe
+    style L fill:#f3e5f5
+    style O fill:#e8f5e8
+```
 
-### 1. Clone from GitHub
+### System Sizing Logic
+
+```mermaid
+flowchart LR
+    subgraph "Input Processing"
+        A[Requested GPUs] --> B{GPU Model?}
+        B -->|GB200/GB300| C[72 GPUs/Rack]
+        B -->|H100 SXM| D[8 GPUs/System]
+        B -->|H100 PCIe| E[8 GPUs/System]
+    end
+    
+    subgraph "Sizing Calculation"
+        C --> F[Systems = ceil(GPUs/72)]
+        D --> G[Systems = ceil(GPUs/8)]
+        E --> G
+        F --> H[Actual GPUs = Systems × 72]
+        G --> I[Actual GPUs = Systems × 8]
+    end
+    
+    subgraph "Power Calculation"
+        H --> J[GB Power: 120kW/rack]
+        I --> K[H100 Power: 6.5kW/system]
+        J --> L[Total IT Load]
+        K --> L
+        L --> M[PUE Application]
+        M --> N[Total Facility Power]
+    end
+```
+
+## 🌐 Networking Architecture Algorithm
+
+### Architecture Selection by Scale
+
+```mermaid
+flowchart TD
+    A[GPU Count Input] --> B{Scale Analysis}
+    B -->|≤ 2,000 GPUs| C[2-Tier Leaf-Spine]
+    B -->|2,001-10,000 GPUs| D[3-Tier with Pods]
+    B -->|> 10,000 GPUs| E[3-Tier Multi-Pod + Core]
+    
+    C --> F[Simple Leaf-Spine Fabric]
+    D --> G[Pod-based Architecture]
+    E --> H[Core-Spine-Leaf Hierarchy]
+    
+    F --> I[Leaf Switches: ceil(Racks/2)]
+    F --> J[Spine Switches: max(6, leafCount/4)]
+    
+    G --> K[Pods: ceil(GPUs/1008)]
+    K --> L[Leaf per Pod: ceil(1008/64)]
+    L --> M[Spine per Pod: max(6, leafs×9/128)]
+    
+    H --> N[Core Groups: ceil(Pods/6)]
+    N --> O[Core Switches: Groups×12]
+    O --> P[Pod Interconnect Matrix]
+```
+
+### Detailed Network Component Sizing
+
+```mermaid
+graph TB
+    subgraph "Pod Architecture (1,008 GPUs)"
+        A[14 Racks × 72 GPUs] --> B[28 Leaf Switches]
+        B --> C[Dual-homed ToR]
+        C --> D[Rails per GPU: 9]
+        D --> E[Spine Requirement]
+        E --> F[16 Spine Switches]
+        F --> G[N+2 Redundancy]
+    end
+    
+    subgraph "Switch Specifications"
+        H[Spectrum-4 400G: 128 ports]
+        I[Spectrum-4 800G: 64 ports]
+        J[Quantum-3 800G: 144 ports]
+    end
+    
+    subgraph "Cable Calculations"
+        K[Intra-Pod: Leaf×Rails×GPUs/Leaf]
+        L[Inter-Pod: Core×Spine×Pods]
+        M[Total Cables = Intra + Inter]
+    end
+    
+    B --> H
+    F --> I
+    F --> J
+    E --> K
+    O --> L
+```
+
+### Storage Network Sizing Algorithm
+
+```mermaid
+flowchart LR
+    subgraph "Training Storage (VAST/WEKA)"
+        A[GPUs] --> B[Bandwidth = GPUs/1000 × 1.6 Tbps]
+        B --> C[400G Ports = ceil(Bandwidth×1000/400)]
+        C --> D[64×400G Switches = ceil(Bandwidth/25.6)]
+    end
+    
+    subgraph "Object Storage (Ceph)"
+        E[GPUs] --> F[100G Ports = GPUs/10]
+        F --> G[32×100G Switches = ceil(GPUs/320)]
+    end
+    
+    subgraph "Network Integration"
+        D --> H[Training Network Fabric]
+        G --> I[Object Storage Fabric]
+        H --> J[Converged Data Center]
+        I --> J
+    end
+```
+
+## 💰 Service Tier Pricing Model
+
+### Service Tier Distribution Logic
+
+```mermaid
+flowchart TD
+    A[Default Distribution<br/>T1:30% T2:35% T3:25% T4:10%] --> B{User Adjusts Slider}
+    B --> C[Track Touched Sliders]
+    C --> D{First Adjustment?}
+    D -->|Yes| E[Redistribute Equally<br/>Across 3 Untouched]
+    D -->|No| F{Second Adjustment?}
+    F -->|Yes| G[Redistribute Equally<br/>Across 2 Untouched]
+    F -->|No| H[Proportional Adjustment<br/>Among Remaining Untouched]
+    
+    E --> I[Validate Total = 100%]
+    G --> I
+    H --> I
+    I --> J{All Sliders Touched?}
+    J -->|No| K[Continue Progressive Logic]
+    J -->|Yes| L[Equal Distribution Among Others]
+    
+    style A fill:#e3f2fd
+    style I fill:#fff3e0
+    style L fill:#f1f8e9
+```
+
+### Revenue Calculation Flow
+
+```mermaid
+graph LR
+    subgraph "Base Cost Calculation"
+        A[Total CAPEX] --> B[Annual Depreciation]
+        C[Annual OPEX] --> D[Total Annual Cost]
+        B --> D
+        D --> E[Effective GPU Hours]
+        E --> F[Base $/GPU-hour]
+    end
+    
+    subgraph "Tier Pricing"
+        F --> G[Tier 1: 1.0× Multiplier]
+        F --> H[Tier 2: 1.45× Multiplier]
+        F --> I[Tier 3: 2.2× Multiplier]
+        F --> J[Tier 4: 3.0× Multiplier]
+    end
+    
+    subgraph "Revenue Calculation"
+        G --> K[T1 Revenue = Rate × GPUs × % × Hours]
+        H --> L[T2 Revenue = Rate × GPUs × % × Hours]
+        I --> M[T3 Revenue = Rate × GPUs × % × Hours]
+        J --> N[T4 Revenue = Rate × GPUs × % × Hours]
+        K --> O[Total Annual Revenue]
+        L --> O
+        M --> O
+        N --> O
+    end
+```
+
+## 🛠️ Quick Start
+
+### Local Development
 ```bash
-git clone https://github.com/YOUR_USERNAME/grafana-sev1-dashboard.git
-cd grafana-sev1-dashboard
+# Frontend
+cd sesterce-dashboard
+npm install
+npm start
+
+# Backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python calculator-api.py
 ```
 
-### 2. Start the Dashboard Server
-
-**Local Development:**
+### Production Deployment
 ```bash
-python3 serve-dashboard.py
-# Access at: http://localhost:8080/sev1-warroom-dashboard.html
+# Automated setup
+./deploy-secure.sh
+
+# Manual nginx setup
+./start-nginx.sh
+
+# Access at http://localhost:3025
 ```
 
-**Production/Ubuntu Server (nginx - Recommended):**
-```bash
-# One-time setup
-./setup-nginx.sh
-
-# Management
-./nginx-management.sh start    # Start server
-./nginx-management.sh status   # Check status
-./nginx-management.sh test     # Test functionality
-
-# Access at: http://YOUR_IP:7777
-```
-
-**Alternative: Python Server:**
-```bash
-# Background mode
-python3 server.py --background
-# OR use the control script
-./dashboard start
-
-# Foreground mode (interactive)
-python3 server.py --foreground
-```
-
-**Expected output:**
-```
-🚀 Starting Grafana SEV-1 Dashboard Server...
-📊 Dashboard URL: http://localhost:8080/sev1-warroom-dashboard.html
-📁 Serving files from: /Users/avanhuys/Projects/Grafana Sesterce
-🔄 Press Ctrl+C to stop the server
-
-✅ Dashboard file: sev1-warroom-dashboard.html
-✅ Data loader: dashboard-data-loader.js
-✅ Data directory: superpod_sev1_fake_telemetry (20 CSV files)
-
-🌐 Opening dashboard in browser: http://localhost:8080/sev1-warroom-dashboard.html
-```
-
-### 3. Access the Dashboard
-**Local:** http://localhost:8080/sev1-warroom-dashboard.html  
-**Ubuntu Server:** http://YOUR_UBUNTU_IP:7777
-
-### 4. Stop the Server
-Press `Ctrl+C` in the terminal to stop the server.
-
-## 🌐 Ubuntu Server Deployment
-
-For remote access on Ubuntu server:
-
-### Quick Ubuntu Setup
-```bash
-# 1. Clone repository
-git clone https://github.com/YOUR_USERNAME/grafana-sev1-dashboard.git
-cd grafana-sev1-dashboard
-
-# 2. Setup nginx (recommended)
-./setup-nginx.sh
-
-# 3. Open firewall (if needed)
-sudo ufw allow 7777/tcp
-
-# 4. Check status
-./nginx-management.sh status
-./nginx-management.sh test
-```
-
-### Alternative: Python Server Setup
-```bash
-# 1-2. Same as above
-# 3. Start Python server
-python3 server.py --background
-# 4-5. Same as above, but use: ./dashboard status
-```
-
-**Share this URL:** `http://YOUR_UBUNTU_IP:7777`
-
-📋 **See [DEPLOYMENT.md](DEPLOYMENT.md) for complete Ubuntu setup guide**
-
-## 📁 Project Structure
-
-```
-Grafana Sesterce/
-├── sev1-warroom-dashboard.html    # Main dashboard HTML
-├── dashboard-data-loader.js       # Data parsing and chart logic
-├── serve-dashboard.py            # Local development server
-├── server.py                     # Production Python server
-├── dashboard                     # Python server control script
-├── setup-nginx.sh                # nginx setup script (recommended)
-├── nginx-management.sh           # nginx control script
-├── nginx-sev1-dashboard.conf     # nginx configuration
-├── DEPLOYMENT.md                 # Ubuntu deployment guide
-├── README.md                     # This file
-└── superpod_sev1_fake_telemetry/ # Synthetic data files
-    ├── queue_wait_quantiles.csv
-    ├── gpu_utilization.csv
-    ├── network_ecn_rate.csv
-    ├── vast_nvmeof_latency_quantiles.csv
-    ├── composite_timeline.csv
-    ├── nccl_logs.log
-    ├── change_timeline.log
-    └── ... (20+ data files)
-```
-
-## 🎛️ Server Management
-
-### nginx (Recommended)
-```bash
-./nginx-management.sh start    # Start nginx
-./nginx-management.sh stop     # Stop nginx
-./nginx-management.sh restart  # Restart nginx
-./nginx-management.sh status   # Check status
-./nginx-management.sh test     # Test functionality
-./nginx-management.sh logs     # View logs
-```
-
-### Python Server (Alternative)
-```bash
-./dashboard start      # Start in background
-./dashboard stop       # Stop server
-./dashboard restart    # Restart server
-./dashboard status     # Check status
-./dashboard foreground # Start interactively
-./dashboard cleanup    # Force cleanup port 7777
-```
-
-### Direct Python Commands
-```bash
-python3 server.py --background    # Start in background
-python3 server.py --foreground    # Start in foreground
-python3 server.py --status        # Check status
-python3 server.py --stop          # Stop server
-python3 server.py --force-cleanup # Force cleanup port 7777
-```
-
-### Smart Features
-- **Auto-kill**: Automatically kills existing servers on port 7777
-- **Background mode**: Runs as daemon, survives terminal close
-- **PID tracking**: Tracks server process for clean management
-- **Status checking**: Real-time server status and URL display
-- **Force cleanup**: Aggressive port cleanup for stubborn processes
-- **Retry logic**: Multiple attempts with escalating force levels
-
-## 🎛️ Dashboard Features
-
-### **7-Row Layout (Grafana War Room Standard)**
-
-#### **Row 1: Exec/SLO (Business View)**
-- Queue Wait P50/P90/P99 with SLO threshold (≤10min)
-- GPU Allocated vs Busy percentages
-- SLA Penalty Exposure ($/hour)
-- Top-10 Whale Customer status
-
-#### **Row 2: GPU/Compute Domain**
-- DCGM GPU Utilization breakdown (SM/Memory/Copy)
-- NCCL All-Reduce Latency heatmap
-- Real-time NCCL WARN/ERROR log stream
-
-#### **Row 3: Network Fabric (RoCEv2/EVPN)**
-- ECN Mark Rate per traffic class
-- PFC Pause counters (Rx/Tx per priority)
-- Per-link utilization hotspot detection
-- EVPN failover events table
-
-#### **Row 4: Storage (VAST NVMe-oF)**
-- NVMe-oF Latency P50/P90/P99
-- Queue depth per frontend
-- Cache hit rates and prefetch statistics
-- FE CPU/RAM/NIC utilization
-- IO mix (Sequential vs Random)
-- Transport errors and timeouts
-
-#### **Row 5: Change & Event Timeline**
-- Annotated change management timeline
-- NOC event overlay (alarms, SNMP traps)
-
-#### **Row 6: Job Scheduler/Platform**
-- Queue backlog growth rate
-- Tenant allocation (Fair-share vs Whale)
-- Job retry and failure rates
-
-#### **Row 7: Cross-Domain Correlation**
-- Composite timeline showing incident cascade
-- ECN↑ → NVMe-oF P99↑ → GPU Util↓ → Queue Wait↑
-
-## 🔧 Troubleshooting
-
-### **Port Already in Use Error**
-```bash
-OSError: [Errno 98] Address already in use
-❌ Error: Port 7777 is still in use after cleanup attempt
-```
-
-**Solutions (in order of preference):**
-
-1. **Use built-in cleanup (Recommended):**
-   ```bash
-   # Force cleanup with control script
-   ./dashboard cleanup
-   
-   # Or with Python directly
-   python3 server.py --force-cleanup
-   
-   # Then start normally
-   ./dashboard start
-   ```
-
-2. **Manual cleanup:**
-   ```bash
-   # Find and kill processes on port 7777
-   sudo lsof -ti:7777 | xargs sudo kill -9
-   
-   # Then start server
-   python3 server.py --background
-   ```
-
-3. **Wait it out:**
-   ```bash
-   # Sometimes processes take time to fully release ports
-   # Wait 2-3 minutes, then try again
-   python3 server.py --background
-   ```
-
-### **Browser Shows "Loading..." Charts**
-- Ensure the HTTP server is running
-- Check browser console (F12) for JavaScript errors
-- Verify CSV files exist in `superpod_sev1_fake_telemetry/` directory
-
-### **Charts Not Updating**
-- Refresh the page (F5)
-- Clear browser cache (Ctrl+Shift+R)
-- Check that all CSV files are properly formatted
-
-## 📊 Incident Timeline
-
-The dashboard simulates this incident progression:
-
-| Time | Event | Impact |
-|------|-------|--------|
-| **16:26 (Day -1)** | Fabric A: 2 spines replaced | Baseline established |
-| **06:26** | VAST FE rollout: Aggressive prefetch ENABLED | Normal operations |
-| **08:26** | 🚨 **INCIDENT START** | Metrics begin degrading |
-| **08:27-09:40** | Cascade effect across all domains | SLO breaches, customer impact |
-| **09:41** | Rollback: VAST FE prefetch DISABLED | Recovery begins |
-
-## 🎨 Customization
-
-### **Modify Data**
-Edit CSV files in `superpod_sev1_fake_telemetry/` to change metrics:
-- `queue_wait_quantiles.csv` - Job queue times
-- `gpu_utilization.csv` - GPU busy/allocated percentages
-- `network_ecn_rate.csv` - Network congestion
-- `vast_nvmeof_latency_quantiles.csv` - Storage latency
-
-### **Update Styling**
-Modify `sev1-warroom-dashboard.html` CSS for:
-- Color schemes
-- Panel layouts
-- Typography
-- Responsive breakpoints
-
-### **Add New Charts**
-Extend `dashboard-data-loader.js` to:
-- Parse additional CSV files
-- Create new Chart.js visualizations
-- Add custom data transformations
-
-## 🏗️ Technical Details
-
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Charts**: Chart.js with time-series support
-- **Data Format**: CSV files with timestamp-based metrics
-- **Server**: Python built-in HTTP server with CORS support
-- **Styling**: Custom CSS mimicking Grafana's dark theme
-- **Responsive**: Mobile-friendly grid layout
-
-## 📝 License
-
-This is a demonstration/mockup project for educational and presentation purposes.
+### Authentication
+- **Admin**: `admin` / `Vader@66`
+- **Users**: `Youssef` / `Y0da!777`, `Maciej` / `H0th#88!`
 
 ---
 
-**🚨 SEV-1 Status**: ACTIVE | **Duration**: 2h 14m | **Impact**: EMEA Pod-2 | **SLO**: BREACHED
+**© 2025 Sesterce. All rights reserved.**
