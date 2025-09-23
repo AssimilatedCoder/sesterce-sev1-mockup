@@ -395,12 +395,12 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
           <div className="text-[11px] text-gray-700 mt-2">
             Total: {(() => {
-              const td2 = td || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
+              const td2 = config.tierDistribution || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
               const total = (td2.tier1 + td2.tier2 + td2.tier3 + td2.tier4);
               return `${(total as any).toFixed ? (total as any).toFixed(1) : total}%`;
             })()}
             {(() => {
-              const td2 = td || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
+              const td2 = config.tierDistribution || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
               const total = td2.tier1 + td2.tier2 + td2.tier3 + td2.tier4;
               return Math.abs(total - 100) > 0.1 ? <span className="text-red-600 ml-1">(Total must equal 100%)</span> : null;
             })()}
