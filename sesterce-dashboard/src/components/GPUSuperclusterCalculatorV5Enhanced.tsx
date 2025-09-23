@@ -72,8 +72,12 @@ const networkFabrics: Record<string, {
 
 const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Get current user from session storage (set by login)
-  const currentUser = sessionStorage.getItem('currentUser');
+  const currentUser = sessionStorage.getItem('sesterceUser');
   const isAdmin = currentUser === 'admin';
+  
+  // Debug logging
+  console.log('Current user:', currentUser);
+  console.log('Is admin:', isAdmin);
   
   // State management
   const [activeTab, setActiveTab] = useState('calculator');
