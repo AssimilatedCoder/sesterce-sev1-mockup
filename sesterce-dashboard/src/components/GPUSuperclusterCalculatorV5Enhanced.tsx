@@ -16,6 +16,7 @@ import { FormulasTabEnhanced } from './tabs/FormulasTabEnhanced';
 import { ServicePricingTab } from './tabs/ServicePricingTab';
 import { FinancialAnalyticsTab } from './tabs/FinancialAnalyticsTab';
 import { CapexBreakdownTab } from './tabs/CapexBreakdownTab';
+import { DocumentationTab } from './tabs/DocumentationTab';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
@@ -87,7 +88,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   
   // Redirect non-admin users away from admin-only tabs
   React.useEffect(() => {
-    if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise')) {
+    if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise' || activeTab === 'documentation')) {
       setActiveTab('calculator');
     }
   }, [activeTab, isAdmin]);
@@ -564,9 +565,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     { id: 'software', label: 'Software Stack', icon: <Cpu className="w-4 h-4" /> },
     { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
     { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
-    { id: 'references', label: 'References', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'references', label: 'References', icon: <FileText className="w-4 h-4" /> },
     // Admin-only tabs
     ...(isAdmin ? [
+      { id: 'documentation', label: 'Documentation', icon: <BookOpen className="w-4 h-4" /> },
       { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
       { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
     ] : [])
@@ -755,6 +757,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'formulas' && (
               <FormulasTabEnhanced />
+            )}
+            
+            {activeTab === 'documentation' && isAdmin && (
+              <DocumentationTab />
             )}
             
             {activeTab === 'references' && (
