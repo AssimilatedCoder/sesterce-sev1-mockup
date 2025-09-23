@@ -69,6 +69,22 @@ const networkingEquipment = {
 export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ config, results }) => {
   const { numGPUs, gpuModel, fabricType, enableBluefield } = config;
   
+  // Derived selections based on philosophy
+  const nicSpeedGb = ((): number => {
+    if (fabricType === 'ethernet-800g' || fabricType === 'infiniband-xdr') return 800;
+    // Treat GB300 on InfiniBand as 800G class when defined, else 400G
+    if (fabricType === 'infiniband' && gpuModel === 'gb300') return 800;
+    return 400;
+  })();
+
+  const determineNetworkArchitecture = (gpus: number): '2-tier_leaf_spine' | '3-tier_with_pods' | '3-tier_multi_pod_with_core' => {
+    if (gpus <= 2000) return '2-tier_leaf_spine';
+    if (gpus <= 10000) return '3-tier_with_pods';
+    return '3-tier_multi_pod_with_core';
+  };
+
+  const architecture = determineNetworkArchitecture(numGPUs || 0);
+
   // Use results from main calculator if available, otherwise calculate locally
   const getNetworkingData = () => {
     if (results && results.network) {
@@ -123,11 +139,16 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     
     // Spine switches (aggregation)
     const spineRadix = switchSpec.ports;
-    const spineSwitchesPerPod = Math.ceil(leafSwitchesPerPod * railsPerGPU / spineRadix);
+    let spineSwitchesPerPod = Math.ceil(leafSwitchesPerPod * railsPerGPU / spineRadix);
+    // Minimum spine count for N+2 redundancy (philosophy rule)
+    spineSwitchesPerPod = Math.max(spineSwitchesPerPod, 6);
     const totalSpineSwitches = spineSwitchesPerPod * numPods;
     
     // Core switches (for inter-pod connectivity)
-    const coreSwitches = numGPUs > 50000 ? 64 : (numGPUs > 25000 ? 32 : 16);
+    let coreSwitches = 0;
+    if (architecture === '3-tier_multi_pod_with_core') {
+      coreSwitches = numGPUs > 100000 ? 144 : (numGPUs > 50000 ? 64 : 36);
+    }
     
     // Cable calculations
     const intraPodCables = totalLeafSwitches * railsPerGPU * gpusPerLeaf;
@@ -166,6 +187,11 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     const totalBandwidth = numGPUs * switchSpec.speed * railsPerGPU / 8; // Theoretical max
     
     return {
+      nic: {
+        speedGbps: nicSpeedGb,
+        perGpu: 1,
+        dualHomed: true
+      },
       switchSpec,
       topology: {
         leafSwitches: totalLeafSwitches,
@@ -235,6 +261,17 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
     power: fabricType === 'infiniband' ? 2000 : 1800
   };
   
+  // Storage network sizing (philosophy rule 10)
+  const storageNetwork = (() => {
+    const g = numGPUs || 0;
+    const storageTbps = (g / 1000) * 1.6; // Tbps
+    const ports400G = Math.ceil((storageTbps * 1000) / 400); // convert Tbps->Gbps
+    const sw64x400G = Math.ceil(storageTbps / 25.6); // 64x400G ~ 25.6 Tbps switch fabric
+    const ports100G = Math.ceil(g / 10);
+    const sw32x100G = Math.ceil(g / 320);
+    return { storageTbps, ports400G, sw64x400G, ports100G, sw32x100G };
+  })();
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-200 pb-3">
@@ -248,7 +285,9 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
           Clos Fabric Architecture - Pod-Based Design
         </h3>
         <p className="text-gray-700 mb-3">
-          {networkDetails.topology.pods} pods × {1024} GPUs each, {networkDetails.topology.railsPerGPU} rails per GPU
+          Architecture: <span className="font-semibold">
+          {architecture === '2-tier_leaf_spine' ? '2-Tier Leaf-Spine' : (architecture === '3-tier_with_pods' ? '3-Tier with Pods' : '3-Tier Multi-Pod with Core')}
+          </span>. {networkDetails.topology.pods} pods × {1024} GPUs each, {networkDetails.topology.railsPerGPU} rails/GPU, dual-homed ToR.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
           <div className="bg-white p-3 rounded-lg">
@@ -395,6 +434,10 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
                 <span className="font-medium">{switchSpec.speed}G</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-600">NICs per GPU:</span>
+                <span className="font-medium">1 × {nicSpeedGb}G (dual-homed ToR)</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Switch Power:</span>
                 <span className="font-medium">{(switchSpec.power / 1000).toFixed(1)}kW</span>
               </div>
@@ -405,7 +448,7 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Architecture:</span>
-                <span className="font-medium">3-Tier Clos (Fat-Tree)</span>
+                <span className="font-medium">{architecture === '2-tier_leaf_spine' ? '2-Tier Leaf-Spine' : (architecture === '3-tier_with_pods' ? '3-Tier with Pods' : '3-Tier Multi-Pod with Core')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Oversubscription:</span>
@@ -421,6 +464,50 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Storage Network Sizing (derived) */}
+      <div className="bg-white rounded-xl shadow p-4">
+        <h3 className="text-sm font-semibold text-gray-800 mb-2">Storage Network Sizing (Derived)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-gray-600">Required Storage BW</div>
+            <div className="text-lg font-bold">{storageNetwork.storageTbps.toFixed(1)} Tbps</div>
+            <div className="text-xs text-gray-500">~1.6 Tbps / 1,000 GPUs</div>
+          </div>
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-gray-600">VAST/WEKA 400G Ports</div>
+            <div className="text-lg font-bold">{storageNetwork.ports400G.toLocaleString()}</div>
+            <div className="text-xs text-gray-500">Switches: {storageNetwork.sw64x400G}</div>
+          </div>
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="text-gray-600">Ceph/Object 100G Ports</div>
+            <div className="text-lg font-bold">{storageNetwork.ports100G.toLocaleString()}</div>
+            <div className="text-xs text-gray-500">Switches: {storageNetwork.sw32x100G}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Networking Philosophy & Rationale */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-3">Networking Philosophy & Selection Rationale</h3>
+        <div className="space-y-3 text-sm text-gray-700">
+          <p>
+            We adopt a pod-based Clos fabric with deterministic scaling milestones: ≤2,000 GPUs deploy as a 2‑tier leaf‑spine; 2,001–10,000 GPUs as a 3‑tier within pods; and &gt;10,000 GPUs as a 3‑tier multi‑pod with a core layer for inter‑pod routing. Each NVL72 rack is dual‑homed to a pair of ToR switches, with one 400G/800G NIC per GPU and {networkDetails.topology.railsPerGPU} rails per GPU to sustain collective operations.
+          </p>
+          <p>
+            Non‑blocking (1:1) fabrics are the default for AI training. Minimum spine counts (≥6 per pod) ensure N+2 redundancy and predictable failure domains. At higher scales, core groups (e.g., 6–12) provide inter‑pod bisection while maintaining bounded hop‑count.
+          </p>
+          <p>
+            Multi‑tenancy is supported through hierarchical QoS, per‑tenant VLANs/VRFs and optional DPU offload. For sovereign or high‑assurance deployments, BlueField‑3 enables micro‑segmentation, in‑line policy enforcement and storage/network isolation. Expect a planning uplift of ~15% network overhead for strict isolation, plus increased DPU density.
+          </p>
+          <p>
+            Storage fabrics scale independently: as a rule of thumb we provision ~1.6 Tbps per 1,000 GPUs for training datasets across VAST/WEKA tiers (400G ports) while object/archival tiers (Ceph/S3) target lower bandwidth with many 100G ports. This separation preserves training throughput while optimizing cost for cold data.
+          </p>
+          <p>
+            Security and resilience are built in: dual ToR per rack, multi‑rail links, ECMP across spines/cores, and explicit failure domains per pod. With adaptive routing and congestion control (IB NDR/XDR or RoCEv2 ECN/PFC), the fabric maintains near line‑rate performance with bounded latency for large collectives.
+          </p>
         </div>
       </div>
 
