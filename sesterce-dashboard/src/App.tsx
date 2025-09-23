@@ -6,7 +6,6 @@ import { TabNavigation } from './components/features/TabNavigation';
 import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboardOriginal';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
-import { DarkModeProvider } from './contexts/DarkModeContext';
 import { Activity, Calculator } from 'lucide-react';
 
 interface AppContentProps {
@@ -34,18 +33,18 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
       {/* Background decorative elements - very subtle */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-green-100/30 dark:bg-green-900/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 dark:bg-blue-900/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-green-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
       </div>
       
       <Header onLogout={onLogout} currentUser={currentUser} />
       
       <main className="pt-16 relative z-10">
         {/* Tab Navigation */}
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40 shadow-sm">
+        <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-40 shadow-sm">
           <Container>
             <TabNavigation
               tabs={tabs}
@@ -94,19 +93,13 @@ function App() {
   };
 
   if (!isAuthenticated) {
-    return (
-      <DarkModeProvider>
-        <Login onLogin={handleLogin} />
-      </DarkModeProvider>
-    );
+    return <Login onLogin={handleLogin} />;
   }
 
   return (
-    <DarkModeProvider>
-      <Router>
-        <AppContent onLogout={handleLogout} currentUser={currentUser} />
-      </Router>
-    </DarkModeProvider>
+    <Router>
+      <AppContent onLogout={handleLogout} currentUser={currentUser} />
+    </Router>
   );
 }
 

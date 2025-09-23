@@ -220,12 +220,12 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   return (
     <div className="space-y-4">
       {/* Software Licensing Warning Banner */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 rounded-lg">
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+          <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-green-800 dark:text-green-400 mb-1">Software Stack Pricing</h4>
-            <p className="text-sm text-green-700 dark:text-green-300">
+            <h4 className="text-sm font-semibold text-green-800 mb-1">Software Stack Pricing</h4>
+            <p className="text-sm text-green-700">
               This TCO calculator now includes dynamic software stack pricing with multiple pre-configured options. 
               Select your preferred stack in the Software Stack Configuration section above. Prices reflect real-world licensing costs and FTE requirements.
             </p>
@@ -236,18 +236,18 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       
 
       {/* GPU Configuration + Service Tier Distribution */}
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-green-500 dark:text-green-400" />
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Zap className="w-4 h-4 text-green-500" />
           GPU Configuration
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">GPU Model</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">GPU Model</label>
             <select 
               value={config.gpuModel}
               onChange={(e) => setGpuModel(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:border-green-500 dark:focus:border-green-400 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             >
               <option value="gb200">GB200 NVL72</option>
               <option value="gb300">GB300 NVL72</option>
