@@ -54,6 +54,26 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
     gpuModel
   );
 
+  // Debug: Check if power requirements are being calculated
+  console.log('Debug - Input Values:', {
+    'results.actualGPUs': results.actualGPUs,
+    'config.numGPUs': config.numGPUs,
+    gpuCount,
+    rackCount,
+    gpuModel,
+    'config.fabricType': config.fabricType
+  });
+  
+  console.log('Debug - Enterprise Costs Power Requirements:', {
+    powerRequirements: enterpriseCosts.powerRequirements,
+    hasGpuPowerKW: !!enterpriseCosts.powerRequirements?.gpuPowerKW,
+    hasTotalClusterPowerKW: !!enterpriseCosts.powerRequirements?.totalClusterPowerKW,
+    actualValues: {
+      gpuPowerKW: enterpriseCosts.powerRequirements?.gpuPowerKW,
+      totalClusterPowerKW: enterpriseCosts.powerRequirements?.totalClusterPowerKW
+    }
+  });
+
   // Original CAPEX from calculator
   const originalCapex = results.totalCapex || 0;
   const gpuCapex = results.gpuCapex || 0;
@@ -264,8 +284,30 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
             <div className="border-t pt-2 flex justify-between items-center">
               <span className="font-medium text-gray-900">Total Cooling Load</span>
               <span className="text-xl font-bold text-blue-900">
-                {enterpriseCosts.powerRequirements?.totalClusterPowerKW ? 
-                  ((enterpriseCosts.powerRequirements.totalClusterPowerKW * 3.412) / 1000000).toFixed(1) : '0.0'} MMBTU/hr
+                {(() => {
+                  const powerKW = enterpriseCosts.powerRequirements?.totalClusterPowerKW;
+                  
+                  // Fallback calculation if enterprise costs don't have power requirements
+                  if (!powerKW && gpuCount && gpuModel) {
+                    const gpuPowerMap: Record<string, number> = {
+                      'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                    };
+                    const gpuPower = gpuPowerMap[gpuModel] || 700;
+                    const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
+                    const totalClusterPowerKW = totalGpuPowerKW * 1.3; // 30% overhead
+                    const coolingLoadMMBTU = (totalClusterPowerKW * 3.412) / 1000000;
+                    console.log('Debug - Using fallback calculation:', { totalClusterPowerKW, coolingLoadMMBTU });
+                    return coolingLoadMMBTU.toFixed(1);
+                  }
+                  
+                  console.log('Debug - Cooling Load Calculation:', {
+                    powerKW,
+                    hasValue: !!powerKW,
+                    calculation: powerKW ? (powerKW * 3.412) / 1000000 : 'N/A'
+                  });
+                  return powerKW ? 
+                    ((powerKW * 3.412) / 1000000).toFixed(1) : '0.0';
+                })()} MMBTU/hr
               </span>
             </div>
           </div>
