@@ -1,168 +1,199 @@
-/* Refined Sesterce Theme - Subtle & Content-Focused */
+/* Design Document Inspired Theme - Professional & Clean */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
 :root {
-  /* Primary Sesterce Green - Used Sparingly as Accent */
-  --sesterce-green-50: #f7fdf9;   /* Very subtle green tint */
-  --sesterce-green-100: #f0fdf4;  /* Barely noticeable green */
-  --sesterce-green-500: #22c55e;  /* Primary green for buttons/CTAs */
-  --sesterce-green-600: #16a34a;  /* Darker green for hover states */
-  --sesterce-green-700: #15803d;  /* Text green for important elements */
+  /* Primary Sesterce Colors - From Design Document */
+  --sesterce-green: #00c896;      /* Primary Sesterce green */
+  --sesterce-green-dark: #00b185; /* Darker Sesterce green */
+  --sesterce-green-light: #e8f5f1; /* Light green tint */
 
-  /* Neutral Palette - Primary UI Colors */
-  --sesterce-slate-50: #f8fafc;   /* Lightest background */
-  --sesterce-slate-100: #f1f5f9;  /* Card backgrounds */
-  --sesterce-slate-200: #e2e8f0;  /* Borders */
-  --sesterce-slate-300: #cbd5e1;  /* Subtle borders */
-  --sesterce-slate-400: #94a3b8;  /* Placeholder text */
-  --sesterce-slate-500: #64748b;  /* Secondary text */
-  --sesterce-slate-600: #475569;  /* Body text */
-  --sesterce-slate-700: #334155;  /* Headings */
-  --sesterce-slate-800: #1e293b;  /* Dark text */
-  --sesterce-slate-900: #0f172a;  /* Darkest text */
+  /* Professional Text Colors - From Design Document */
+  --sesterce-text-primary: #2c3e50;   /* Primary text */
+  --sesterce-text-secondary: #34495e; /* Secondary text */
+  --sesterce-text-muted: #6c757d;     /* Muted text */
+  --sesterce-text-light: #95a5a6;     /* Light text */
 
-  /* Warm Grays for Better Readability */
-  --sesterce-gray-50: #fafafa;
-  --sesterce-gray-100: #f4f4f5;
-  --sesterce-gray-200: #e4e4e7;
-  --sesterce-gray-300: #d4d4d8;
-  --sesterce-gray-500: #71717a;
-  --sesterce-gray-600: #52525b;
-  --sesterce-gray-700: #3f3f46;
-  --sesterce-gray-800: #27272a;
-  --sesterce-gray-900: #18181b;
+  /* Neutral Backgrounds - From Design Document */
+  --sesterce-bg-primary: #ffffff;     /* Pure white */
+  --sesterce-bg-secondary: #f8f9fa;   /* Light grey panels */
+  --sesterce-bg-gradient: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
 
-  /* Blue Accent - For Information */
-  --sesterce-blue-50: #eff6ff;
-  --sesterce-blue-500: #3b82f6;
-  --sesterce-blue-600: #2563eb;
-  --sesterce-blue-700: #1d4ed8;
+  /* Borders and Dividers - From Design Document */
+  --sesterce-border-light: #ecf0f1;   /* Light borders */
+  --sesterce-border-medium: #dee2e6;  /* Medium borders */
+  --sesterce-border-accent: #00c896;  /* Accent borders */
 
-  /* Status Colors - Unchanged for Clarity */
-  --sesterce-yellow-50: #fefce8;
-  --sesterce-yellow-400: #facc15;
-  --sesterce-orange-50: #fff7ed;
-  --sesterce-orange-400: #fb923c;
-  --sesterce-red-50: #fef2f2;
-  --sesterce-red-400: #f87171;
+  /* Status Colors - Professional */
+  --sesterce-success: #00c896;
+  --sesterce-warning: #ffc107;
+  --sesterce-error: #dc3545;
+  --sesterce-info: #17a2b8;
+
+  /* Typography - Roboto from Design Document */
+  --sesterce-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sesterce-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
-/* Minimal Color Overrides - Preserve Original Design */
-.bg-white { background-color: #ffffff !important; }
+/* Global Font Override - Apply Roboto */
+body, html {
+  font-family: var(--sesterce-font-family) !important;
+  font-size: 11pt !important;
+  line-height: 1.6 !important;
+  font-weight: 400 !important;
+}
 
-/* Use slate for better readability */
-.bg-gray-50 { background-color: var(--sesterce-slate-50) !important; }
-.bg-gray-100 { background-color: var(--sesterce-slate-100) !important; }
-.border-gray-200 { border-color: var(--sesterce-slate-200) !important; }
-.border-gray-300 { border-color: var(--sesterce-slate-300) !important; }
-.text-gray-500 { color: var(--sesterce-slate-500) !important; }
-.text-gray-600 { color: var(--sesterce-slate-600) !important; }
-.text-gray-700 { color: var(--sesterce-slate-700) !important; }
-.text-gray-800 { color: var(--sesterce-slate-800) !important; }
-.text-gray-900 { color: var(--sesterce-slate-900) !important; }
+/* Design Document Color Overrides */
+.bg-white { background-color: var(--sesterce-bg-primary) !important; }
+.bg-gray-50 { background-color: var(--sesterce-bg-secondary) !important; }
+.bg-gray-100 { background-color: var(--sesterce-bg-secondary) !important; }
 
-/* Selective Blue to Green Conversion - Only for Primary Actions */
-.bg-blue-600 { background-color: var(--sesterce-green-600) !important; }
-.bg-blue-700 { background-color: var(--sesterce-green-700) !important; }
-.hover\:bg-blue-700:hover { background-color: var(--sesterce-green-700) !important; }
-.text-blue-600 { color: var(--sesterce-blue-600) !important; } /* Keep blue for links */
-.text-blue-700 { color: var(--sesterce-blue-700) !important; }
+/* Text Colors - Professional Hierarchy */
+.text-gray-500 { color: var(--sesterce-text-muted) !important; }
+.text-gray-600 { color: var(--sesterce-text-secondary) !important; }
+.text-gray-700 { color: var(--sesterce-text-secondary) !important; }
+.text-gray-800 { color: var(--sesterce-text-primary) !important; }
+.text-gray-900 { color: var(--sesterce-text-primary) !important; }
 
-/* Keep Information Sections Blue - Don't Convert to Green */
-.bg-blue-50 { background-color: var(--sesterce-blue-50) !important; }
-.border-blue-400 { border-color: var(--sesterce-blue-500) !important; }
+/* Borders - Professional & Clean */
+.border-gray-200 { border-color: var(--sesterce-border-medium) !important; }
+.border-gray-300 { border-color: var(--sesterce-border-medium) !important; }
 
-/* Keep Purple Sections as Blue for Variety */
-.bg-purple-50 { background-color: var(--sesterce-blue-50) !important; }
-.border-purple-400 { border-color: var(--sesterce-blue-500) !important; }
+/* Primary Actions - Sesterce Green */
+.bg-green-600 { background-color: var(--sesterce-green) !important; }
+.bg-green-700 { background-color: var(--sesterce-green-dark) !important; }
+.text-green-600 { color: var(--sesterce-green) !important; }
+.text-green-700 { color: var(--sesterce-green-dark) !important; }
+.hover\:bg-green-700:hover { background-color: var(--sesterce-green-dark) !important; }
 
-/* Cyan becomes subtle slate */
-.bg-cyan-50 { background-color: var(--sesterce-slate-50) !important; }
+/* Information Sections - Keep Professional */
+.bg-blue-50 { background-color: var(--sesterce-bg-secondary) !important; }
+.bg-purple-50 { background-color: var(--sesterce-bg-secondary) !important; }
+.bg-cyan-50 { background-color: var(--sesterce-bg-secondary) !important; }
+.border-blue-400 { border-color: var(--sesterce-green) !important; }
+.border-purple-400 { border-color: var(--sesterce-green) !important; }
+.text-blue-600 { color: var(--sesterce-green) !important; }
+.text-blue-700 { color: var(--sesterce-green-dark) !important; }
 
-/* Status colors remain distinct for clarity */
-.bg-yellow-50 { background-color: var(--sesterce-yellow-50) !important; }
-.border-yellow-400 { border-color: var(--sesterce-yellow-400) !important; }
-.bg-orange-50 { background-color: var(--sesterce-orange-50) !important; }
-.border-orange-200 { border-color: var(--sesterce-orange-400) !important; }
-.bg-red-50 { background-color: var(--sesterce-red-50) !important; }
-.border-red-200 { border-color: var(--sesterce-red-400) !important; }
+/* Status Colors - Professional & Clear */
+.bg-yellow-50 { background-color: #fef9f0 !important; }
+.border-yellow-400 { border-color: var(--sesterce-warning) !important; }
+.bg-orange-50 { background-color: #fef9f0 !important; }
+.border-orange-200 { border-color: var(--sesterce-warning) !important; }
+.bg-red-50 { background-color: #fef5f5 !important; }
+.border-red-200 { border-color: var(--sesterce-error) !important; }
 
-/* Green - Only for Primary Actions & Success States */
-.bg-green-50 { background-color: var(--sesterce-green-50) !important; }
-.bg-green-100 { background-color: var(--sesterce-green-100) !important; }
-.bg-green-600 { background-color: var(--sesterce-green-600) !important; }
-.bg-green-700 { background-color: var(--sesterce-green-700) !important; }
-.text-green-600 { color: var(--sesterce-green-600) !important; }
-.text-green-700 { color: var(--sesterce-green-700) !important; }
+/* Success States */
+.bg-green-50 { background-color: var(--sesterce-green-light) !important; }
+.bg-green-100 { background-color: var(--sesterce-green-light) !important; }
+.border-green-200 { border-color: var(--sesterce-green) !important; }
+.border-green-400 { border-color: var(--sesterce-green) !important; }
 
-/* Hover states */
-.hover\:bg-green-700:hover { background-color: var(--sesterce-green-700) !important; }
-.hover\:bg-gray-50:hover { background-color: var(--sesterce-slate-50) !important; }
+/* Hover States */
+.hover\:bg-gray-50:hover { background-color: var(--sesterce-bg-secondary) !important; }
 
-/* Focus states */
-.focus\:ring-green-500:focus { --tw-ring-color: var(--sesterce-green-500) !important; }
+/* Focus States */
+.focus\:ring-green-500:focus { --tw-ring-color: var(--sesterce-green) !important; }
 
-/* Subtle gradient adjustments */
-.from-green-50 { --tw-gradient-from: var(--sesterce-green-50) !important; }
-.to-gray-100 { --tw-gradient-to: var(--sesterce-slate-100) !important; }
+/* Gradients - Professional */
+.from-green-50 { --tw-gradient-from: var(--sesterce-green-light) !important; }
+.to-gray-100 { --tw-gradient-to: var(--sesterce-bg-secondary) !important; }
+.from-blue-50 { --tw-gradient-from: var(--sesterce-bg-secondary) !important; }
+.to-purple-50 { --tw-gradient-to: var(--sesterce-bg-secondary) !important; }
+.from-indigo-50 { --tw-gradient-from: var(--sesterce-bg-secondary) !important; }
 
-/* Keep most gradients neutral */
-.from-blue-50 { --tw-gradient-from: var(--sesterce-slate-50) !important; }
-.to-purple-50 { --tw-gradient-to: var(--sesterce-slate-100) !important; }
-.from-indigo-50 { --tw-gradient-from: var(--sesterce-slate-50) !important; }
-
-/* Refined Sesterce Components - Content-First Design */
+/* Design Document Components - Professional & Clean */
 .sesterce-card {
-  background: #ffffff;
-  border: 1px solid var(--sesterce-slate-200);
+  background: var(--sesterce-bg-primary);
+  border: 1px solid var(--sesterce-border-medium);
   border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-family: var(--sesterce-font-family);
 }
 
 .sesterce-card-accent {
-  background: var(--sesterce-slate-50);
-  border: 1px solid var(--sesterce-slate-200);
-  border-left: 3px solid var(--sesterce-green-500);
+  background: var(--sesterce-bg-secondary);
+  border: 1px solid var(--sesterce-border-medium);
+  border-left: 3px solid var(--sesterce-green);
 }
 
 .sesterce-button-primary {
-  background-color: var(--sesterce-green-600);
+  background-color: var(--sesterce-green);
   color: white;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
   font-weight: 500;
+  font-family: var(--sesterce-font-family);
   transition: all 0.2s ease;
   border: none;
 }
 
 .sesterce-button-primary:hover {
-  background-color: var(--sesterce-green-700);
+  background-color: var(--sesterce-green-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 200, 150, 0.15);
 }
 
 .sesterce-input {
-  border: 1px solid var(--sesterce-slate-300);
+  border: 1px solid var(--sesterce-border-medium);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
-  background: white;
+  background: var(--sesterce-bg-primary);
+  font-family: var(--sesterce-font-family);
+  color: var(--sesterce-text-primary);
   transition: border-color 0.2s ease;
-  color: var(--sesterce-slate-700);
 }
 
 .sesterce-input:focus {
   outline: none;
-  border-color: var(--sesterce-green-500);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
+  border-color: var(--sesterce-green);
+  box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.08);
 }
 
 .sesterce-section {
-  background: var(--sesterce-slate-50);
-  border: 1px solid var(--sesterce-slate-200);
+  background: var(--sesterce-bg-secondary);
+  border: 1px solid var(--sesterce-border-medium);
   border-radius: 8px;
 }
 
-/* Improved readability classes */
-.sesterce-text-primary { color: var(--sesterce-slate-900); }
-.sesterce-text-secondary { color: var(--sesterce-slate-600); }
-.sesterce-text-muted { color: var(--sesterce-slate-500); }
-.sesterce-bg-subtle { background-color: var(--sesterce-slate-50); }
-.sesterce-border-subtle { border-color: var(--sesterce-slate-200); }
+/* Professional Typography Classes */
+.sesterce-text-primary { color: var(--sesterce-text-primary); }
+.sesterce-text-secondary { color: var(--sesterce-text-secondary); }
+.sesterce-text-muted { color: var(--sesterce-text-muted); }
+.sesterce-bg-subtle { background-color: var(--sesterce-bg-secondary); }
+.sesterce-border-subtle { border-color: var(--sesterce-border-medium); }
+
+/* Table Styling - From Design Document */
+table.sesterce-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 10pt;
+  background: var(--sesterce-bg-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-family: var(--sesterce-font-family);
+}
+
+table.sesterce-table th {
+  background: var(--sesterce-green);
+  color: #ffffff;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 10pt;
+  border: 1px solid var(--sesterce-green-dark);
+}
+
+table.sesterce-table td {
+  padding: 10px 15px;
+  border: 1px solid var(--sesterce-border-light);
+  vertical-align: top;
+  background: var(--sesterce-bg-primary);
+}
+
+table.sesterce-table tr:nth-child(even) td {
+  background: var(--sesterce-bg-secondary);
+}
+
+table.sesterce-table tr:hover td {
+  background: var(--sesterce-green-light);
+}
