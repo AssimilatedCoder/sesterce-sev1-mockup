@@ -26,11 +26,11 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'jwt-secret-key-change-in-production')
 USERS = {
     'Youssef': {
         'password_hash': hashlib.sha256('Y0da!777'.encode()).hexdigest(),
-        'role': 'user'
+        'role': 'admin'
     },
     'Maciej': {
         'password_hash': hashlib.sha256('H0th#88!'.encode()).hexdigest(),
-        'role': 'user'
+        'role': 'admin'
     },
     'admin': {
         'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
