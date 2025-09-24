@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, BookOpen, FileText, Server, Cpu, Zap, Building2, Database } from 'lucide-react';
+import { ExternalLink, BookOpen, FileText, Server, Cpu, Zap, Building2, Database, DollarSign } from 'lucide-react';
 
 export const ReferencesTab: React.FC = () => {
   return (
@@ -233,12 +233,40 @@ export const ReferencesTab: React.FC = () => {
               <ul className="text-sm text-gray-600 mt-1 space-y-1">
                 <li>• DDN A3I Solutions for NVIDIA Cloud Partners (NCP Reference Architecture)</li>
                 <li>• DDN A3I Solutions with NVIDIA DGX SuperPOD Reference Architecture</li>
+                <li>• DDN EXAScaler: 7 of top 10 IO500 production systems (September 2024)</li>
+                <li>• DDN Infinia: Object storage for inference workloads (launched November 2023)</li>
+              </ul>
+            </div>
+            <div className="pl-6">
+              <p className="text-sm font-medium text-gray-700">VAST Data</p>
+              <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                <li>• VAST NVIDIA NCP White Paper 2025</li>
+                <li>• NVIDIA DGX SuperPOD VAST Reference Architecture (RA-11389-001)</li>
+                <li>• xAI Colossus 100K GPU deployment validation (September 2024)</li>
+                <li>• VAST Universal Storage Platform: Disaggregated Shared Everything (DASE)</li>
+              </ul>
+            </div>
+            <div className="pl-6">
+              <p className="text-sm font-medium text-gray-700">Weka Data Platform</p>
+              <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                <li>• Weka AI/ML Storage Platform: Container-native distributed filesystem</li>
+                <li>• Top 5 entries in IO500 rankings (September 2024)</li>
+                <li>• 40K+ GPU deployments at major CSPs</li>
+              </ul>
+            </div>
+            <div className="pl-6">
+              <p className="text-sm font-medium text-gray-700">Pure Storage</p>
+              <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                <li>• Pure Storage FlashBlade NVIDIA DGX SuperPOD Deployment Guide</li>
+                <li>• FlashBlade//S: Performance tier (270 GB/s per chassis)</li>
+                <li>• FlashBlade//E: Capacity tier with QLC flash (&lt;1W/TB power efficiency)</li>
               </ul>
             </div>
             <div className="pl-6">
               <p className="text-sm font-medium text-gray-700">NetApp</p>
               <ul className="text-sm text-gray-600 mt-1">
                 <li>• NetApp AFF A90 Storage Systems with NVIDIA DGX SuperPOD Design Guide (NVA-1175)</li>
+                <li>• Best protocol flexibility: NFS, SMB, S3, FC, iSCSI support</li>
               </ul>
             </div>
             <div className="pl-6">
@@ -247,18 +275,36 @@ export const ReferencesTab: React.FC = () => {
                 <li>• IBM Storage Scale System 6000 with NVIDIA DGX SuperPOD Deployment Guide (IBM Redbooks)</li>
               </ul>
             </div>
-            <div className="pl-6">
-              <p className="text-sm font-medium text-gray-700">VAST Data</p>
-              <ul className="text-sm text-gray-600 mt-1 space-y-1">
-                <li>• VAST NVIDIA NCP White Paper 2025</li>
-                <li>• NVIDIA DGX SuperPOD VAST Reference Architecture (RA-11389-001)</li>
-              </ul>
+          </div>
+        </div>
+
+        {/* Currency & Financial References */}
+        <div className="mb-6">
+          <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <DollarSign className="w-4 h-4" />
+            Currency & Financial Analysis
+          </h4>
+          <div className="space-y-3 pl-6">
+            <div className="border-l-4 border-green-200 pl-4 hover:border-green-400 transition-colors">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-800">
+                    <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                      European Central Bank Exchange Rates <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">3-month rolling average USD/EUR rates (Q4 2024: 0.92)</div>
+                </div>
+              </div>
             </div>
-            <div className="pl-6">
-              <p className="text-sm font-medium text-gray-700">Pure Storage</p>
-              <ul className="text-sm text-gray-600 mt-1">
-                <li>• Pure Storage FlashBlade NVIDIA DGX SuperPOD Deployment Guide</li>
-              </ul>
+            <div className="text-sm text-gray-600">
+              • Currency conversion uses quarterly updated 3-month rolling averages
+            </div>
+            <div className="text-sm text-gray-600">
+              • USD base currency with EUR conversion at 0.92 rate (Q4 2024)
+            </div>
+            <div className="text-sm text-gray-600">
+              • All financial projections include 5% revenue growth and 3% cost inflation
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   BookOpen, ChevronDown, ChevronUp, Calculator, Cpu, HardDrive, 
   Network, Zap, Shield, DollarSign, TrendingUp,
-  Info, AlertCircle, CheckCircle
+  Info, AlertCircle, CheckCircle, Globe, Database
 } from 'lucide-react';
 
 export const DocumentationTab: React.FC = () => {
@@ -565,6 +565,102 @@ export const DocumentationTab: React.FC = () => {
               <p><strong>Optimistic Scenario:</strong> 90% utilization, liquid cooling, 1:1 oversubscription</p>
               <p><strong>Enterprise Scenario:</strong> Include all security, backup, and compliance components</p>
               <p><strong>Growth Planning:</strong> Model 2x and 5x scale scenarios for future expansion</p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Currency Conversion Section */}
+      <Section id="currency" title="Currency Conversion System" icon={Globe}>
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            The calculator includes a comprehensive currency conversion system that allows users to view all 
+            financial data in either USD or EUR using professionally sourced exchange rates.
+          </p>
+          
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h4 className="font-semibold text-green-900 mb-2">Currency Features</h4>
+            <ul className="text-sm text-green-800 space-y-1">
+              <li>• <strong>Real-time switching:</strong> Toggle between USD and EUR in the top navigation</li>
+              <li>• <strong>3-month rolling averages:</strong> Uses ECB data for stable, professional rates</li>
+              <li>• <strong>Persistent selection:</strong> Currency choice saved across sessions</li>
+              <li>• <strong>Universal conversion:</strong> All tabs and calculations automatically convert</li>
+              <li>• <strong>Professional formatting:</strong> Proper negative number handling and scaling</li>
+            </ul>
+          </div>
+
+          <OptionCard
+            title="Currency Selector"
+            description="Located in the top-right header, allows instant switching between USD and EUR display"
+            impact="All financial values throughout the application are converted using current exchange rates"
+            values={["USD (Base Currency)", "EUR (Converted)"]}
+            defaultValue="USD"
+          />
+
+          <FormulaBox
+            title="Currency Conversion Formula"
+            formula="Converted_Amount = Base_Amount × Exchange_Rate"
+            explanation="Current rates: USD → EUR = 0.92, EUR → USD = 1.087 (Q4 2024 3-month average)"
+          />
+
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2">Exchange Rate Source</h4>
+            <p className="text-sm text-blue-800">
+              Exchange rates are sourced from the European Central Bank (ECB) and updated quarterly using 
+              3-month rolling averages to provide stable, professional-grade conversion rates suitable for 
+              enterprise financial planning and budgeting.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      {/* Storage Analysis Section */}
+      <Section id="storage-analysis" title="Storage Platform Comparison" icon={Database}>
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            The Storage Analysis tab includes a comprehensive comparison of enterprise storage platforms 
+            specifically designed for AI/ML workloads and GPU supercluster deployments.
+          </p>
+          
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+            <h4 className="font-semibold text-purple-900 mb-2">Storage Comparison Features</h4>
+            <ul className="text-sm text-purple-800 space-y-1">
+              <li>• <strong>Vendor Analysis:</strong> VAST Data, Weka, DDN, Pure Storage, NetApp</li>
+              <li>• <strong>Performance Metrics:</strong> Throughput, latency, IOPS, scalability</li>
+              <li>• <strong>Production Validation:</strong> Based on IO500 results and real deployments</li>
+              <li>• <strong>Scale Guidance:</strong> Deployment patterns by GPU count (1K-100K+)</li>
+              <li>• <strong>Cost Analysis:</strong> $/GB comparisons and TCO considerations</li>
+            </ul>
+          </div>
+
+          <OptionCard
+            title="Embedded Storage Comparison"
+            description="Interactive HTML document with detailed vendor comparison tables and deployment guidance"
+            impact="Provides strategic guidance for storage architecture decisions at different scales"
+            values={["VAST Universal", "Weka Platform", "DDN EXAScaler", "DDN Infinia", "Pure FlashBlade", "NetApp AFF"]}
+          />
+
+          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <h4 className="font-semibold text-yellow-900 mb-2">Key Insights from Analysis</h4>
+            <ul className="text-sm text-yellow-800 space-y-1">
+              <li>• <strong>Market Leaders:</strong> VAST Data and DDN EXAScaler dominate 100K+ GPU deployments</li>
+              <li>• <strong>IO500 Performance:</strong> DDN holds 7 of top 10 production spots</li>
+              <li>• <strong>Architecture Trend:</strong> 90% of hyperscale deployments use mixed vendor strategies</li>
+              <li>• <strong>Cost Reality:</strong> Storage represents 15-20% of total cluster CAPEX at scale</li>
+            </ul>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-gray-900 mb-2">Decision Framework</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium text-gray-800 mb-1">Training-Primary (&gt;10K GPUs):</p>
+                <p className="text-gray-600">DDN EXAScaler or VAST Data as primary, with Ceph/object for cold tier</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-800 mb-1">Inference-Primary:</p>
+                <p className="text-gray-600">Weka or DDN Infinia for low-latency serving, with Pure FlashBlade//E for capacity</p>
+              </div>
             </div>
           </div>
         </div>

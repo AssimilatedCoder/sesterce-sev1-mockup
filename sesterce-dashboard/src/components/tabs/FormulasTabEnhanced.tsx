@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator } from 'lucide-react';
+import { Calculator, Globe, Database } from 'lucide-react';
 
 export const FormulasTabEnhanced: React.FC = () => {
   return (
@@ -339,6 +339,90 @@ export const FormulasTabEnhanced: React.FC = () => {
         </div>
       </div>
 
+      {/* Currency Conversion Formulas */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Globe className="w-5 h-5 text-blue-600" />
+          Currency Conversion Formulas
+        </h3>
+        <div className="space-y-4 font-mono text-sm">
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Base Currency Conversion:</div>
+            <div>Converted_Amount = Base_Amount × Exchange_Rate</div>
+            <div className="mt-1 text-gray-600">USD → EUR: Amount_EUR = Amount_USD × 0.92</div>
+            <div className="text-gray-600">EUR → USD: Amount_USD = Amount_EUR × 1.087</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">3-Month Rolling Average Rate:</div>
+            <div>Rate_Q4_2024 = (Rate_Oct + Rate_Nov + Rate_Dec) / 3</div>
+            <div className="mt-1 text-gray-600">Current USD/EUR rate: 0.92 (Q4 2024 average)</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Formatted Currency Display:</div>
+            <div>if (abs_amount ≥ 1e9): format = "€X.XXB" or "$X.XXB"</div>
+            <div>if (abs_amount ≥ 1e6): format = "€X.XXM" or "$X.XXM"</div>
+            <div>if (abs_amount ≥ 1e3): format = "€XXXK" or "$XXXK"</div>
+            <div className="mt-1 text-gray-600">Negative values: "-€X.XXB" (minus sign before currency symbol)</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Financial Projections with Currency:</div>
+            <div>Year_N_Revenue_EUR = Year_N_Revenue_USD × Current_Exchange_Rate</div>
+            <div>Cash_Flow_EUR = (Revenue_EUR - OPEX_EUR - Depreciation_EUR)</div>
+            <div className="mt-1 text-gray-600">All financial metrics converted consistently across 5-year projections</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Storage Platform Analysis Methodology */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Database className="w-5 h-5 text-purple-600" />
+          Storage Platform Analysis Methodology
+        </h3>
+        <div className="space-y-4 font-mono text-sm">
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Performance Scoring Matrix:</div>
+            <div>Vendor_Score = (Throughput_Score × 0.3) + (Latency_Score × 0.25) + (Scale_Score × 0.25) + (Maturity_Score × 0.2)</div>
+            <div className="mt-1 text-gray-600">Throughput: GB/s per chassis/cluster normalized to 100-point scale</div>
+            <div className="text-gray-600">Latency: Inverse of microsecond latency (lower = higher score)</div>
+            <div className="text-gray-600">Scale: Maximum proven GPU deployment size</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Cost per GB Calculation:</div>
+            <div>Cost_per_GB = (Hardware_Cost + 3_Year_Support) / Usable_Capacity_GB</div>
+            <div className="mt-1 text-gray-600">Includes: Storage hardware, networking, software licenses</div>
+            <div className="text-gray-600">Excludes: Datacenter space, power, cooling (calculated separately)</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Deployment Pattern Matching:</div>
+            <div>if (GPU_Count ≥ 50000): Pattern = "Hyperscale" (VAST + DDN + Ceph)</div>
+            <div>if (10000 ≤ GPU_Count &lt; 50000): Pattern = "Large Scale" (Unified or Tiered)</div>
+            <div>if (1000 ≤ GPU_Count &lt; 10000): Pattern = "Medium Scale" (Performance Focus)</div>
+            <div className="mt-1 text-gray-600">Based on xAI Colossus, Meta RSC, and other production deployments</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">IO500 Performance Weighting:</div>
+            <div>IO500_Weight = (BW_Score + IOPS_Score + MD_Score) / 3</div>
+            <div className="mt-1 text-gray-600">BW: Bandwidth test results (sequential I/O)</div>
+            <div className="text-gray-600">IOPS: Random I/O operations per second</div>
+            <div className="text-gray-600">MD: Metadata operations (file create/delete/stat)</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="font-bold mb-2">Vendor Recommendation Algorithm:</div>
+            <div>Recommendation = argmax(Vendor_Score × Use_Case_Match × Budget_Fit)</div>
+            <div className="mt-1 text-gray-600">Use_Case_Match: Training=DDN/VAST, Inference=Weka/DDN_Infinia</div>
+            <div className="text-gray-600">Budget_Fit: Cost alignment with specified budget constraints</div>
+          </div>
+        </div>
+      </div>
+
       {/* Validation & Accuracy Notes */}
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
         <h3 className="flex items-center gap-2 text-lg font-bold text-blue-800 mb-2">
@@ -352,6 +436,8 @@ export const FormulasTabEnhanced: React.FC = () => {
           <li>• PUE values from production deployments (Google: 1.09, Meta: 1.12)</li>
           <li>• Cooling costs validated against CoolIT and Motivair specifications</li>
           <li>• Staff costs based on industry salary surveys for AI infrastructure roles</li>
+          <li>• Currency rates from European Central Bank (ECB) 3-month rolling averages</li>
+          <li>• Storage analysis based on IO500 SC24 results and production deployment data</li>
           <li>• All formulas cross-validated with real-world deployment data</li>
         </ul>
       </div>
