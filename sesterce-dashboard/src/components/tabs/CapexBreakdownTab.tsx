@@ -43,12 +43,15 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
 
   // Calculate enterprise infrastructure costs
   const rackCount = Math.ceil((results.actualGPUs || config.numGPUs) / 72); // Assuming GB200/GB300 primarily
+  const gpuCount = results.actualGPUs || config.numGPUs;
+  const gpuModel = config.gpuModel || 'gb200';
+  
   const enterpriseCosts = calculateEnterpriseInfrastructureCosts(
-    results.actualGPUs || config.numGPUs,
+    gpuCount,
     rackCount,
     config.fabricType || 'ethernet',
     includeOptional,
-    config.gpuModel || 'gb200'
+    gpuModel
   );
 
   // Original CAPEX from calculator
@@ -171,25 +174,27 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Cluster Computing Load</span>
                 <span className="font-semibold text-yellow-700">
-                  {enterpriseCosts.powerRequirements.gpuPowerKW.toFixed(0)} kW
+                  {enterpriseCosts.powerRequirements?.gpuPowerKW?.toFixed(0) || '0'} kW
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Cooling Systems</span>
                 <span className="font-semibold text-yellow-700">
-                  {(enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.6).toFixed(0)} kW
+                  {enterpriseCosts.powerRequirements?.infrastructureOverheadKW ? 
+                    (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.6).toFixed(0) : '0'} kW
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Datacenter Ancillary</span>
                 <span className="font-semibold text-yellow-700">
-                  {(enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.4).toFixed(0)} kW
+                  {enterpriseCosts.powerRequirements?.infrastructureOverheadKW ? 
+                    (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.4).toFixed(0) : '0'} kW
                 </span>
               </div>
               <div className="border-t pt-2 flex justify-between items-center">
                 <span className="font-medium text-gray-900">Total Power Draw</span>
                 <span className="text-xl font-bold text-yellow-900">
-                  {enterpriseCosts.powerRequirements.totalClusterPowerMW.toFixed(1)} MW
+                  {enterpriseCosts.powerRequirements?.totalClusterPowerMW?.toFixed(1) || '0.0'} MW
                 </span>
               </div>
             </div>
@@ -239,14 +244,14 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Heat Load (Computing)</span>
               <span className="font-semibold text-blue-700">
-                {enterpriseCosts.powerRequirements ? 
+                {enterpriseCosts.powerRequirements?.gpuPowerKW ? 
                   (enterpriseCosts.powerRequirements.gpuPowerKW * 3.412).toFixed(0) : '0'} BTU/hr
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Infrastructure Heat</span>
               <span className="font-semibold text-blue-700">
-                {enterpriseCosts.powerRequirements ? 
+                {enterpriseCosts.powerRequirements?.infrastructureOverheadKW ? 
                   (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 3.412).toFixed(0) : '0'} BTU/hr
               </span>
             </div>
@@ -259,8 +264,8 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
             <div className="border-t pt-2 flex justify-between items-center">
               <span className="font-medium text-gray-900">Total Cooling Load</span>
               <span className="text-xl font-bold text-blue-900">
-                {enterpriseCosts.powerRequirements ? 
-                  ((enterpriseCosts.powerRequirements.totalClusterPowerKW * 3.412) / 1000000).toFixed(1) : '0'} MMBTU/hr
+                {enterpriseCosts.powerRequirements?.totalClusterPowerKW ? 
+                  ((enterpriseCosts.powerRequirements.totalClusterPowerKW * 3.412) / 1000000).toFixed(1) : '0.0'} MMBTU/hr
               </span>
             </div>
           </div>
