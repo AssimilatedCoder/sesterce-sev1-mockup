@@ -1,5 +1,5 @@
-import React from 'react';
-import { Network, Cpu, Activity } from 'lucide-react';
+import React, { useState } from 'react';
+import { Network, Cpu, Activity, ChevronDown, ChevronUp, Book } from 'lucide-react';
 
 interface NetworkingTabEnhancedProps {
   config: any;
@@ -68,6 +68,7 @@ const networkingEquipment = {
 
 export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ config, results }) => {
   const { numGPUs, gpuModel, fabricType, enableBluefield } = config;
+  const [isPlaybookExpanded, setIsPlaybookExpanded] = useState(false);
   
   // Derived selections based on philosophy
   const nicSpeedGb = ((): number => {
@@ -489,89 +490,6 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
         </div>
       </div>
 
-      {/* Networking Philosophy & Rationale */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">Networking Philosophy & Selection Rationale</h3>
-        <div className="space-y-3 text-sm text-gray-700">
-          <p>
-            We adopt a pod-based Clos fabric with deterministic scaling milestones: ≤2,000 GPUs deploy as a 2‑tier leaf‑spine; 2,001–10,000 GPUs as a 3‑tier within pods; and &gt;10,000 GPUs as a 3‑tier multi‑pod with a core layer for inter‑pod routing. Each NVL72 rack is dual‑homed to a pair of ToR switches, with one 400G/800G NIC per GPU and {networkDetails.topology.railsPerGPU} rails per GPU to sustain collective operations.
-          </p>
-          <p>
-            Non‑blocking (1:1) fabrics are the default for AI training. Minimum spine counts (≥6 per pod) ensure N+2 redundancy and predictable failure domains. At higher scales, core groups (e.g., 6–12) provide inter‑pod bisection while maintaining bounded hop‑count.
-          </p>
-          <p>
-            Multi‑tenancy is supported through hierarchical QoS, per‑tenant VLANs/VRFs and optional DPU offload. For sovereign or high‑assurance deployments, BlueField‑3 enables micro‑segmentation, in‑line policy enforcement and storage/network isolation. Expect a planning uplift of ~15% network overhead for strict isolation, plus increased DPU density.
-          </p>
-          <p>
-            Storage fabrics scale independently: as a rule of thumb we provision ~1.6 Tbps per 1,000 GPUs for training datasets across VAST/WEKA tiers (400G ports) while object/archival tiers (Ceph/S3) target lower bandwidth with many 100G ports. This separation preserves training throughput while optimizing cost for cold data.
-          </p>
-          <p>
-            Security and resilience are built in: dual ToR per rack, multi‑rail links, ECMP across spines/cores, and explicit failure domains per pod. With adaptive routing and congestion control (IB NDR/XDR or RoCEv2 ECN/PFC), the fabric maintains near line‑rate performance with bounded latency for large collectives.
-          </p>
-        </div>
-      </div>
-
-      {/* RoCEv2 / EVPN / VXLAN Compliance (Ethernet) */}
-      {fabricType !== 'infiniband' && (
-        <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-3">RoCEv2 + EVPN/VXLAN Compliance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-semibold text-gray-800 mb-2">RoCEv2 (RDMA over Converged Ethernet v2)</h4>
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                <li>Protocol: RoCEv2 (L3, UDP 4791)</li>
-                <li>GID: v2 (IPv4/IPv6)</li>
-                <li>Lossless class via PFC (prio 3)</li>
-              </ul>
-            </div>
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-semibold text-gray-800 mb-2">Congestion Control</h4>
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                <li>PFC: enabled, 8 priorities, no‑drop class 3</li>
-                <li>ECN: enabled, mark ≥70% buffer</li>
-                <li>DCQCN: adaptive rate reduction</li>
-              </ul>
-            </div>
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-semibold text-gray-800 mb-2">EVPN/VXLAN Overlay</h4>
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                <li>Control plane: EVPN‑BGP</li>
-                <li>Overlay: VXLAN (L2/L3 VNI, symmetric IRB)</li>
-                <li>EVPN‑MH multihoming (no MLAG)</li>
-              </ul>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-semibold text-gray-800 mb-2">QoS & Buffering</h4>
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                <li>DSCP: RDMA=CS3(26), Storage=AF21(18), Mgmt=CS6(48)</li>
-                <li>Buffer alloc: RDMA 40%, Storage 20%, Default 40%</li>
-                <li>Scheduling: RDMA strict, others WFQ</li>
-              </ul>
-            </div>
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-semibold text-gray-800 mb-2">EVPN‑MH Benefits</h4>
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                <li>No ISL/MLAG pairs; scales beyond 2 leaves</li>
-                <li>Standards‑based DF election (Type‑4)</li>
-                <li>Vendor interop via RFC 7432</li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-4 text-sm">
-            <h4 className="font-semibold text-gray-800 mb-2">Design Validation</h4>
-            <ul className="list-disc list-inside text-gray-700 space-y-1">
-              <li>Lossless class configured: Yes (PFC priority 3)</li>
-              <li>Congestion control active: Yes (ECN + DCQCN)</li>
-              <li>EVPN control plane: Yes (MP‑BGP)</li>
-              <li>VXLAN MTU ≥ 9000: Yes (jumbo frames)</li>
-              <li>Tenant isolation: Yes (VRF + symmetric IRB)</li>
-            </ul>
-          </div>
-        </div>
-      )}
-
       {/* Performance Characteristics */}
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -610,6 +528,361 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Combined Networking Philosophy & RoCEv2/EVPN Compliance */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">Networking Philosophy & Selection Rationale</h3>
+        <div className="space-y-4 text-sm text-gray-700">
+          <p>
+            We adopt a pod-based Clos fabric with deterministic scaling milestones: ≤2,000 GPUs deploy as a 2‑tier leaf‑spine; 2,001–10,000 GPUs as a 3‑tier within pods; and &gt;10,000 GPUs as a 3‑tier multi‑pod with a core layer for inter‑pod routing. Each NVL72 rack is dual‑homed to a pair of ToR switches, with one 400G/800G NIC per GPU and {networkDetails.topology.railsPerGPU} rails per GPU to sustain collective operations.
+          </p>
+          <p>
+            Non‑blocking (1:1) fabrics are the default for AI training. Minimum spine counts (≥6 per pod) ensure N+2 redundancy and predictable failure domains. At higher scales, core groups (e.g., 6–12) provide inter‑pod bisection while maintaining bounded hop‑count.
+          </p>
+          <p>
+            Multi‑tenancy is supported through hierarchical QoS, per‑tenant VLANs/VRFs and optional DPU offload. For sovereign or high‑assurance deployments, BlueField‑3 enables micro‑segmentation, in‑line policy enforcement and storage/network isolation. Expect a planning uplift of ~15% network overhead for strict isolation, plus increased DPU density.
+          </p>
+          <p>
+            Storage fabrics scale independently: as a rule of thumb we provision ~1.6 Tbps per 1,000 GPUs for training datasets across VAST/WEKA tiers (400G ports) while object/archival tiers (Ceph/S3) target lower bandwidth with many 100G ports. This separation preserves training throughput while optimizing cost for cold data.
+          </p>
+          <p>
+            Security and resilience are built in: dual ToR per rack, multi‑rail links, ECMP across spines/cores, and explicit failure domains per pod. With adaptive routing and congestion control (IB NDR/XDR or RoCEv2 ECN/PFC), the fabric maintains near line‑rate performance with bounded latency for large collectives.
+          </p>
+        </div>
+
+        {/* RoCEv2 / EVPN / VXLAN Compliance (Ethernet) */}
+        {fabricType !== 'infiniband' && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-lg font-bold text-gray-800 mb-4">RoCEv2 + EVPN/VXLAN Implementation</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-gray-50 p-4 rounded">
+                <h5 className="font-semibold text-gray-800 mb-2">RoCEv2 (RDMA over Converged Ethernet v2)</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Protocol: RoCEv2 (L3, UDP 4791)</li>
+                  <li>GID: v2 (IPv4/IPv6)</li>
+                  <li>Lossless class via PFC (prio 3)</li>
+                </ul>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <h5 className="font-semibold text-gray-800 mb-2">Congestion Control</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>PFC: enabled, 8 priorities, no‑drop class 3</li>
+                  <li>ECN: enabled, mark ≥70% buffer</li>
+                  <li>DCQCN: adaptive rate reduction</li>
+                </ul>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <h5 className="font-semibold text-gray-800 mb-2">EVPN/VXLAN Overlay</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Control plane: EVPN‑BGP</li>
+                  <li>Overlay: VXLAN (L2/L3 VNI, symmetric IRB)</li>
+                  <li>EVPN‑MH multihoming (no MLAG)</li>
+                </ul>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
+              <div className="bg-gray-50 p-4 rounded">
+                <h5 className="font-semibold text-gray-800 mb-2">QoS & Buffering</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>DSCP: RDMA=CS3(26), Storage=AF21(18), Mgmt=CS6(48)</li>
+                  <li>Buffer alloc: RDMA 40%, Storage 20%, Default 40%</li>
+                  <li>Scheduling: RDMA strict, others WFQ</li>
+                </ul>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <h5 className="font-semibold text-gray-800 mb-2">EVPN‑MH Benefits</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>No ISL/MLAG pairs; scales beyond 2 leaves</li>
+                  <li>Standards‑based DF election (Type‑4)</li>
+                  <li>Vendor interop via RFC 7432</li>
+                </ul>
+              </div>
+            </div>
+            <div className="mt-4 text-sm">
+              <h5 className="font-semibold text-gray-800 mb-2">Design Validation</h5>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>Lossless class configured: Yes (PFC priority 3)</li>
+                <li>Congestion control active: Yes (ECN + DCQCN)</li>
+                <li>EVPN control plane: Yes (MP‑BGP)</li>
+                <li>VXLAN MTU ≥ 9000: Yes (jumbo frames)</li>
+                <li>Tenant isolation: Yes (VRF + symmetric IRB)</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Collapsible Networking Playbook */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl shadow-lg border border-indigo-200">
+        <div 
+          className="p-6 cursor-pointer flex items-center justify-between hover:bg-gradient-to-r hover:from-indigo-100 hover:to-purple-100 transition-all duration-200"
+          onClick={() => setIsPlaybookExpanded(!isPlaybookExpanded)}
+        >
+          <div className="flex items-center gap-3">
+            <Book className="w-6 h-6 text-indigo-600" />
+            <h3 className="text-xl font-bold text-gray-800">Mass-Scale Ethernet AI Fabric Runbook</h3>
+            <span className="text-sm text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">RoCEv2 + EVPN/VXLAN</span>
+          </div>
+          {isPlaybookExpanded ? (
+            <ChevronUp className="w-5 h-5 text-indigo-600" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-indigo-600" />
+          )}
+        </div>
+        
+        {isPlaybookExpanded && (
+          <div className="px-6 pb-6 border-t border-indigo-200">
+            <div className="bg-white rounded-lg p-6 mt-4">
+              
+              {/* Scope */}
+              <section className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Scope</h4>
+                <p className="text-gray-700 leading-relaxed">
+                  This handbook consolidates the complete Ethernet‑only network design, parameters, and golden configurations for RoCEv2 + EVPN/VXLAN fabrics powering very large GPU clusters (10k–200k GPUs). It captures current best practices from mass‑scale deployments and provides step‑by‑step runbooks, validation, and troubleshooting procedures.
+                </p>
+              </section>
+
+              {/* Reference Architecture */}
+              <section className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Reference Architecture & Scale Milestones</h4>
+                
+                <h5 className="font-semibold text-gray-700 mb-3">Roles & Platforms</h5>
+                <div className="overflow-x-auto mb-4">
+                  <table className="w-full border-collapse border border-gray-300 text-sm">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-3 py-2 text-left">Tier/Role</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Platform</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Primary Function</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">Leaf / ToR</td>
+                        <td className="border border-gray-300 px-3 py-2">Spectrum‑4 SN5600 (64×800G)</td>
+                        <td className="border border-gray-300 px-3 py-2">VTEP, EVPN‑MH access</td>
+                        <td className="border border-gray-300 px-3 py-2">Breakouts to 400G/200G for hosts/DPUs</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">Spine</td>
+                        <td className="border border-gray-300 px-3 py-2">Spectrum‑4 SN5600</td>
+                        <td className="border border-gray-300 px-3 py-2">ECMP aggregation</td>
+                        <td className="border border-gray-300 px-3 py-2">≥6 spines per pod (N+2)</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">Super‑spine/Core</td>
+                        <td className="border border-gray-300 px-3 py-2">Spectrum‑4 SN5600</td>
+                        <td className="border border-gray-300 px-3 py-2">Inter‑pod/core group</td>
+                        <td className="border border-gray-300 px-3 py-2">6–12 core groups beyond 10k GPUs</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">OOB</td>
+                        <td className="border border-gray-300 px-3 py-2">SN2201</td>
+                        <td className="border border-gray-300 px-3 py-2">Out‑of‑band MGMT</td>
+                        <td className="border border-gray-300 px-3 py-2">BMC/console only</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <h5 className="font-semibold text-gray-700 mb-3">Topology Steps</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
+                  <li>≤2,000 GPUs: 2‑tier leaf–spine (non‑blocking).</li>
+                  <li>2,001–10,000 GPUs: 3‑tier (leaf/spine/super‑spine) within a pod.</li>
+                  <li>&gt;10,000 GPUs: multi‑pod; add core groups for inter‑pod bisection while keeping hop‑count bounded (≤3 hops intra‑pod; ≤5 hops inter‑pod).</li>
+                </ul>
+              </section>
+
+              {/* Protocol Stack */}
+              <section className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Protocol Stack & Fabric Policies</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h5 className="font-semibold text-gray-700 mb-3">RoCEv2 Transport</h5>
+                    <div className="bg-gray-50 p-4 rounded">
+                      <table className="w-full text-sm">
+                        <tbody>
+                          <tr><td className="py-1 font-medium">UDP port:</td><td className="py-1">4791</td></tr>
+                          <tr><td className="py-1 font-medium">GID version:</td><td className="py-1">v2 (IP‑based), IPv4/IPv6</td></tr>
+                          <tr><td className="py-1 font-medium">MTU:</td><td className="py-1">9000 end‑to‑end (including VXLAN overhead)</td></tr>
+                          <tr><td className="py-1 font-medium">Lossless class:</td><td className="py-1">PFC enabled on 802.1p/UP 3 only</td></tr>
+                          <tr><td className="py-1 font-medium">ECN/DCQCN:</td><td className="py-1">ECN marking on RDMA queue; DCQCN enabled on NICs</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h5 className="font-semibold text-gray-700 mb-3">EVPN/VXLAN Overlay</h5>
+                    <div className="bg-gray-50 p-4 rounded">
+                      <table className="w-full text-sm">
+                        <tbody>
+                          <tr><td className="py-1 font-medium">Control plane:</td><td className="py-1">EVPN‑BGP (RR optional on spines/cores)</td></tr>
+                          <tr><td className="py-1 font-medium">Data plane:</td><td className="py-1">VXLAN (UDP 4789), symmetric IRB</td></tr>
+                          <tr><td className="py-1 font-medium">EVPN‑MH:</td><td className="py-1">Enabled on ToRs; ESIs on bonds; uplinks marked as MH uplinks</td></tr>
+                          <tr><td className="py-1 font-medium">DSCP handling:</td><td className="py-1">Copy on encap; preserve on decap</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Golden Configs */}
+              <section className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Golden Configurations</h4>
+                
+                <h5 className="font-semibold text-gray-700 mb-3">QoS: DSCP/UP Mapping, PFC, ECN & Scheduling</h5>
+                <div className="overflow-x-auto mb-4">
+                  <table className="w-full border-collapse border border-gray-300 text-sm">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-3 py-2 text-left">Traffic</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">DSCP</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">802.1p/UP</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Queue Class</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">RoCE data</td>
+                        <td className="border border-gray-300 px-3 py-2">26 (CS3)</td>
+                        <td className="border border-gray-300 px-3 py-2">3</td>
+                        <td className="border border-gray-300 px-3 py-2">Lossless (PFC)</td>
+                        <td className="border border-gray-300 px-3 py-2">Strict end‑to‑end DSCP trust</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">CNP (DCQCN)</td>
+                        <td className="border border-gray-300 px-3 py-2">48 (CS6)</td>
+                        <td className="border border-gray-300 px-3 py-2">6/7</td>
+                        <td className="border border-gray-300 px-3 py-2">Lossy strict control</td>
+                        <td className="border border-gray-300 px-3 py-2">Must not be in lossless queue</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-3 py-2">Mgmt/Control</td>
+                        <td className="border border-gray-300 px-3 py-2">48/CS6</td>
+                        <td className="border border-gray-300 px-3 py-2">6/7</td>
+                        <td className="border border-gray-300 px-3 py-2">Lossy strict/High prio</td>
+                        <td className="border border-gray-300 px-3 py-2">As per policy</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                  <p className="text-blue-800 text-sm">
+                    <strong>ECN thresholds (starting point, tune with telemetry):</strong> begin marks at ~40–60% of RDMA queue headroom; cap at ~70–80%. PFC watchdog is enabled globally to break deadlocks.
+                  </p>
+                </div>
+
+                <h5 className="font-semibold text-gray-700 mb-3">NVUE — QoS & Congestion Control (Leaf/Spine)</h5>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto">
+                  <pre className="text-sm"><code>{`nv set qos mapping default-global trust l3
+nv set qos mapping default-global dscp 26 switch-priority 3
+nv set qos mapping default-global dscp 48 switch-priority 7
+nv set qos remark default-global rewrite l3
+nv set qos remark default-global switch-priority 3 dscp 26
+nv set qos remark default-global switch-priority 7 dscp 48
+nv set qos pfc default-global cos 3 enable on
+nv set qos pfc-watchdog default-global forward enable on
+nv set qos pfc-watchdog default-global detection-time 500
+nv set qos pfc-watchdog default-global recovery-time 2000
+nv set qos congestion-control default-global traffic-class 3 ecn enable on
+nv set qos congestion-control default-global traffic-class 3 red enable on
+nv set qos congestion-control default-global traffic-class 3 min-threshold 40000
+nv set qos congestion-control default-global traffic-class 3 max-threshold 200000
+nv set qos egress-scheduler default-global traffic-class 7 mode strict
+nv set qos egress-scheduler default-global traffic-class 3 mode dwrr
+nv set qos egress-scheduler default-global traffic-class 3 bw-percent 30
+nv config apply`}</code></pre>
+                </div>
+
+                <h5 className="font-semibold text-gray-700 mb-3">NVUE — EVPN Multihoming (EVPN‑MH) Rack Access</h5>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto">
+                  <pre className="text-sm"><code>{`nv set evpn multihoming enable on
+nv set interface bond1 bond member swp1,swp2
+nv set interface bond2 bond member swp3,swp4
+nv set interface bond1 evpn multihoming segment local-id 1
+nv set interface bond2 evpn multihoming segment local-id 2
+nv set interface swp51-54 evpn multihoming uplink on
+nv set evpn multihoming mac-holdtime 1000
+nv set evpn multihoming neighbor-holdtime 600
+nv set evpn multihoming startup-delay 1800
+nv config apply`}</code></pre>
+                </div>
+              </section>
+
+              {/* Operational Runbooks */}
+              <section className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Operational Runbooks</h4>
+                
+                <h5 className="font-semibold text-gray-700 mb-3">Turn‑Up Checklist (per pod)</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                  <li>Rack ToRs; validate optics/cables and port speeds; set MTU 9000.</li>
+                  <li>Apply NVUE seed to ToRs, spines, and (if used) super‑spines; verify BGP/BFD/EVPN sessions.</li>
+                  <li>Enable EVPN‑MH on ToRs; verify DF status and ES‑import routes.</li>
+                  <li>Apply QoS (DSCP trust, PFC on UP3, ECN/RED) and confirm queue counters.</li>
+                  <li>Enable VXLAN DSCP copy/preserve; test encapsulated DSCP carries end‑to‑end.</li>
+                  <li>Bring up hosts/DPUs; set RoCE v2, DSCP/TOS, PFC/DCQCN; validate with RDMA tests.</li>
+                  <li>Run canary collective benchmarks at pod scale; check tail latencies and CNP/ECN counters.</li>
+                  <li>Activate telemetry streaming and SLO alerts.</li>
+                </ul>
+
+                <h5 className="font-semibold text-gray-700 mb-3">PFC Watchdog Event Playbook</h5>
+                <ul className="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                  <li>Identify offending port/queue; snapshot counters and WJH events.</li>
+                  <li>Quarantine/shape the tenant VRF if required; lower ECN min thresholds on affected path.</li>
+                  <li>Verify CNP is mapped to lossy strict queue and RDMA data only uses DSCP 26.</li>
+                  <li>Inspect optics/cables for errors; flap only the affected member post‑drain.</li>
+                  <li>Post‑mortem: adjust headroom and ECN profile; add perf CI guardrail.</li>
+                </ul>
+              </section>
+
+              {/* Performance Objectives */}
+              <section className="mb-8">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Performance Objectives & SLOs</h4>
+                <p className="text-gray-700 leading-relaxed">
+                  Latency budget: &lt;2 µs per switch hop; intra‑pod ≤3 hops; inter‑pod ≤5 hops. Throughput: sustain near line‑rate on RDMA ports with zero packet loss in the lossless class under representative collective workloads. Tail‑latency SLOs: define per‑job P‑99.9 latency thresholds for all‑reduce and embedding lookups, and integrate into CI/CD perf gates.
+                </p>
+              </section>
+
+              {/* Quick Reference */}
+              <section className="mb-6">
+                <h4 className="text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Parameter Quick Reference</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300 text-sm">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-3 py-2 text-left">Category</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Parameter</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Value / Guidance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td className="border border-gray-300 px-3 py-2">MTU</td><td className="border border-gray-300 px-3 py-2">Fabric & VTEPs</td><td className="border border-gray-300 px-3 py-2">9000</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">RoCEv2</td><td className="border border-gray-300 px-3 py-2">UDP port</td><td className="border border-gray-300 px-3 py-2">4791</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">QoS</td><td className="border border-gray-300 px-3 py-2">RoCE DSCP→UP</td><td className="border border-gray-300 px-3 py-2">26 → UP3 (lossless)</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">QoS</td><td className="border border-gray-300 px-3 py-2">CNP DSCP→UP</td><td className="border border-gray-300 px-3 py-2">48 → UP6/7 (lossy strict)</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">ECN</td><td className="border border-gray-300 px-3 py-2">Marking thresholds</td><td className="border border-gray-300 px-3 py-2">Start ~40–60% headroom; cap ~70–80%</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">EVPN</td><td className="border border-gray-300 px-3 py-2">IRB mode</td><td className="border border-gray-300 px-3 py-2">Symmetric (L2VNI per VLAN, L3VNI per VRF)</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">EVPN‑MH</td><td className="border border-gray-300 px-3 py-2">DF election</td><td className="border border-gray-300 px-3 py-2">Type‑4 / HRW</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">Underlay</td><td className="border border-gray-300 px-3 py-2">BFD timers</td><td className="border border-gray-300 px-3 py-2">300/300 ms, mult 3</td></tr>
+                      <tr><td className="border border-gray-300 px-3 py-2">Underlay</td><td className="border border-gray-300 px-3 py-2">ECMP</td><td className="border border-gray-300 px-3 py-2">Enable, resilient hashing</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <div className="text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
+                © 2025-09-24 — Ethernet‑only AI Fabric Runbook (RoCEv2 + EVPN/VXLAN). Mass-scale deployment guide for GB200/NVL72‑class clusters.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

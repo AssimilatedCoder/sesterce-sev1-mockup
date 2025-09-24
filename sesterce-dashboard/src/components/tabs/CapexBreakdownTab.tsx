@@ -54,25 +54,6 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
     gpuModel
   );
 
-  // Debug: Check if power requirements are being calculated
-  console.log('Debug - Input Values:', {
-    'results.actualGPUs': results.actualGPUs,
-    'config.numGPUs': config.numGPUs,
-    gpuCount,
-    rackCount,
-    gpuModel,
-    'config.fabricType': config.fabricType
-  });
-  
-  console.log('Debug - Enterprise Costs Power Requirements:', {
-    powerRequirements: enterpriseCosts.powerRequirements,
-    hasGpuPowerKW: !!enterpriseCosts.powerRequirements?.gpuPowerKW,
-    hasTotalClusterPowerKW: !!enterpriseCosts.powerRequirements?.totalClusterPowerKW,
-    actualValues: {
-      gpuPowerKW: enterpriseCosts.powerRequirements?.gpuPowerKW,
-      totalClusterPowerKW: enterpriseCosts.powerRequirements?.totalClusterPowerKW
-    }
-  });
 
   // Original CAPEX from calculator
   const originalCapex = results.totalCapex || 0;
@@ -296,15 +277,8 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
                     const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
                     const totalClusterPowerKW = totalGpuPowerKW * 1.3; // 30% overhead
                     const coolingLoadMMBTU = (totalClusterPowerKW * 3.412) / 1000000;
-                    console.log('Debug - Using fallback calculation:', { totalClusterPowerKW, coolingLoadMMBTU });
                     return coolingLoadMMBTU.toFixed(1);
                   }
-                  
-                  console.log('Debug - Cooling Load Calculation:', {
-                    powerKW,
-                    hasValue: !!powerKW,
-                    calculation: powerKW ? (powerKW * 3.412) / 1000000 : 'N/A'
-                  });
                   return powerKW ? 
                     ((powerKW * 3.412) / 1000000).toFixed(1) : '0.0';
                 })()} MMBTU/hr

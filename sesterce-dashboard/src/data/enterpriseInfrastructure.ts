@@ -604,7 +604,6 @@ export const calculateEnterpriseInfrastructureCosts = (
 
   // Calculate power requirements for proper sizing
   const powerReqs = calculatePowerRequirements(gpuCount, rackCount, gpuModel);
-  console.log('Debug - Power Requirements calculated:', powerReqs);
 
   enterpriseInfrastructure.forEach(component => {
     // Skip optional components if not requested

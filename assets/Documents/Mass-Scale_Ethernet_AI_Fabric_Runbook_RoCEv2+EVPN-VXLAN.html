@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mass‑Scale Ethernet AI Fabric Runbook — RoCEv2 + EVPN/VXLAN</title>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --panel: #11131a;
+    --ink: #e6e6e6;
+    --muted: #a9a9b3;
+    --accent: #7dd3fc;
+    --accent-2: #c084fc;
+    --border: #222533;
+    --ok: #22c55e;
+    --warn: #eab308;
+    --bad: #ef4444;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  }
+  html,body { margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:var(--sans); }
+  .container { max-width: 1080px; margin: 0 auto; padding: 2rem 1.2rem 6rem; }
+  header.hero {
+    background: radial-gradient(1200px 400px at 30% 0%, #1a1e2e 0%, rgba(26,30,46,0) 60%),
+                linear-gradient(90deg, rgba(125,211,252,0.18), rgba(192,132,252,0.18));
+    border-bottom: 1px solid var(--border);
+    padding: 3.5rem 0 2rem;
+  }
+  .title { font-size: 2.0rem; line-height: 1.25; margin: 0.2rem 0; font-weight: 800; }
+  .subtitle { font-size: 1.05rem; color: var(--muted); margin-top: 0.25rem; }
+  .meta { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+  nav.toc { background: var(--panel); border: 1px solid var(--border); padding: 1rem; border-radius: 10px; }
+  nav.toc h2 { margin-top: 0; font-size: 1.1rem; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc ul { list-style: none; padding-left: 0; margin: 0; }
+  nav.toc li { margin: 0.25rem 0; }
+  section { margin-top: 2.2rem; }
+  h1, h2, h3 { scroll-margin-top: 90px; }
+  h1 { font-size: 1.6rem; margin: 1.6rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+  h2 { font-size: 1.25rem; margin: 1.2rem 0 0.6rem; color: #eaeaff; }
+  h3 { font-size: 1.05rem; margin: 1rem 0 0.4rem; color: #dee3ff; }
+  p { line-height: 1.6; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 980px) {
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+  }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; vertical-align: top; }
+  th { background: #171a24; text-align: left; }
+  code, pre { font-family: var(--mono); }
+  pre { background: #0f1220; border: 1px solid var(--border); padding: 0.9rem 1rem; overflow: auto; border-radius: 10px; position: relative; }
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px; background: #1e253a; color: var(--ink);
+    border: 1px solid var(--border); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+  }
+  .list ul { margin-top: 0.2rem; }
+  .callout { border-left: 4px solid var(--accent-2); background: #141728; padding: 0.75rem 1rem; border-radius: 8px; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  .footer { color: var(--muted); font-size: 0.9rem; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+
+  /* Print */
+  @media print {
+    header.hero, .footer { display: none; }
+    body { background: #fff; color: #000; }
+    .card { border-color: #ddd; }
+    th, td { border-color: #ddd; }
+    a { color: #000; text-decoration: none; }
+    pre { border-color: #ddd; background: #f6f8fa; }
+  }
+</style>
+<script>
+  // Build a dynamic Table of Contents from h1/h2/h3 inside main
+  document.addEventListener('DOMContentLoaded', function() {
+    const main = document.querySelector('main');
+    const tocList = document.querySelector('#toc-list');
+    const headings = main.querySelectorAll('h1, h2, h3');
+    const slug = s => s.toLowerCase().replace(/[^a-z0-9\s\-]/g,'').trim().replace(/\s+/g,'-');
+    headings.forEach(h => {
+      if (!h.id) h.id = slug(h.textContent);
+      const li = document.createElement('li');
+      li.className = h.tagName.toLowerCase();
+      li.style.marginLeft = h.tagName === 'H1' ? '0' : h.tagName === 'H2' ? '1rem' : '2rem';
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+
+    // Copy buttons for code blocks
+    document.querySelectorAll('pre').forEach(pre => {
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pre.innerText);
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = 'Copy', 1200);
+        } catch(e){ btn.textContent = 'Error'; }
+      });
+      pre.appendChild(btn);
+    });
+  });
+</script>
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <div class="title">Mass‑Scale Ethernet AI Fabric Runbook</div>
+    <div class="subtitle">RoCEv2 + EVPN/VXLAN for GB200/NVL72‑class Clusters</div>
+    <div class="meta">Version: v1.0 • Generated: 2025-09-24 08:08 UTC</div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="grid grid-2">
+    <div>
+      <section>
+        <h1>Scope</h1>
+        <p>This handbook consolidates the complete Ethernet‑only network design, parameters, and golden configurations for RoCEv2 + EVPN/VXLAN fabrics powering very large GPU clusters (10k–200k GPUs). It captures current best practices from mass‑scale deployments and provides step‑by‑step runbooks, validation, and troubleshooting procedures.</p>
+      </section>
+    </div>
+    <div>
+      <nav class="toc card">
+        <h2>Table of Contents</h2>
+        <ul id="toc-list" aria-label="Table of contents"></ul>
+      </nav>
+    </div>
+  </div>
+
+  <section>
+    <h1>1. Networking Philosophy &amp; Selection Rationale</h1>
+    <p>We deploy a pod‑based Clos fabric on NVIDIA Spectrum‑X switches with an EVPN/VXLAN overlay and RoCEv2 transport. Pods scale deterministically: ≤2,000 GPUs as 2‑tier leaf–spine; 2,001–10,000 GPUs as 3‑tier within pods; and beyond 10,000 GPUs as multi‑pod with a core/super‑spine group for inter‑pod bisection. Each NVL72 rack is dual‑homed via EVPN multihoming (EVPN‑MH) to a pair of ToRs; no chassis MLAG is used. The fabric is non‑blocking (1:1) for training traffic, with ≥6 spines per pod for N+2 headroom and predictable failure domains. EVPN/VXLAN symmetric IRB is used for tenant mobility, and the underlay runs eBGP (unnumbered or /31) with BFD and high‑fanout ECMP.</p>
+    <p>RoCEv2 is the transport across the Ethernet fabric; ECN marking at switches, DCQCN on hosts, and a single PFC priority (lossless class) maintain near line‑rate throughput and bounded tail‑latency for large collectives. Tenant isolation leverages per‑tenant VRFs/VNIs with hierarchical QoS and optional BlueField‑3 offload for micro‑segmentation and inline encryption for sovereign workloads. Storage fabrics scale independently; high‑performance storage (HPS) uses RoCEv2 and is kept separate from user/in‑band and out‑of‑band networks.</p>
+  </section>
+
+  <section>
+    <h1>2. Reference Architecture &amp; Scale Milestones</h1>
+    <h2>2.1 Roles &amp; Platforms</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Tier/Role</th><th>Platform</th><th>Primary Function</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Leaf / ToR</td><td>Spectrum‑4 SN5600 (64×800G)</td><td>VTEP, EVPN‑MH access</td><td>Breakouts to 400G/200G for hosts/DPUs</td></tr>
+          <tr><td>Spine</td><td>Spectrum‑4 SN5600</td><td>ECMP aggregation</td><td>≥6 spines per pod (N+2)</td></tr>
+          <tr><td>Super‑spine/Core</td><td>Spectrum‑4 SN5600</td><td>Inter‑pod/core group</td><td>6–12 core groups beyond 10k GPUs</td></tr>
+          <tr><td>OOB</td><td>SN2201</td><td>Out‑of‑band MGMT</td><td>BMC/console only</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>2.2 Topology Steps</h2>
+    <div class="card list">
+      <ul>
+        <li>≤2,000 GPUs: 2‑tier leaf–spine (non‑blocking).</li>
+        <li>2,001–10,000 GPUs: 3‑tier (leaf/spine/super‑spine) within a pod.</li>
+        <li>&gt;10,000 GPUs: multi‑pod; add core groups for inter‑pod bisection while keeping hop‑count bounded (≤3 hops intra‑pod; ≤5 hops inter‑pod).</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h1>3. Protocol Stack &amp; Fabric Policies</h1>
+    <h2>3.1 RoCEv2 Transport</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Element</th><th>Setting / Value</th></tr></thead>
+        <tbody>
+          <tr><td>UDP port</td><td>4791</td></tr>
+          <tr><td>GID version</td><td>v2 (IP‑based), IPv4/IPv6</td></tr>
+          <tr><td>MTU</td><td>9000 end‑to‑end (including VXLAN overhead)</td></tr>
+          <tr><td>Lossless class</td><td>PFC enabled on 802.1p/UP 3 only</td></tr>
+          <tr><td>ECN/DCQCN</td><td>ECN marking on RDMA queue; DCQCN enabled on NICs</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>3.2 EVPN/VXLAN Overlay</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Aspect</th><th>Setting / Value</th></tr></thead>
+        <tbody>
+          <tr><td>Control plane</td><td>EVPN‑BGP (RR optional on spines/cores)</td></tr>
+          <tr><td>Data plane</td><td>VXLAN (UDP 4789), symmetric IRB</td></tr>
+          <tr><td>EVPN‑MH</td><td>Enabled on ToRs; ESIs on bonds; uplinks marked as MH uplinks</td></tr>
+          <tr><td>DSCP handling</td><td>Copy on encap; preserve on decap</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>3.3 Underlay (eBGP + BFD + ECMP)</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Feature</th><th>Baseline</th></tr></thead>
+        <tbody>
+          <tr><td>BFD timers</td><td>300/300 ms, multiplier 3 (tighten as stable)</td></tr>
+          <tr><td>ECMP</td><td>Enable, resilient hashing</td></tr>
+          <tr><td>Security</td><td>GTSM/TTL‑1, strict prefix‑filters</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h1>4. Detailed Parameters &amp; Golden Configs</h1>
+    <h2>4.1 QoS: DSCP/UP Mapping, PFC, ECN &amp; Scheduling</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Traffic</th><th>DSCP</th><th>802.1p/UP</th><th>Queue Class</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>RoCE data</td><td>26 (CS3)</td><td>3</td><td>Lossless (PFC)</td><td>Strict end‑to‑end DSCP trust</td></tr>
+          <tr><td>CNP (DCQCN)</td><td>48 (CS6)</td><td>6/7</td><td>Lossy strict control</td><td>Must not be in lossless queue</td></tr>
+          <tr><td>Mgmt/Control</td><td>48/CS6</td><td>6/7</td><td>Lossy strict/High prio</td><td>As per policy</td></tr>
+        </tbody>
+      </table>
+      <p class="callout">ECN thresholds (starting point, tune with telemetry): begin marks at ~40–60% of RDMA queue headroom; cap at ~70–80%. PFC watchdog is enabled globally to break deadlocks.</p>
+    </div>
+
+    <h2>4.2 NVUE — QoS &amp; Congestion Control (Leaf/Spine)</h2>
+    <pre><code>nv set qos mapping default-global trust l3
+nv set qos mapping default-global dscp 26 switch-priority 3
+nv set qos mapping default-global dscp 48 switch-priority 7
+nv set qos remark default-global rewrite l3
+nv set qos remark default-global switch-priority 3 dscp 26
+nv set qos remark default-global switch-priority 7 dscp 48
+nv set qos pfc default-global cos 3 enable on
+nv set qos pfc-watchdog default-global forward enable on
+nv set qos pfc-watchdog default-global detection-time 500
+nv set qos pfc-watchdog default-global recovery-time 2000
+nv set qos congestion-control default-global traffic-class 3 ecn enable on
+nv set qos congestion-control default-global traffic-class 3 red enable on
+nv set qos congestion-control default-global traffic-class 3 min-threshold 40000
+nv set qos congestion-control default-global traffic-class 3 max-threshold 200000
+nv set qos egress-scheduler default-global traffic-class 7 mode strict
+nv set qos egress-scheduler default-global traffic-class 3 mode dwrr
+nv set qos egress-scheduler default-global traffic-class 3 bw-percent 30
+nv config apply</code></pre>
+
+    <h2>4.3 NVUE — VXLAN/EVPN (symmetric IRB) &amp; DSCP Handling</h2>
+    <pre><code>nv set interface lo ip address 10.255.0.11/32
+nv set nve vxlan source address auto
+nv set nve vxlan encapsulation dscp action copy
+nv set nve vxlan decapsulation dscp action preserve
+nv set evpn enable on
+nv set vrf default router bgp address-family l2vpn-evpn enable on
+nv set bridge domain br_default vlan 110 vni 10110
+nv set vrf BLUE
+nv set vrf BLUE evpn vni 40110
+nv set interface vlan110 ip vrf BLUE
+nv set interface vlan110 ip address 10.110.0.1/24
+nv config apply</code></pre>
+
+    <h2>4.4 NVUE — EVPN Multihoming (EVPN‑MH) Rack Access</h2>
+    <pre><code>nv set evpn multihoming enable on
+nv set interface bond1 bond member swp1,swp2
+nv set interface bond2 bond member swp3,swp4
+nv set interface bond1 evpn multihoming segment local-id 1
+nv set interface bond2 evpn multihoming segment local-id 2
+nv set interface swp51-54 evpn multihoming uplink on
+nv set evpn multihoming mac-holdtime 1000
+nv set evpn multihoming neighbor-holdtime 600
+nv set evpn multihoming startup-delay 1800
+nv config apply</code></pre>
+
+    <h2>4.5 NVUE — Underlay eBGP Unnumbered + BFD</h2>
+    <pre><code># Leaf
+nv set router bgp autonomous-system 65101
+nv set router bgp router-id 10.255.0.11
+nv set vrf default router bgp peer swp51 remote-as external
+nv set vrf default router bgp peer swp52 remote-as external
+nv set vrf default router bgp address-family ipv4-unicast static-network 10.255.0.11/32
+nv set vrf default router bgp peer swp51 address-family l2vpn-evpn enable on
+nv set vrf default router bgp peer swp52 address-family l2vpn-evpn enable on
+nv set vrf default router bgp peer swp51 bfd enable on
+nv set vrf default router bgp peer swp52 bfd enable on
+nv config apply
+
+# Spine
+nv set router bgp autonomous-system 65199
+nv set router bgp router-id 10.255.255.101
+nv set evpn enable on
+nv set vrf default router bgp address-family l2vpn-evpn enable on
+nv set vrf default router bgp peer swp1-swp64 remote-as external
+nv set vrf default router bgp address-family ipv4-unicast static-network 10.255.255.101/32
+nv set vrf default router bgp peer swp1-swp64 address-family l2vpn-evpn enable on
+nv config apply</code></pre>
+
+    <h2>4.6 Optional — Route Reflection for Overlay Scale</h2>
+    <pre><code>nv set vrf default router bgp peer-group LEAFS
+nv set vrf default router bgp peer-group LEAFS address-family l2vpn-evpn enable on
+nv set vrf default router bgp peer-group LEAFS address-family l2vpn-evpn route-reflector-client on
+nv set vrf default router bgp neighbor 10.255.0.11 peer-group LEAFS remote-as internal
+nv set vrf default router bgp neighbor 10.255.0.12 peer-group LEAFS remote-as internal
+nv config apply</code></pre>
+  </section>
+
+  <section>
+    <h1>5. Storage Fabric (RoCEv2) &amp; In‑Band Networks</h1>
+    <p>Maintain separate VRFs for High‑Performance Storage (HPS), in‑band/user services, and OOB. On GB200 scalable units (SUs), provision ~16×800 GbE non‑blocking uplinks from the pod to storage appliances for hot datasets. Use RoCEv2 with the same QoS mapping (DSCP 26 for RDMA, DSCP 48 for CNP), ECN/PFC/DCQCN as in the training fabric. User/in‑band services (K8s/Slurm, registries, NFS home) run at lower bandwidth on a distinct VRF/VNI to avoid interference.</p>
+  </section>
+
+  <section>
+    <h1>6. Hosts / DPUs — RoCEv2, PFC &amp; DCQCN</h1>
+    <p>ConnectX‑8 SuperNICs (or BlueField‑3 DPUs) act as RoCEv2 endpoints. Configure one lossless priority for RDMA data (priority 3) and place CNP/control in a higher priority lossy strict queue (6/7). Use DSCP trust on the NIC and align DSCP to UP 3. Ensure MTU 9000 and verify no drops on the lossless class under load.</p>
+    <h2>6.1 Host Seed (mlx5 / OFED tools)</h2>
+    <pre><code># RoCE v2 + DSCP 26 for data (TOS 104)
+echo "RoCE v2" &gt; /sys/kernel/config/rdma_cm/mlx5_0/ports/1/default_roce_mode
+echo 104 &gt; /sys/kernel/config/rdma_cm/mlx5_0/ports/1/default_roce_tos
+
+# Enable PFC only on priority 3 and trust DSCP
+mlnx_qos -i ethX --pfc 0,0,0,1,0,0,0,0
+mlnx_qos -i ethX --trust=dscp
+
+# (Optional) lldptool alternative
+# lldptool -T -i ethX -V PFC willing=no enabled=3</code></pre>
+  </section>
+
+  <section>
+    <h1>7. Performance Objectives &amp; SLOs</h1>
+    <p>Latency budget: &lt;2 µs per switch hop; intra‑pod ≤3 hops; inter‑pod ≤5 hops. Throughput: sustain near line‑rate on RDMA ports with zero packet loss in the lossless class under representative collective workloads. Tail‑latency SLOs: define per‑job P‑99.9 latency thresholds for all‑reduce and embedding lookups, and integrate into CI/CD perf gates.</p>
+  </section>
+
+  <section>
+    <h1>8. Design Validation &amp; Smoke Tests</h1>
+    <div class="card list">
+      <ul>
+        <li>Lossless class present end‑to‑end (UP 3 only).</li>
+        <li>VXLAN DSCP copy on encap, preserve on decap; ECN propagates (RFC 6040).</li>
+        <li>CNP received at senders; ECN marks observable; DCQCN converges without oscillation.</li>
+        <li>EVPN‑MH enabled; ES‑IDs set; uplinks marked MH‑uplink; DF election Type‑4/HRW.</li>
+        <li>BFD on all BGP peers (300/300/3) with 24h soak.</li>
+        <li>MTU 9000 everywhere (including VTEPs).</li>
+        <li>ECMP hashing verified; resilient hashing active.</li>
+        <li>PFC watchdog interventions = 0 during baseline.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h1>9. Operational Runbooks</h1>
+    <h2>9.1 Turn‑Up Checklist (per pod)</h2>
+    <div class="card list">
+      <ul>
+        <li>Rack ToRs; validate optics/cables and port speeds; set MTU 9000.</li>
+        <li>Apply NVUE seed to ToRs, spines, and (if used) super‑spines; verify BGP/BFD/EVPN sessions.</li>
+        <li>Enable EVPN‑MH on ToRs; verify DF status and ES‑import routes.</li>
+        <li>Apply QoS (DSCP trust, PFC on UP3, ECN/RED) and confirm queue counters.</li>
+        <li>Enable VXLAN DSCP copy/preserve; test encapsulated DSCP carries end‑to‑end.</li>
+        <li>Bring up hosts/DPUs; set RoCE v2, DSCP/TOS, PFC/DCQCN; validate with RDMA tests.</li>
+        <li>Run canary collective benchmarks at pod scale; check tail latencies and CNP/ECN counters.</li>
+        <li>Activate telemetry streaming and SLO alerts.</li>
+      </ul>
+    </div>
+
+    <h2>9.2 ECN Tuning Procedure</h2>
+    <div class="card list">
+      <ul>
+        <li>Start with min/max thresholds (e.g., 40kB/200kB) on the RDMA queue and record baseline.</li>
+        <li>If PFC counters increment, lower ECN min by 10–20%; if over‑marking reduces throughput, raise ECN min.</li>
+        <li>Keep PFC watchdog enabled; any intervention implies thresholds too high or mis‑marking.</li>
+        <li>Target minimal PFC activity with healthy ECN/CNP signaling and stable DCQCN slopes.</li>
+      </ul>
+    </div>
+
+    <h2>9.3 PFC Watchdog Event Playbook</h2>
+    <div class="card list">
+      <ul>
+        <li>Identify offending port/queue; snapshot counters and WJH events.</li>
+        <li>Quarantine/shape the tenant VRF if required; lower ECN min thresholds on affected path.</li>
+        <li>Verify CNP is mapped to lossy strict queue and RDMA data only uses DSCP 26.</li>
+        <li>Inspect optics/cables for errors; flap only the affected member post‑drain.</li>
+        <li>Post‑mortem: adjust headroom and ECN profile; add perf CI guardrail.</li>
+      </ul>
+    </div>
+
+    <h2>9.4 Change Batching &amp; Canarying</h2>
+    <div class="card list">
+      <ul>
+        <li>Stage on dark subset (one rack per pod) during low‑risk window.</li>
+        <li>Run canary collectives; compare against SLOs and last baseline.</li>
+        <li>Roll forward per pod; pause on any SLO breach; rollback via NVUE snapshot if needed.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h1>10. Security &amp; Multi‑Tenancy</h1>
+    <p>Use VRF‑per‑tenant and VNI‑per‑VRF with strict route‑target policy. Optionally, use BlueField‑3 for inline ACLs and IPsec offload where sovereign isolation is required.</p>
+  </section>
+
+  <section>
+    <h1>11. Capacity Planning &amp; Bisection</h1>
+    <p>Keep non‑blocking within pods; size super‑spine/core groups for inter‑pod bisection. Provision ~16×800 GbE uplinks per scalable unit for hot storage tiers; keep user/in‑band separate. ECMP everywhere; verify hashing entropy for collective flows.</p>
+  </section>
+
+  <section>
+    <h1>12. Parameter Quick Reference</h1>
+    <div class="card">
+      <table>
+        <thead><tr><th>Category</th><th>Parameter</th><th>Value / Guidance</th></tr></thead>
+        <tbody>
+          <tr><td>MTU</td><td>Fabric &amp; VTEPs</td><td>9000</td></tr>
+          <tr><td>RoCEv2</td><td>UDP port</td><td>4791</td></tr>
+          <tr><td>QoS</td><td>RoCE DSCP→UP</td><td>26 → UP3 (lossless)</td></tr>
+          <tr><td>QoS</td><td>CNP DSCP→UP</td><td>48 → UP6/7 (lossy strict)</td></tr>
+          <tr><td>ECN</td><td>Marking thresholds</td><td>Start ~40–60% headroom; cap ~70–80%</td></tr>
+          <tr><td>EVPN</td><td>IRB mode</td><td>Symmetric (L2VNI per VLAN, L3VNI per VRF)</td></tr>
+          <tr><td>EVPN‑MH</td><td>DF election</td><td>Type‑4 / HRW</td></tr>
+          <tr><td>Underlay</td><td>BFD timers</td><td>300/300 ms, mult 3</td></tr>
+          <tr><td>Underlay</td><td>ECMP</td><td>Enable, resilient hashing</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h1>13. Seed Config Appendix (Copy‑Paste)</h1>
+    <h2>13.1 Leaf (ToR) — Full Seed</h2>
+    <pre><code>nv set interface lo ip address 10.255.0.11/32
+nv set nve vxlan source address auto
+nv set nve vxlan encapsulation dscp action copy
+nv set nve vxlan decapsulation dscp action preserve
+nv set evpn enable on
+nv set vrf default router bgp address-family l2vpn-evpn enable on
+nv set router bgp autonomous-system 65101
+nv set router bgp router-id 10.255.0.11
+nv set vrf default router bgp peer swp51,swp52 remote-as external
+nv set vrf default router bgp address-family ipv4-unicast static-network 10.255.0.11/32
+nv set vrf default router bgp peer swp51,swp52 address-family l2vpn-evpn enable on
+nv set evpn multihoming enable on
+nv set interface bond1 bond member swp1,swp2
+nv set interface bond2 bond member swp3,swp4
+nv set interface bond1 evpn multihoming segment local-id 1
+nv set interface bond2 evpn multihoming segment local-id 2
+nv set interface swp51-54 evpn multihoming uplink on
+nv set bridge domain br_default vlan 110 vni 10110
+nv set vrf BLUE
+nv set vrf BLUE evpn vni 40110
+nv set interface vlan110 ip vrf BLUE
+nv set interface vlan110 ip address 10.110.0.1/24
+nv set qos mapping default-global trust l3
+nv set qos mapping default-global dscp 26 switch-priority 3
+nv set qos mapping default-global dscp 48 switch-priority 7
+nv set qos remark default-global rewrite l3
+nv set qos remark default-global switch-priority 3 dscp 26
+nv set qos remark default-global switch-priority 7 dscp 48
+nv set qos pfc default-global cos 3 enable on
+nv set qos pfc-watchdog default-global forward enable on
+nv set qos pfc-watchdog default-global detection-time 500
+nv set qos pfc-watchdog default-global recovery-time 2000
+nv set qos congestion-control default-global traffic-class 3 ecn enable on
+nv set qos congestion-control default-global traffic-class 3 red enable on
+nv set qos congestion-control default-global traffic-class 3 min-threshold 40000
+nv set qos congestion-control default-global traffic-class 3 max-threshold 200000
+nv set qos egress-scheduler default-global traffic-class 7 mode strict
+nv set qos egress-scheduler default-global traffic-class 3 mode dwrr
+nv set qos egress-scheduler default-global traffic-class 3 bw-percent 30
+nv set vrf default router bgp peer swp51 bfd enable on
+nv set vrf default router bgp peer swp52 bfd enable on
+nv config apply</code></pre>
+
+    <h2>13.2 Spine — Full Seed</h2>
+    <pre><code>nv set interface lo ip address 10.255.255.101/32
+nv set router bgp autonomous-system 65199
+nv set router bgp router-id 10.255.255.101
+nv set evpn enable on
+nv set vrf default router bgp address-family l2vpn-evpn enable on
+nv set vrf default router bgp peer swp1-swp64 remote-as external
+nv set vrf default router bgp address-family ipv4-unicast static-network 10.255.255.101/32
+nv set vrf default router bgp peer swp1-swp64 address-family l2vpn-evpn enable on
+nv config apply</code></pre>
+
+    <h2>13.3 Host NIC — Seed</h2>
+    <pre><code># RoCE v2 + DSCP 26 (TOS 104)
+echo "RoCE v2" &gt; /sys/kernel/config/rdma_cm/mlx5_0/ports/1/default_roce_mode
+echo 104 &gt; /sys/kernel/config/rdma_cm/mlx5_0/ports/1/default_roce_tos
+mlnx_qos -i ethX --pfc 0,0,0,1,0,0,0,0
+mlnx_qos -i ethX --trust=dscp
+# lldptool -T -i ethX -V PFC willing=no enabled=3</code></pre>
+  </section>
+
+  <section>
+    <h1>14. Troubleshooting Cookbook</h1>
+    <h2>14.1 EVPN‑MH Fails to DF on One ToR</h2>
+    <p>Check that both access bonds have the same ESI and that uplinks are marked as multihoming uplinks. Verify Type‑4 DF election is enabled and check ES‑import RTs.</p>
+    <h2>14.2 Excess CNPs (Throughput Collapse)</h2>
+    <p>Over‑marking ECN or mis‑queueing CNP. Raise ECN min threshold by ~10–20% and ensure CNP is mapped to a high‑priority lossy strict queue (not lossless).</p>
+    <h2>14.3 PFC Storm / Watchdog Trigger</h2>
+    <p>Reduce ECN min, validate headroom, verify no non‑RDMA flows tagged DSCP 26. Inspect optics/cables for errors and drain/recover the port.</p>
+    <h2>14.4 VXLAN DSCP Lost</h2>
+    <p>Ensure “copy on encap” and “preserve on decap” are set on the VTEPs; check that intermediate devices do not remark DSCP.</p>
+  </section>
+
+  <section>
+    <h1>15. Glossary</h1>
+    <div class="card">
+      <table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td>RoCEv2</td><td>RDMA over Converged Ethernet version 2 (UDP/IP).</td></tr>
+          <tr><td>DCQCN</td><td>NIC‑side congestion control reacting to ECN/CNP.</td></tr>
+          <tr><td>CNP</td><td>Congestion Notification Packet used by DCQCN feedback loop.</td></tr>
+          <tr><td>ECN</td><td>Explicit Congestion Notification – switch marks instead of dropping.</td></tr>
+          <tr><td>PFC</td><td>Priority Flow Control – per‑priority pause; enable on exactly one priority for RDMA.</td></tr>
+          <tr><td>EVPN‑MH</td><td>EVPN Multihoming – standards‑based all‑active LAG without chassis MLAG.</td></tr>
+          <tr><td>Symmetric IRB</td><td>L3 forwarding model in EVPN with L3‑VNI per VRF.</td></tr>
+          <tr><td>VTEP</td><td>VXLAN Tunnel End Point.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    © 2025-09-24 — Ethernet‑only AI Fabric Runbook (RoCEv2 + EVPN/VXLAN). Self‑contained HTML for distribution &amp; print.
+  </div>
+</main>
+</body>
+</html>
