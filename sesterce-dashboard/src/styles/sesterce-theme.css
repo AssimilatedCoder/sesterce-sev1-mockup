@@ -1,36 +1,42 @@
-/* Sesterce-inspired Color Theme */
+/* Refined Sesterce Theme - Subtle & Content-Focused */
 :root {
-  /* Primary Sesterce Colors */
-  --sesterce-green-50: #f0f9f4;
-  --sesterce-green-100: #dcf4e3;
-  --sesterce-green-200: #bbf7d0;
-  --sesterce-green-300: #86efac;
-  --sesterce-green-400: #4ade80;
-  --sesterce-green-500: #22c55e;
-  --sesterce-green-600: #16a34a;
-  --sesterce-green-700: #15803d;
-  --sesterce-green-800: #166534;
-  --sesterce-green-900: #14532d;
+  /* Primary Sesterce Green - Used Sparingly as Accent */
+  --sesterce-green-50: #f7fdf9;   /* Very subtle green tint */
+  --sesterce-green-100: #f0fdf4;  /* Barely noticeable green */
+  --sesterce-green-500: #22c55e;  /* Primary green for buttons/CTAs */
+  --sesterce-green-600: #16a34a;  /* Darker green for hover states */
+  --sesterce-green-700: #15803d;  /* Text green for important elements */
 
-  /* Neutral Grays */
-  --sesterce-gray-50: #f9fafb;
-  --sesterce-gray-100: #f3f4f6;
-  --sesterce-gray-200: #e5e7eb;
-  --sesterce-gray-300: #d1d5db;
-  --sesterce-gray-400: #9ca3af;
-  --sesterce-gray-500: #6b7280;
-  --sesterce-gray-600: #4b5563;
-  --sesterce-gray-700: #374151;
-  --sesterce-gray-800: #1f2937;
-  --sesterce-gray-900: #111827;
+  /* Neutral Palette - Primary UI Colors */
+  --sesterce-slate-50: #f8fafc;   /* Lightest background */
+  --sesterce-slate-100: #f1f5f9;  /* Card backgrounds */
+  --sesterce-slate-200: #e2e8f0;  /* Borders */
+  --sesterce-slate-300: #cbd5e1;  /* Subtle borders */
+  --sesterce-slate-400: #94a3b8;  /* Placeholder text */
+  --sesterce-slate-500: #64748b;  /* Secondary text */
+  --sesterce-slate-600: #475569;  /* Body text */
+  --sesterce-slate-700: #334155;  /* Headings */
+  --sesterce-slate-800: #1e293b;  /* Dark text */
+  --sesterce-slate-900: #0f172a;  /* Darkest text */
 
-  /* Accent Colors */
+  /* Warm Grays for Better Readability */
+  --sesterce-gray-50: #fafafa;
+  --sesterce-gray-100: #f4f4f5;
+  --sesterce-gray-200: #e4e4e7;
+  --sesterce-gray-300: #d4d4d8;
+  --sesterce-gray-500: #71717a;
+  --sesterce-gray-600: #52525b;
+  --sesterce-gray-700: #3f3f46;
+  --sesterce-gray-800: #27272a;
+  --sesterce-gray-900: #18181b;
+
+  /* Blue Accent - For Information */
   --sesterce-blue-50: #eff6ff;
-  --sesterce-blue-100: #dbeafe;
   --sesterce-blue-500: #3b82f6;
   --sesterce-blue-600: #2563eb;
+  --sesterce-blue-700: #1d4ed8;
 
-  /* Status Colors */
+  /* Status Colors - Unchanged for Clarity */
   --sesterce-yellow-50: #fefce8;
   --sesterce-yellow-400: #facc15;
   --sesterce-orange-50: #fff7ed;
@@ -39,25 +45,39 @@
   --sesterce-red-400: #f87171;
 }
 
-/* Override existing color classes with Sesterce theme */
+/* Minimal Color Overrides - Preserve Original Design */
 .bg-white { background-color: #ffffff !important; }
-.bg-gray-50 { background-color: var(--sesterce-gray-50) !important; }
-.bg-gray-100 { background-color: var(--sesterce-gray-100) !important; }
 
-/* Green theme overrides */
-.bg-blue-50 { background-color: var(--sesterce-green-50) !important; }
-.bg-blue-100 { background-color: var(--sesterce-green-100) !important; }
-.border-blue-200 { border-color: var(--sesterce-green-200) !important; }
-.border-blue-400 { border-color: var(--sesterce-green-400) !important; }
-.text-blue-600 { color: var(--sesterce-green-600) !important; }
-.text-blue-700 { color: var(--sesterce-green-700) !important; }
+/* Use slate for better readability */
+.bg-gray-50 { background-color: var(--sesterce-slate-50) !important; }
+.bg-gray-100 { background-color: var(--sesterce-slate-100) !important; }
+.border-gray-200 { border-color: var(--sesterce-slate-200) !important; }
+.border-gray-300 { border-color: var(--sesterce-slate-300) !important; }
+.text-gray-500 { color: var(--sesterce-slate-500) !important; }
+.text-gray-600 { color: var(--sesterce-slate-600) !important; }
+.text-gray-700 { color: var(--sesterce-slate-700) !important; }
+.text-gray-800 { color: var(--sesterce-slate-800) !important; }
+.text-gray-900 { color: var(--sesterce-slate-900) !important; }
 
-.bg-purple-50 { background-color: var(--sesterce-green-50) !important; }
-.border-purple-400 { border-color: var(--sesterce-green-400) !important; }
+/* Selective Blue to Green Conversion - Only for Primary Actions */
+.bg-blue-600 { background-color: var(--sesterce-green-600) !important; }
+.bg-blue-700 { background-color: var(--sesterce-green-700) !important; }
+.hover\:bg-blue-700:hover { background-color: var(--sesterce-green-700) !important; }
+.text-blue-600 { color: var(--sesterce-blue-600) !important; } /* Keep blue for links */
+.text-blue-700 { color: var(--sesterce-blue-700) !important; }
 
-.bg-cyan-50 { background-color: var(--sesterce-green-100) !important; }
+/* Keep Information Sections Blue - Don't Convert to Green */
+.bg-blue-50 { background-color: var(--sesterce-blue-50) !important; }
+.border-blue-400 { border-color: var(--sesterce-blue-500) !important; }
 
-/* Status colors remain distinct */
+/* Keep Purple Sections as Blue for Variety */
+.bg-purple-50 { background-color: var(--sesterce-blue-50) !important; }
+.border-purple-400 { border-color: var(--sesterce-blue-500) !important; }
+
+/* Cyan becomes subtle slate */
+.bg-cyan-50 { background-color: var(--sesterce-slate-50) !important; }
+
+/* Status colors remain distinct for clarity */
 .bg-yellow-50 { background-color: var(--sesterce-yellow-50) !important; }
 .border-yellow-400 { border-color: var(--sesterce-yellow-400) !important; }
 .bg-orange-50 { background-color: var(--sesterce-orange-50) !important; }
@@ -65,49 +85,42 @@
 .bg-red-50 { background-color: var(--sesterce-red-50) !important; }
 .border-red-200 { border-color: var(--sesterce-red-400) !important; }
 
-/* Green accents */
+/* Green - Only for Primary Actions & Success States */
 .bg-green-50 { background-color: var(--sesterce-green-50) !important; }
 .bg-green-100 { background-color: var(--sesterce-green-100) !important; }
 .bg-green-600 { background-color: var(--sesterce-green-600) !important; }
 .bg-green-700 { background-color: var(--sesterce-green-700) !important; }
-.border-green-200 { border-color: var(--sesterce-green-200) !important; }
-.border-green-400 { border-color: var(--sesterce-green-400) !important; }
 .text-green-600 { color: var(--sesterce-green-600) !important; }
 .text-green-700 { color: var(--sesterce-green-700) !important; }
 
 /* Hover states */
 .hover\:bg-green-700:hover { background-color: var(--sesterce-green-700) !important; }
-.hover\:bg-gray-50:hover { background-color: var(--sesterce-gray-50) !important; }
+.hover\:bg-gray-50:hover { background-color: var(--sesterce-slate-50) !important; }
 
 /* Focus states */
 .focus\:ring-green-500:focus { --tw-ring-color: var(--sesterce-green-500) !important; }
 
-/* Gradient overrides */
-.from-blue-50 { --tw-gradient-from: var(--sesterce-green-50) !important; }
-.to-purple-50 { --tw-gradient-to: var(--sesterce-green-100) !important; }
-.from-indigo-50 { --tw-gradient-from: var(--sesterce-green-50) !important; }
-.to-purple-50 { --tw-gradient-to: var(--sesterce-green-100) !important; }
+/* Subtle gradient adjustments */
+.from-green-50 { --tw-gradient-from: var(--sesterce-green-50) !important; }
+.to-gray-100 { --tw-gradient-to: var(--sesterce-slate-100) !important; }
 
-/* Icon colors */
-.text-indigo-600 { color: var(--sesterce-green-600) !important; }
-.bg-indigo-100 { background-color: var(--sesterce-green-100) !important; }
-.border-indigo-200 { border-color: var(--sesterce-green-200) !important; }
+/* Keep most gradients neutral */
+.from-blue-50 { --tw-gradient-from: var(--sesterce-slate-50) !important; }
+.to-purple-50 { --tw-gradient-to: var(--sesterce-slate-100) !important; }
+.from-indigo-50 { --tw-gradient-from: var(--sesterce-slate-50) !important; }
 
-/* Tab and navigation colors */
-.border-b-2.border-gray-200 { border-color: var(--sesterce-green-200) !important; }
-
-/* Sesterce-specific components */
+/* Refined Sesterce Components - Content-First Design */
 .sesterce-card {
   background: #ffffff;
-  border: 1px solid var(--sesterce-gray-200);
+  border: 1px solid var(--sesterce-slate-200);
   border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
 .sesterce-card-accent {
-  background: var(--sesterce-green-50);
-  border: 1px solid var(--sesterce-green-200);
-  border-left: 4px solid var(--sesterce-green-500);
+  background: var(--sesterce-slate-50);
+  border: 1px solid var(--sesterce-slate-200);
+  border-left: 3px solid var(--sesterce-green-500);
 }
 
 .sesterce-button-primary {
@@ -117,40 +130,39 @@
   padding: 0.75rem 1.5rem;
   font-weight: 500;
   transition: all 0.2s ease;
+  border: none;
 }
 
 .sesterce-button-primary:hover {
   background-color: var(--sesterce-green-700);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
 }
 
 .sesterce-input {
-  border: 1px solid var(--sesterce-gray-300);
+  border: 1px solid var(--sesterce-slate-300);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   background: white;
   transition: border-color 0.2s ease;
+  color: var(--sesterce-slate-700);
 }
 
 .sesterce-input:focus {
   outline: none;
   border-color: var(--sesterce-green-500);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-}
-
-.sesterce-header {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-bottom: 1px solid var(--sesterce-green-200) !important;
-}
-
-.sesterce-header-gradient {
-  background: linear-gradient(135deg, var(--sesterce-green-600) 0%, var(--sesterce-green-700) 100%);
-  color: white;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
 }
 
 .sesterce-section {
-  background: var(--sesterce-gray-50);
-  border: 1px solid var(--sesterce-gray-200);
+  background: var(--sesterce-slate-50);
+  border: 1px solid var(--sesterce-slate-200);
   border-radius: 8px;
 }
+
+/* Improved readability classes */
+.sesterce-text-primary { color: var(--sesterce-slate-900); }
+.sesterce-text-secondary { color: var(--sesterce-slate-600); }
+.sesterce-text-muted { color: var(--sesterce-slate-500); }
+.sesterce-bg-subtle { background-color: var(--sesterce-slate-50); }
+.sesterce-border-subtle { border-color: var(--sesterce-slate-200); }

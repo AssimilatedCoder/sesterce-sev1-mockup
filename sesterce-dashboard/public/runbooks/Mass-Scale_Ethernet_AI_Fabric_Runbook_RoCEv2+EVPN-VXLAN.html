@@ -7,15 +7,15 @@
 <style>
   :root {
     --bg: #ffffff;            /* clean white background */
-    --panel: #f9fafb;         /* subtle gray panels */
-    --ink: #111827;           /* dark gray text */
-    --muted: #6b7280;         /* muted gray text */
-    --accent: #16a34a;        /* sesterce green-600 */
-    --accent-2: #22c55e;      /* sesterce green-500 */
-    --border: #e5e7eb;        /* light gray borders */
-    --ok: #16a34a;            /* sesterce green-600 */
-    --warn: #facc15;          /* yellow-400 */
-    --bad: #f87171;           /* red-400 */
+    --panel: #f8fafc;         /* subtle slate panels */
+    --ink: #334155;           /* readable slate text */
+    --muted: #64748b;         /* muted slate text */
+    --accent: #2563eb;        /* blue accent for links */
+    --accent-2: #16a34a;      /* green for success/actions */
+    --border: #e2e8f0;        /* slate borders */
+    --ok: #16a34a;            /* green for success */
+    --warn: #facc15;          /* yellow for warnings */
+    --bad: #f87171;           /* red for errors */
     --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   }
@@ -48,10 +48,10 @@
   .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
   table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
   th, td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; vertical-align: top; }
-  th { background: #f0f9f4; text-align: left; color: var(--accent); font-weight: 600; }
+  th { background: #f1f5f9; text-align: left; color: var(--ink); font-weight: 600; }
   code, pre { font-family: var(--mono); }
-  pre { background: #f0f9f4; border: 1px solid #dcf4e3; padding: 0.9rem 1rem; overflow: auto; border-radius: 10px; position: relative; }
-  code { background: #f0f9f4; color: var(--accent); padding: 0.2rem 0.4rem; border-radius: 4px; }
+  pre { background: #f8fafc; border: 1px solid var(--border); padding: 0.9rem 1rem; overflow: auto; border-radius: 10px; position: relative; }
+  code { background: #f1f5f9; color: var(--accent); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
   .copy-btn {
     position: absolute; top: 8px; right: 8px; background: #1e253a; color: var(--ink);
     border: 1px solid var(--border); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer;
