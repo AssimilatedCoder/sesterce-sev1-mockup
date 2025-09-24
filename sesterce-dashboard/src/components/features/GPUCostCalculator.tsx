@@ -137,10 +137,17 @@ export const GPUCostCalculator: React.FC = () => {
   }, [numGPUs, gpuModel, coolingType, region]);
 
   const formatCurrency = (amount: number) => {
-    if (amount >= 1000000) {
-      return `$${(amount / 1000000).toFixed(1)}M`;
+    const isNegative = amount < 0;
+    const absAmount = Math.abs(amount);
+    
+    let formatted = '';
+    if (absAmount >= 1000000) {
+      formatted = `$${(absAmount / 1000000).toFixed(1)}M`;
+    } else {
+      formatted = `$${absAmount.toLocaleString()}`;
     }
-    return `$${amount.toLocaleString()}`;
+    
+    return isNegative ? `-${formatted}` : formatted;
   };
 
   const tabs = [

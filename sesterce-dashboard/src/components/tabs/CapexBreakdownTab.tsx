@@ -26,10 +26,21 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
   };
 
   const formatCurrency = (amount: number) => {
-    if (amount >= 1e9) return `$${(amount / 1e9).toFixed(2)}B`;
-    if (amount >= 1e6) return `$${(amount / 1e6).toFixed(2)}M`;
-    if (amount >= 1e3) return `$${(amount / 1e3).toFixed(0)}K`;
-    return `$${amount.toFixed(0)}`;
+    const isNegative = amount < 0;
+    const absAmount = Math.abs(amount);
+    
+    let formatted = '';
+    if (absAmount >= 1e9) {
+      formatted = `$${(absAmount / 1e9).toFixed(2)}B`;
+    } else if (absAmount >= 1e6) {
+      formatted = `$${(absAmount / 1e6).toFixed(2)}M`;
+    } else if (absAmount >= 1e3) {
+      formatted = `$${(absAmount / 1e3).toFixed(0)}K`;
+    } else {
+      formatted = `$${absAmount.toFixed(0)}`;
+    }
+    
+    return isNegative ? `-${formatted}` : formatted;
   };
 
   // Helper function to format cooling load with appropriate units based on cluster size
