@@ -6,6 +6,7 @@ import {
 import { gpuSpecs } from '../../data/gpuSpecs';
 import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
 import { softwareStacks, recommendStack, calculateStackCost } from '../../data/softwareStacks';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -114,6 +115,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   results,
   formatNumber
 }) => {
+  const { formatCurrency } = useCurrency();
   const spec = gpuSpecs[config.gpuModel];
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     storage: true,
@@ -515,10 +517,10 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   }}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="vast-ceph-optimal">VAST + Ceph Multi-Tier (Recommended) - $615K/PB TCO</option>
-                  <option value="all-flash-performance">All-Flash Maximum Performance - $1.28M/PB TCO</option>
-                  <option value="cost-optimized-scale">Cost-Optimized at Scale - $435K/PB TCO</option>
-                  <option value="enterprise-balanced">Enterprise Balanced - $1.4M/PB TCO</option>
+                  <option value="vast-ceph-optimal">VAST + Ceph Multi-Tier (Recommended) - {formatCurrency(615000)}/PB TCO</option>
+                  <option value="all-flash-performance">All-Flash Maximum Performance - {formatCurrency(1280000)}/PB TCO</option>
+                  <option value="cost-optimized-scale">Cost-Optimized at Scale - {formatCurrency(435000)}/PB TCO</option>
+                  <option value="enterprise-balanced">Enterprise Balanced - {formatCurrency(1400000)}/PB TCO</option>
                   <option value="custom">Custom Configuration</option>
                 </select>
               </div>
@@ -541,7 +543,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">VAST Universal</div>
-                        <div className="text-gray-600">1+ TB/s/PB, $650K/PB</div>
+                        <div className="text-gray-600">1+ TB/s/PB, {formatCurrency(650000)}/PB</div>
                         <div className="text-gray-500">QLC economics, 100k+ GPU scale</div>
                       </div>
                     </label>
@@ -555,7 +557,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">WEKA Parallel</div>
-                        <div className="text-gray-600">720 GB/s/PB, $475K/PB</div>
+                        <div className="text-gray-600">720 GB/s/PB, {formatCurrency(475000)}/PB</div>
                         <div className="text-gray-500">GPUDirect, software-defined</div>
                       </div>
                     </label>
@@ -569,7 +571,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">DDN EXAScaler</div>
-                        <div className="text-gray-600">1.1+ TB/s/PB, $1M/PB</div>
+                        <div className="text-gray-600">1.1+ TB/s/PB, {formatCurrency(1000000)}/PB</div>
                         <div className="text-gray-500">HW accelerated, 100k+ GPUs</div>
                       </div>
                     </label>
@@ -589,7 +591,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">Pure FlashBlade//E</div>
-                        <div className="text-gray-600">3.4 TB/s/PB, $800K/PB</div>
+                        <div className="text-gray-600">3.4 TB/s/PB, {formatCurrency(800000)}/PB</div>
                         <div className="text-gray-500">Enterprise, Evergreen sub</div>
                       </div>
                     </label>
@@ -603,7 +605,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">NetApp AFF</div>
-                        <div className="text-gray-600">350 GB/s/PB, $700K/PB</div>
+                        <div className="text-gray-600">350 GB/s/PB, {formatCurrency(700000)}/PB</div>
                         <div className="text-gray-500">Enterprise NAS/SAN</div>
                       </div>
                     </label>
@@ -623,7 +625,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">Ceph All-NVMe</div>
-                        <div className="text-gray-600">100 GB/s/PB, $350K/PB</div>
+                        <div className="text-gray-600">100 GB/s/PB, {formatCurrency(350000)}/PB</div>
                         <div className="text-gray-500">Open-source, all-flash</div>
                       </div>
                     </label>
@@ -637,7 +639,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">Ceph Hybrid</div>
-                        <div className="text-gray-600">50 GB/s/PB, $200K/PB</div>
+                        <div className="text-gray-600">50 GB/s/PB, {formatCurrency(200000)}/PB</div>
                         <div className="text-gray-500">NVMe cache + SSD</div>
                       </div>
                     </label>
@@ -651,7 +653,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">Dell PowerScale</div>
-                        <div className="text-gray-600">100 GB/s/PB, $600K/PB</div>
+                        <div className="text-gray-600">100 GB/s/PB, {formatCurrency(600000)}/PB</div>
                         <div className="text-gray-500">Enterprise scale-out</div>
                       </div>
                     </label>
@@ -671,7 +673,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">Ceph HDD</div>
-                        <div className="text-gray-600">10 GB/s/PB, $100K/PB</div>
+                        <div className="text-gray-600">10 GB/s/PB, {formatCurrency(100000)}/PB</div>
                         <div className="text-gray-500">SSD cache + HDD capacity</div>
                       </div>
                     </label>
@@ -685,7 +687,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       />
                       <div className="text-xs">
                         <div className="font-medium">S3 Object (MinIO/Wasabi)</div>
-                        <div className="text-gray-600">5 GB/s/PB, $50K/PB CAPEX</div>
+                        <div className="text-gray-600">5 GB/s/PB, {formatCurrency(50000)}/PB CAPEX</div>
                         <div className="text-gray-500">Archive, 11 9s durability</div>
                       </div>
                     </label>
@@ -869,7 +871,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 >
                   {Object.entries(softwareStacks).map(([id, stack]) => (
                     <option key={id} value={id}>
-                      {stack.name} (~${stack.totalCostPerGPU}/GPU equiv/yr)
+                      {stack.name} (~{formatCurrency(stack.totalCostPerGPU)}/GPU equiv/yr)
                     </option>
                   ))}
                 </select>
@@ -1118,7 +1120,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               {config.enableBluefield && (
                 <div className="text-xs text-gray-500 mt-2 ml-6">
                   • RDMA offload & acceleration<br/>
-                  • 150W per DPU, $2,500/unit<br/>
+                  • 150W per DPU, {formatCurrency(2500)}/unit<br/>
                   • {config.gpuModel.startsWith('gb') ? '4 per NVL72 system (72 GPUs)' : '1 per 8 GPUs'}
                 </div>
               )}
@@ -1160,7 +1162,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 type="text"
                 value={config.gpuPriceOverride}
                 onChange={(e) => setGpuPriceOverride(e.target.value)}
-                placeholder={`$${spec?.unitPrice.toLocaleString()}`}
+                placeholder={formatCurrency(spec?.unitPrice || 0)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
               />
               <span className="text-xs text-gray-500 mt-1 block">
@@ -1200,12 +1202,12 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             </div>
             
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Custom Energy Rate ($/kWh)</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Custom Energy Rate ({formatCurrency(1)}/kWh)</label>
               <input 
                 type="text"
                 value={config.customEnergyRate}
                 onChange={(e) => setCustomEnergyRate(e.target.value)}
-                placeholder={`$${regionRates[config.region]?.rate || '0.05'}`}
+                placeholder={formatCurrency(regionRates[config.region]?.rate || 0.05)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
               />
               <span className="text-xs text-gray-500 mt-1 block">
@@ -1245,7 +1247,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
               <div className="text-xs text-gray-500 mb-1">Cost per GPU Hour</div>
-              <div className="text-2xl font-bold text-gray-900">${results.costPerHour.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-gray-900">{formatCurrency(results.costPerHour)}</div>
               <div className="text-xs text-gray-500">At {config.utilization}% utilization</div>
             </div>
             
@@ -1274,7 +1276,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               </div>
               <div>
                 <div className="text-xs text-gray-500">Storage $/GB/mo</div>
-                <div className="text-xl font-semibold">${results.storageGbMonth.toFixed(4)}</div>
+                <div className="text-xl font-semibold">{formatCurrency(results.storageGbMonth)}</div>
               </div>
             </div>
           </div>
@@ -1377,7 +1379,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">5yr TCO/PB:</span>
-                          <span className="font-medium">${(tier?.costPerPB.total5Year / 1000).toFixed(0)}K</span>
+                          <span className="font-medium">{formatCurrency(tier?.costPerPB.total5Year / 1000 || 0)}K</span>
                         </div>
                       </div>
                     </div>
