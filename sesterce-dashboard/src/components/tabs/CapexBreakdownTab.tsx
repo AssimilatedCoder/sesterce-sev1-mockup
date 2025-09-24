@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Server, HardDrive, Zap, Shield, Database, 
   Network, Users, AlertTriangle, ChevronDown, ChevronUp,
-  Calculator, DollarSign, Package
+  Calculator, DollarSign, Package, Cpu, Thermometer
 } from 'lucide-react';
 import { calculateEnterpriseInfrastructureCosts } from '../../data/enterpriseInfrastructure';
 
@@ -126,69 +126,180 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
 
   return (
     <div className="space-y-6">
-      {/* CAPEX Impact Summary */}
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg border border-red-200">
+      {/* CAPEX Overview Summary */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
         <div className="flex items-center gap-3 mb-4">
-          <AlertTriangle className="w-6 h-6 text-red-600" />
+          <Package className="w-6 h-6 text-blue-600" />
           <h2 className="text-xl font-bold text-gray-900">Complete CAPEX Analysis</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <p className="text-sm text-gray-600">Original Calculator</p>
-            <p className="text-2xl font-bold text-gray-700">{formatCurrency(originalCapex)}</p>
+            <p className="text-sm text-gray-600">Core Infrastructure</p>
+            <p className="text-2xl font-bold text-blue-700">{formatCurrency(originalCapex)}</p>
+            <p className="text-xs text-gray-500">GPUs, Storage, Network, Cooling</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">Missing Infrastructure</p>
-            <p className="text-2xl font-bold text-red-600">{formatCurrency(enterpriseCosts.totalCapex)}</p>
+            <p className="text-sm text-gray-600">Ancillary Infrastructure</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(enterpriseCosts.totalCapex)}</p>
+            <p className="text-xs text-gray-500">Security, Backup, Platform, Operations</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">Total Real CAPEX</p>
-            <p className="text-2xl font-bold text-red-700">{formatCurrency(comprehensiveCapex)}</p>
+            <p className="text-sm text-gray-600">Total Enterprise CAPEX</p>
+            <p className="text-2xl font-bold text-indigo-700">{formatCurrency(comprehensiveCapex)}</p>
+            <p className="text-xs text-gray-500">Production-ready deployment</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">CAPEX Increase</p>
-            <p className="text-2xl font-bold text-red-800">
-              +{((enterpriseCosts.totalCapex / originalCapex) * 100).toFixed(0)}%
+            <p className="text-sm text-gray-600">Infrastructure Ratio</p>
+            <p className="text-2xl font-bold text-purple-700">
+              {((enterpriseCosts.totalCapex / originalCapex) * 100).toFixed(0)}%
             </p>
+            <p className="text-xs text-gray-500">Ancillary vs Core</p>
           </div>
         </div>
       </div>
 
-      {/* Power Requirements Display */}
+      {/* Power & Infrastructure Analysis */}
       {enterpriseCosts.powerRequirements && (
-        <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-          <div className="flex items-center gap-3 mb-4">
-            <Zap className="w-6 h-6 text-yellow-600" />
-            <h3 className="text-lg font-bold text-gray-900">Cluster Power Requirements</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Power Requirements */}
+          <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+            <div className="flex items-center gap-3 mb-4">
+              <Zap className="w-6 h-6 text-yellow-600" />
+              <h3 className="text-lg font-bold text-gray-900">Power Requirements</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Cluster Computing Load</span>
+                <span className="font-semibold text-yellow-700">
+                  {enterpriseCosts.powerRequirements.gpuPowerKW.toFixed(0)} kW
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Cooling Systems</span>
+                <span className="font-semibold text-yellow-700">
+                  {(enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.6).toFixed(0)} kW
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Datacenter Ancillary</span>
+                <span className="font-semibold text-yellow-700">
+                  {(enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.4).toFixed(0)} kW
+                </span>
+              </div>
+              <div className="border-t pt-2 flex justify-between items-center">
+                <span className="font-medium text-gray-900">Total Power Draw</span>
+                <span className="text-xl font-bold text-yellow-900">
+                  {enterpriseCosts.powerRequirements.totalClusterPowerMW.toFixed(1)} MW
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <p className="text-sm text-gray-600">GPU Power</p>
-              <p className="text-xl font-bold text-yellow-700">
-                {enterpriseCosts.powerRequirements.gpuPowerKW.toFixed(0)} kW
-              </p>
+
+          {/* Installed Power Infrastructure */}
+          <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+            <div className="flex items-center gap-3 mb-4">
+              <Zap className="w-6 h-6 text-green-600" />
+              <h3 className="text-lg font-bold text-gray-900">Installed Power Infrastructure</h3>
             </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">Infrastructure Overhead</p>
-              <p className="text-xl font-bold text-yellow-700">
-                {enterpriseCosts.powerRequirements.infrastructureOverheadKW.toFixed(0)} kW
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">Total Cluster Power</p>
-              <p className="text-xl font-bold text-yellow-800">
-                {enterpriseCosts.powerRequirements.totalClusterPowerKW.toFixed(0)} kW
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">Total (MW)</p>
-              <p className="text-xl font-bold text-yellow-900">
-                {enterpriseCosts.powerRequirements.totalClusterPowerMW.toFixed(1)} MW
-              </p>
+            <div className="space-y-3">
+              {enterpriseCosts.breakdown
+                .filter(item => item.component.category === 'power_backup')
+                .map((item, index) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">{item.component.name.replace(/\s*\([^)]*\)/g, '')}</span>
+                    <span className="font-semibold text-green-700">
+                      {formatCurrency(item.capex)}
+                    </span>
+                  </div>
+                ))}
+              <div className="border-t pt-2 flex justify-between items-center">
+                <span className="font-medium text-gray-900">Total Power CAPEX</span>
+                <span className="text-xl font-bold text-green-900">
+                  {formatCurrency(
+                    enterpriseCosts.breakdown
+                      .filter(item => item.component.category === 'power_backup')
+                      .reduce((sum, item) => sum + item.capex, 0)
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Cooling Infrastructure Analysis */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Cooling Requirements */}
+        <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-3 mb-4">
+            <Thermometer className="w-6 h-6 text-blue-600" />
+            <h3 className="text-lg font-bold text-gray-900">Cooling Requirements</h3>
+          </div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Heat Load (Computing)</span>
+              <span className="font-semibold text-blue-700">
+                {enterpriseCosts.powerRequirements ? 
+                  (enterpriseCosts.powerRequirements.gpuPowerKW * 3.412).toFixed(0) : '0'} BTU/hr
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Infrastructure Heat</span>
+              <span className="font-semibold text-blue-700">
+                {enterpriseCosts.powerRequirements ? 
+                  (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 3.412).toFixed(0) : '0'} BTU/hr
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Cooling Technology</span>
+              <span className="font-semibold text-blue-700">
+                {config.coolingType === 'liquid' ? 'Liquid Cooling' : 'Air Cooling'}
+              </span>
+            </div>
+            <div className="border-t pt-2 flex justify-between items-center">
+              <span className="font-medium text-gray-900">Total Cooling Load</span>
+              <span className="text-xl font-bold text-blue-900">
+                {enterpriseCosts.powerRequirements ? 
+                  ((enterpriseCosts.powerRequirements.totalClusterPowerKW * 3.412) / 1000000).toFixed(1) : '0'} MMBTU/hr
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Installed Cooling Infrastructure */}
+        <div className="bg-cyan-50 p-6 rounded-lg border border-cyan-200">
+          <div className="flex items-center gap-3 mb-4">
+            <Thermometer className="w-6 h-6 text-cyan-600" />
+            <h3 className="text-lg font-bold text-gray-900">Installed Cooling Infrastructure</h3>
+          </div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Cooling Systems</span>
+              <span className="font-semibold text-cyan-700">
+                {formatCurrency(coolingCapex)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Datacenter Infrastructure</span>
+              <span className="font-semibold text-cyan-700">
+                {formatCurrency(results.datacenterCapex || 0)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Efficiency Rating</span>
+              <span className="font-semibold text-cyan-700">
+                PUE {results.pueValue?.toFixed(2) || '1.20'}
+              </span>
+            </div>
+            <div className="border-t pt-2 flex justify-between items-center">
+              <span className="font-medium text-gray-900">Total Cooling CAPEX</span>
+              <span className="text-xl font-bold text-cyan-900">
+                {formatCurrency(coolingCapex + (results.datacenterCapex || 0))}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Controls */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -206,34 +317,42 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
         </div>
       </div>
 
-      {/* Original CAPEX Breakdown */}
+      {/* Core Infrastructure CAPEX */}
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="font-semibold text-gray-900 mb-4">Original Calculator CAPEX</h3>
+        <div className="flex items-center gap-2 mb-4">
+          <Package className="w-5 h-5 text-blue-600" />
+          <h3 className="font-semibold text-gray-900">Core Infrastructure CAPEX</h3>
+          <span className="text-sm text-gray-500">({formatCurrency(originalCapex)} total)</span>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <Package className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <Cpu className="w-8 h-8 text-blue-600 mx-auto mb-2" />
             <p className="text-sm text-gray-600">GPU Hardware</p>
             <p className="text-lg font-bold text-blue-700">{formatCurrency(gpuCapex)}</p>
+            <p className="text-xs text-gray-500">{((gpuCapex / originalCapex) * 100).toFixed(0)}% of core</p>
           </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
+          <div className="text-center p-4 bg-green-50 rounded-lg border border-green-100">
             <Network className="w-8 h-8 text-green-600 mx-auto mb-2" />
             <p className="text-sm text-gray-600">Networking</p>
             <p className="text-lg font-bold text-green-700">{formatCurrency(networkCapex)}</p>
+            <p className="text-xs text-gray-500">{((networkCapex / originalCapex) * 100).toFixed(0)}% of core</p>
           </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
+          <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-100">
             <HardDrive className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Storage</p>
+            <p className="text-sm text-gray-600">Storage Systems</p>
             <p className="text-lg font-bold text-purple-700">{formatCurrency(storageCapex)}</p>
+            <p className="text-xs text-gray-500">{((storageCapex / originalCapex) * 100).toFixed(0)}% of core</p>
           </div>
-          <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <Zap className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Cooling</p>
-            <p className="text-lg font-bold text-yellow-700">{formatCurrency(coolingCapex)}</p>
+          <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-100">
+            <Zap className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+            <p className="text-sm text-gray-600">Cooling & DC</p>
+            <p className="text-lg font-bold text-orange-700">{formatCurrency(coolingCapex + (results.datacenterCapex || 0))}</p>
+            <p className="text-xs text-gray-500">{(((coolingCapex + (results.datacenterCapex || 0)) / originalCapex) * 100).toFixed(0)}% of core</p>
           </div>
         </div>
       </div>
 
-      {/* Missing Infrastructure Categories */}
+      {/* Ancillary Infrastructure Categories */}
       {Object.entries(categoryInfo).map(([categoryKey, categoryData]) => {
         const components = categorizedComponents[categoryKey] || [];
         if (components.length === 0) return null;
@@ -363,17 +482,17 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
         </div>
       </div>
 
-      {/* Recommendations */}
-      <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-3">Enterprise Infrastructure Analysis</h3>
-        <div className="space-y-2 text-sm text-blue-800">
-          <p>• <strong>Server Hardware:</strong> Complete server costs (chassis, memory, storage, management) were missing from GPU-only calculations</p>
-          <p>• <strong>French FTE Costs:</strong> Updated to reflect French market rates (€100k gross + 45% employer charges = €145k total cost per senior engineer)</p>
-          <p>• <strong>Dynamic Power Sizing:</strong> Generators, UPS, and fuel storage now scale with actual cluster power requirements ({enterpriseCosts.powerRequirements?.totalClusterPowerMW.toFixed(1)} MW for this configuration)</p>
-          <p>• <strong>N+1 Redundancy:</strong> Power infrastructure includes proper redundancy for enterprise SLAs</p>
-          <p>• <strong>Security & Compliance:</strong> Enterprise security stack mandatory for production AI/ML workloads</p>
-          <p>• <strong>Platform Services:</strong> Modern data platform (Kafka, Spark, Elasticsearch) essential for AI/ML operations</p>
-          <p>• <strong>Total Impact:</strong> Real enterprise CAPEX is typically 2-3x higher than GPU-only calculations, with significant ongoing OPEX for operations staff</p>
+      {/* Enterprise Infrastructure Analysis */}
+      <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+        <h3 className="font-semibold text-green-900 mb-3">Enterprise Infrastructure Analysis</h3>
+        <div className="space-y-2 text-sm text-green-800">
+          <p>• <strong>Complete Server Infrastructure:</strong> Includes chassis, memory, storage, and management controllers for production-ready systems</p>
+          <p>• <strong>French Market Rates:</strong> Reflects accurate French employment costs (€100k gross + 45% employer charges = €145k total per senior engineer)</p>
+          <p>• <strong>Dynamic Power Sizing:</strong> Infrastructure scales precisely with cluster requirements ({enterpriseCosts.powerRequirements?.totalClusterPowerMW.toFixed(1)} MW) including N+1 redundancy</p>
+          <p>• <strong>Enterprise Security:</strong> Comprehensive security stack ensures compliance and protection for production AI/ML workloads</p>
+          <p>• <strong>Modern Platform Services:</strong> Integrated data platform (Kafka, Spark, Elasticsearch) enables advanced AI/ML operations</p>
+          <p>• <strong>Production Readiness:</strong> Complete enterprise infrastructure ensures reliability, security, and operational excellence</p>
+          <p>• <strong>Accurate TCO:</strong> Comprehensive analysis provides realistic enterprise deployment costs for informed decision-making</p>
         </div>
       </div>
     </div>
