@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, DollarSign, Calculator, BarChart3, PieChart, Target } from 'lucide-react';
+import { TrendingUp, DollarSign, Calculator, BarChart3, PieChart, Target, AlertTriangle } from 'lucide-react';
 
 interface FinancialAnalyticsTabProps {
   config: any;
@@ -7,6 +7,28 @@ interface FinancialAnalyticsTabProps {
 }
 
 export const FinancialAnalyticsTab: React.FC<FinancialAnalyticsTabProps> = ({ config, results }) => {
+  
+  // If no results yet, show a message
+  if (!results || !config) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <TrendingUp className="w-6 h-6 text-green-600" /> Revenue & Financial Analysis
+        </h2>
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-semibold text-yellow-800 mb-1">No Financial Data Available</h4>
+              <p className="text-sm text-yellow-700">
+                Please configure your cluster parameters and click 'Calculate TCO' on the Calculator tab to see detailed revenue projections, EBITDA analysis, and financial metrics.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   // Calculate comprehensive financial metrics
   const calculateFinancialMetrics = () => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Network, Cpu, Activity, ChevronDown, ChevronUp, Book } from 'lucide-react';
+import { Network, Cpu, Activity, ChevronDown, ChevronUp, Book, AlertTriangle } from 'lucide-react';
 
 interface NetworkingTabEnhancedProps {
   config: any;
@@ -278,6 +278,21 @@ export const NetworkingTabEnhanced: React.FC<NetworkingTabEnhancedProps> = ({ co
       <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-200 pb-3">
         Network Architecture Analysis
       </h2>
+
+      {/* Banner when using fallback calculations */}
+      {(!results || !results.network) && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-semibold text-yellow-800 mb-1">Using Estimated Network Data</h4>
+              <p className="text-sm text-yellow-700">
+                The network analysis below uses estimated calculations based on your configuration. For the most accurate network costs and specifications, please click 'Calculate TCO' on the Calculator tab.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Fabric Overview */}
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">

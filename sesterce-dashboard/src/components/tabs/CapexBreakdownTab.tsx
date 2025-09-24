@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Server, HardDrive, Zap, Shield, Database, 
   Network, Users, AlertTriangle, ChevronDown, ChevronUp,
-  Calculator, DollarSign, Package, Cpu, Thermometer
+  DollarSign, Package, Cpu, Thermometer
 } from 'lucide-react';
 import { calculateEnterpriseInfrastructureCosts } from '../../data/enterpriseInfrastructure';
 
@@ -50,9 +50,21 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
 
   if (!results || !config) {
     return (
-      <div className="p-8 text-center">
-        <Calculator className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600">Run a calculation to see detailed CAPEX breakdown</p>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Package className="w-6 h-6 text-blue-600" /> Complete CAPEX Breakdown
+        </h2>
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-semibold text-yellow-800 mb-1">No CAPEX Data Available</h4>
+              <p className="text-sm text-yellow-700">
+                Please configure your cluster parameters and click 'Calculate TCO' on the Calculator tab to see detailed capital expenditure breakdown, including core infrastructure, enterprise components, power requirements, and cooling analysis.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
