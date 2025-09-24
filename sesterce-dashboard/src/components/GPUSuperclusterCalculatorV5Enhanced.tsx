@@ -282,11 +282,12 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const fabric = networkFabrics[fabricType];
     const isGB200 = gpuModel === 'gb200';
     const isGB300 = gpuModel === 'gb300';
+    const isHClass = gpuModel.startsWith('h100') || gpuModel.startsWith('h200');
     
     // Pod-based architecture (from design document)
     const gpusPerPod = isGB200 ? 1008 : 1024;
     const numPods = Math.ceil(numGPUs / gpusPerPod);
-    const railsPerGPU = isGB200 || isGB300 ? 9 : 8;
+    const railsPerGPU = (isGB200 || isGB300) ? 9 : 8;
     
     // Adjust switch counts based on topology and oversubscription
     const oversubRatio = parseFloat(oversubscription.split(':')[0]);
@@ -323,7 +324,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       if (isGB200 || isGB300) {
         dpuCount = Math.ceil(numGPUs / 72) * 4; // 4 dual-port BlueField-3 per NVL72
       } else {
-        dpuCount = Math.ceil(numGPUs / 8); // One per DGX node
+        // For OEM 8-GPU nodes (H100/H200), assume one DPU per node
+        dpuCount = Math.ceil(numGPUs / 8);
       }
       dpuCost = dpuCount * 2500; // BlueField-3 SuperNIC price
       dpuPower = dpuCount * 150; // 150W per DPU (from design doc)
@@ -417,7 +419,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     
     // Power calculations using design document specifications
     const systemsTotal = systemsNeeded; // Use the systems we calculated above
-    const rackPowerTotal = systemsTotal * (spec?.rackPower || (spec?.powerPerGPU || 1000) * safeRackSize);
+    // For H100/H200 OEM nodes (8 GPUs per server), use node rackPower; for NVL72 use provided rack power
+    const perSystemPower = spec?.rackPower || (spec?.powerPerGPU || 1000) * safeRackSize;
+    const rackPowerTotal = systemsTotal * perSystemPower;
     const gpuPowerMW = rackPowerTotal / 1000000; // Use actual rack power from design doc
     const pueValue = pueOverride ? parseFloat(pueOverride) : ((spec?.pue || {})[coolingType] || regionData.pue);
     

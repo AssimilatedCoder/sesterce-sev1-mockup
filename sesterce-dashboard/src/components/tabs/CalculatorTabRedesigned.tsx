@@ -255,6 +255,8 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               <option value="gb300">GB300 NVL72</option>
               <option value="h100-sxm">H100 SXM</option>
               <option value="h100-pcie">H100 PCIe</option>
+              <option value="h200-sxm">H200 SXM</option>
+              <option value="h200-pcie">H200 PCIe</option>
             </select>
           </div>
           

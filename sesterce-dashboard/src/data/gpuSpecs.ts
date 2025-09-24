@@ -54,5 +54,28 @@ export const gpuSpecs: Record<string, GPUSpec> = {
     coolingOptions: ['air'],
     pue: { air: 1.5 },
     reference: 'https://www.nvidia.com/en-us/data-center/h100/'
+  },
+  // New: NVIDIA H200 family
+  'h200-sxm': {
+    name: 'H200 SXM',
+    powerPerGPU: 700, // SXM configurable up to ~700W
+    memoryPerGPU: 141, // 141 GB HBM3e
+    unitPrice: 33000, // market estimate 33-35k
+    rackSize: 8, // OEM nodes with 8x SXM GPUs
+    rackPower: 11000, // ~11kW per 8x SXM node (vendor TDP + platform overhead)
+    coolingOptions: ['air', 'liquid'],
+    pue: { air: 1.4, liquid: 1.1 },
+    reference: 'https://www.nvidia.com/en-us/data-center/h200/'
+  },
+  'h200-pcie': {
+    name: 'H200 PCIe',
+    powerPerGPU: 600, // PCIe variant lower than SXM
+    memoryPerGPU: 141,
+    unitPrice: 30000,
+    rackSize: 8, // common 8x PCIe server
+    rackPower: 8000, // ~8kW node incl. CPUs/IO
+    coolingOptions: ['air'],
+    pue: { air: 1.5 },
+    reference: 'https://www.nvidia.com/en-us/data-center/h200/'
   }
 };

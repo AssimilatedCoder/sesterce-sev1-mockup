@@ -136,10 +136,10 @@ export const CoolingPowerTabEnhanced: React.FC<CoolingPowerTabEnhancedProps> = (
     }
     
     // Power distribution
-    const numRacks = Math.ceil(numGPUs / (spec.rackSize || 72));
+    const numRacks = Math.ceil(numGPUs / (spec.rackSize || 8));
     const powerDistribution = {
       racksTotal: numRacks,
-      powerPerRack: isGB200 ? 120 : (isGB300 ? 140 : 10.4),
+      powerPerRack: isGB200 ? 120 : (isGB300 ? 140 : (spec.rackPower ? Math.round(spec.rackPower / 1000) : 10)),
       pduPerRack: 3, // N+1 configuration
       voltage: '415V',
       phase: '3-phase',
