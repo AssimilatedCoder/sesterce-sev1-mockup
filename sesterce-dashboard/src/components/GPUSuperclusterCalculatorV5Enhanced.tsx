@@ -619,55 +619,168 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-4 md:p-8">
-      <div className="max-w-[1900px] mx-auto">
-        {/* Header Section */}
-        <div className="text-center mb-8 pb-6 border-b border-gray-200">
-          <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg p-4">
-              <Cpu className="w-16 h-16 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Enterprise Layout with Left Sidebar */}
+      <div className="flex h-screen">
+        {/* Left Sidebar Navigation */}
+        <div className="w-72 bg-white border-r border-gray-200 flex flex-col">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                <Cpu className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">TCO Calculator</h1>
+                <p className="text-sm text-gray-500">GPU SuperCluster Analysis</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-medium">
+                v5.0 Enhanced
+              </span>
+              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                Enterprise
+              </span>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            GPU SuperCluster Cost Calculator
-          </h1>
-          <p className="text-base text-gray-600 mb-3">
-            Complete Infrastructure & TCO Analysis Platform
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <span className="px-4 py-1.5 bg-green-500 text-white rounded-full text-xs font-semibold">
-              v5.0 Enhanced - Full Stack Edition
-            </span>
-            <span className="px-4 py-1.5 bg-gray-800 text-white rounded-full text-xs font-semibold">
-              with Verified References
-            </span>
-          </div>
-        </div>
 
-        {/* Main content area */}
-        <div className="bg-white rounded-xl shadow-md p-6 md:p-6 border border-gray-200">
-          {/* Tab Navigation */}
-          <div className="flex flex-wrap gap-1 mb-6 p-0.5 bg-gray-100 rounded-lg">
-            {tabs.map((tab) => (
+          {/* Navigation Menu */}
+          <nav className="flex-1 p-4 space-y-1">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 px-3">
+              Analysis
+            </div>
+            {tabs.slice(0, 5).map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-md font-medium text-xs transition-all
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                   ${activeTab === tab.id 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'bg-transparent text-gray-600 hover:bg-gray-50'
+                    ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }
                 `}
               >
-                {React.cloneElement(tab.icon, { className: 'w-4 h-4' })}
+                {React.cloneElement(tab.icon, { 
+                  className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
+                })}
                 {tab.label}
               </button>
             ))}
+            
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 mt-6 px-3">
+              Configuration
+            </div>
+            {tabs.slice(5, 8).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
+                  ${activeTab === tab.id 
+                    ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+              >
+                {React.cloneElement(tab.icon, { 
+                  className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
+                })}
+                {tab.label}
+              </button>
+            ))}
+
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 mt-6 px-3">
+              Resources
+            </div>
+            {tabs.slice(8, 10).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
+                  ${activeTab === tab.id 
+                    ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+              >
+                {React.cloneElement(tab.icon, { 
+                  className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
+                })}
+                {tab.label}
+              </button>
+            ))}
+
+            {/* Admin Section */}
+            {isAdmin && (
+              <>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 mt-6 px-3">
+                  Admin
+                </div>
+                {tabs.slice(10).map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
+                      ${activeTab === tab.id 
+                        ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    {React.cloneElement(tab.icon, { 
+                      className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
+                    })}
+                    {tab.label}
+                  </button>
+                ))}
+              </>
+            )}
+          </nav>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Bar */}
+          <div className="bg-white border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {tabs.find(tab => tab.id === activeTab)?.label}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {activeTab === 'calculator' && 'Configure your GPU cluster parameters'}
+                  {activeTab === 'financial' && 'Revenue projections and financial analysis'}
+                  {activeTab === 'capex' && 'Complete capital expenditure breakdown'}
+                  {activeTab === 'networking' && 'Network architecture and costs'}
+                  {activeTab === 'storage' && 'Storage configuration and analysis'}
+                  {activeTab === 'pricing' && 'Service tier pricing models'}
+                  {activeTab === 'software' && 'Software stack configuration'}
+                  {activeTab === 'cooling' && 'Power and cooling infrastructure'}
+                  {activeTab === 'formulas' && 'Calculation formulas and methodology'}
+                  {activeTab === 'references' && 'Technical references and sources'}
+                  {activeTab === 'documentation' && 'Complete system documentation'}
+                  {activeTab === 'design' && 'Generated design summary'}
+                  {activeTab === 'exercise' && 'Design exercise documentation'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-500">
+                  {numGPUs.toLocaleString()} GPUs • {gpuModel.toUpperCase()}
+                </span>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              </div>
+            </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="min-h-[600px]">
+          {/* Content Area */}
+          <div className="flex-1 overflow-auto bg-gray-50">
+            <div className="p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[calc(100vh-200px)]">
+                <div className="p-6">
             {activeTab === 'calculator' && (
               <CalculatorTabRedesigned
                 config={config}
@@ -774,6 +887,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             {activeTab === 'exercise' && isAdmin && (
               <DesignExerciseTab />
             )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

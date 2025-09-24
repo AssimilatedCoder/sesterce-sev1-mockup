@@ -34,12 +34,38 @@
   --sesterce-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
-/* Global Font Override - Apply Roboto */
+/* Global Font Override - Modern Enterprise Typography */
 body, html {
   font-family: var(--sesterce-font-family) !important;
-  font-size: 11pt !important;
-  line-height: 1.6 !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
   font-weight: 400 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modern Enterprise UI Enhancements */
+* {
+  box-sizing: border-box;
+}
+
+/* Clean scrollbars for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Design Document Color Overrides */
@@ -196,4 +222,74 @@ table.sesterce-table tr:nth-child(even) td {
 
 table.sesterce-table tr:hover td {
   background: var(--sesterce-green-light);
+}
+
+/* Modern Form Controls */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  font-family: var(--sesterce-font-family) !important;
+  border: 1px solid var(--sesterce-border-medium) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background: white !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: var(--sesterce-green) !important;
+  box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.1) !important;
+}
+
+/* Modern Button Styling */
+button {
+  font-family: var(--sesterce-font-family) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Modern Card Styling */
+.bg-white.rounded-xl,
+.bg-white.rounded-lg {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Enhanced Table Styling */
+table {
+  font-family: var(--sesterce-font-family) !important;
+}
+
+th {
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+}
+
+/* Modern Typography Scale */
+h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+h2 { font-size: 1.5rem; font-weight: 600; line-height: 1.3; }
+h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+h4 { font-size: 1.125rem; font-weight: 500; line-height: 1.4; }
+h5 { font-size: 1rem; font-weight: 500; line-height: 1.5; }
+h6 { font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
+
+/* Professional spacing */
+.space-y-6 > * + * { margin-top: 1.5rem !important; }
+.space-y-4 > * + * { margin-top: 1rem !important; }
+.space-y-3 > * + * { margin-top: 0.75rem !important; }
+
+/* Clean focus states */
+*:focus {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
 }
