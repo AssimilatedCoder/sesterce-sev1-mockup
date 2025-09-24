@@ -578,7 +578,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
   'bytplus-integrated': {
     id: 'bytplus-integrated',
     name: 'BytePlus Integrated Platform',
-    description: 'ByteDance integrated platform (Chinese vendor - compliance limitations)',
+    description: 'BytePlus (ByteDance/TikTok group) integrated platform — Hong Kong/China affiliation; compliance limitations for EU sovereignty',
     targetScale: 'large',
     components: [
       'bytplus',
@@ -590,7 +590,7 @@ export const softwareStacks: Record<string, SoftwareStack> = {
     deploymentTime: '4-8 hours',
     maturityLevel: 'stable',
     vendorLockIn: 'medium',
-    complianceSupport: [] // ByteDance/TikTok - Chinese company, NOT suitable for European compliance
+    complianceSupport: [] // BytePlus/ByteDance – not suitable for European sovereign compliance
   },
   
   'opensource-optimized': {

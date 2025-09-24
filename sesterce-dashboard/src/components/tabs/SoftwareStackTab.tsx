@@ -217,7 +217,7 @@ export const SoftwareStackTab: React.FC<SoftwareStackTabProps> = ({
                     <div className="flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3 text-red-600" />
                       <span className="text-xs text-red-700 font-medium">
-                        Security Warning: Chinese vendor - not suitable for European compliance
+                        Security Warning: BytePlus (ByteDance/TikTok group) — Hong Kong/China affiliation; not suitable for European sovereign compliance
                       </span>
                     </div>
                   </div>
