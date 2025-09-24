@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface GPUSpec {
   name: string;
@@ -18,6 +19,7 @@ interface RegionRate {
 }
 
 export const GPUCostCalculator: React.FC = () => {
+  const { formatCurrency: formatCurrencyHook } = useCurrency();
   const [activeTab, setActiveTab] = useState('calculator');
   const [numGPUs, setNumGPUs] = useState(10000);
   const [gpuModel, setGpuModel] = useState('gb200');
@@ -136,19 +138,8 @@ export const GPUCostCalculator: React.FC = () => {
     calculate();
   }, [numGPUs, gpuModel, coolingType, region]);
 
-  const formatCurrency = (amount: number) => {
-    const isNegative = amount < 0;
-    const absAmount = Math.abs(amount);
-    
-    let formatted = '';
-    if (absAmount >= 1000000) {
-      formatted = `$${(absAmount / 1000000).toFixed(1)}M`;
-    } else {
-      formatted = `$${absAmount.toLocaleString()}`;
-    }
-    
-    return isNegative ? `-${formatted}` : formatted;
-  };
+  // Use the currency hook for formatting
+  const formatCurrency = formatCurrencyHook;
 
   const tabs = [
     { id: 'calculator', label: '💰 Cost Calculator' },

@@ -21,6 +21,8 @@ import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { formatNumber } from '../utils/formatters';
+import { CurrencySelector } from './common/CurrencySelector';
+import { useCurrency } from '../hooks/useCurrency';
 
 // Region rates with more comprehensive data
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
@@ -85,6 +87,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   
   // State management
   const [activeTab, setActiveTab] = useState('calculator');
+  
+  // Currency conversion hook (for future use in calculations)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const currencyHook = useCurrency();
   
   // Redirect non-admin users away from admin-only tabs
   React.useEffect(() => {
@@ -727,7 +733,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                   {activeTab === 'exercise' && 'Comprehensive design exercise documentation'}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
+                <CurrencySelector compact={true} />
                 <span className="text-sm text-gray-500">
                   {numGPUs.toLocaleString()} GPUs • {gpuModel.toUpperCase()}
                 </span>

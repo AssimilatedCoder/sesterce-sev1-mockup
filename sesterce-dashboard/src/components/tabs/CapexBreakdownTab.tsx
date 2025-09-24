@@ -5,6 +5,7 @@ import {
   DollarSign, Package, Cpu, Thermometer
 } from 'lucide-react';
 import { calculateEnterpriseInfrastructureCosts } from '../../data/enterpriseInfrastructure';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface CapexBreakdownTabProps {
   config: any;
@@ -14,6 +15,7 @@ interface CapexBreakdownTabProps {
 export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, results }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['compute_hardware']));
   const [includeOptional, setIncludeOptional] = useState(false);
+  const { formatCurrency: formatCurrencyHook } = useCurrency();
 
   const toggleCategory = (category: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -25,23 +27,8 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
     setExpandedCategories(newExpanded);
   };
 
-  const formatCurrency = (amount: number) => {
-    const isNegative = amount < 0;
-    const absAmount = Math.abs(amount);
-    
-    let formatted = '';
-    if (absAmount >= 1e9) {
-      formatted = `$${(absAmount / 1e9).toFixed(2)}B`;
-    } else if (absAmount >= 1e6) {
-      formatted = `$${(absAmount / 1e6).toFixed(2)}M`;
-    } else if (absAmount >= 1e3) {
-      formatted = `$${(absAmount / 1e3).toFixed(0)}K`;
-    } else {
-      formatted = `$${absAmount.toFixed(0)}`;
-    }
-    
-    return isNegative ? `-${formatted}` : formatted;
-  };
+  // Use the currency hook for formatting
+  const formatCurrency = formatCurrencyHook;
 
   // Helper function to format cooling load with appropriate units based on cluster size
   const formatCoolingLoad = (powerKW: number) => {

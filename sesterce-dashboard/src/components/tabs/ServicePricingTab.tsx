@@ -1,4 +1,5 @@
 import React from 'react';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface ServicePricingTabProps {
   config: any;
@@ -30,6 +31,7 @@ export const ServicePricingTab: React.FC<ServicePricingTabProps> = ({
   setTierDistribution,
   setServiceModifiers
 }) => {
+  const { formatCurrency } = useCurrency();
   const baseCostPerHour = (() => {
     if (!results) return 0;
     const annualDep = (results.totalCapex || 0) / (config.depreciation || 3);
@@ -104,7 +106,7 @@ export const ServicePricingTab: React.FC<ServicePricingTabProps> = ({
         <p className="text-sm text-gray-600">Base infrastructure-derived GPU-hour cost and service multipliers.</p>
         <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200 inline-block">
           <span className="text-sm text-blue-800 font-medium">Raw GPU Hour Cost (incl. depreciation): </span>
-          <span className="text-sm font-bold text-blue-900">${baseCostPerHour.toFixed(2)}/GPU-hour</span>
+          <span className="text-sm font-bold text-blue-900">{formatCurrency(baseCostPerHour)}/GPU-hour</span>
         </div>
       </div>
 
@@ -177,7 +179,7 @@ export const ServicePricingTab: React.FC<ServicePricingTabProps> = ({
                   <td className="p-2">{tier.baseMultiplier.toFixed(2)}x</td>
                   <td className="p-2">{tier.modifiers.toFixed(2)}</td>
                   <td className="p-2">{tier.totalMultiplier.toFixed(2)}x</td>
-                  <td className="p-2">${tier.effectiveRate.toFixed(2)}</td>
+                  <td className="p-2">{formatCurrency(tier.effectiveRate)}</td>
                   <td className="p-2">
                     <input type="range" min={0} max={100} value={tier.clusterPercentage} onChange={(e) => updateSlider(serviceTiers.find(t => t.name === tier.name)!.id, parseFloat(e.target.value))} />
                     <span className="ml-2 font-medium">{tier.clusterPercentage.toFixed(1)}%</span>
@@ -189,7 +191,7 @@ export const ServicePricingTab: React.FC<ServicePricingTabProps> = ({
             <tfoot>
               <tr className="bg-blue-50 font-semibold border-t">
                 <td className="p-2" colSpan={4}>Blended Average Rate</td>
-                <td className="p-2">${blendedRate.toFixed(2)}/GPU-hour</td>
+                <td className="p-2">{formatCurrency(blendedRate)}/GPU-hour</td>
                 <td className="p-2">Total</td>
                 <td className="p-2">{formatNumber(totalRevenue)}</td>
               </tr>
@@ -211,7 +213,7 @@ export const ServicePricingTab: React.FC<ServicePricingTabProps> = ({
           </div>
           <div className="p-4 rounded bg-gradient-to-br from-blue-500 to-cyan-600 text-white">
             <div>Blended Rate</div>
-            <div className="text-2xl font-bold">${blendedRate.toFixed(2)}/GPU-hr</div>
+            <div className="text-2xl font-bold">{formatCurrency(blendedRate)}/GPU-hr</div>
           </div>
           <div className="p-4 rounded bg-gradient-to-br from-rose-500 to-pink-600 text-white">
             <div>Utilization</div>

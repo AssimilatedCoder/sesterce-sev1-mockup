@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, DollarSign, Calculator, BarChart3, PieChart, Target, AlertTriangle } from 'lucide-react';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface FinancialAnalyticsTabProps {
   config: any;
@@ -7,6 +8,7 @@ interface FinancialAnalyticsTabProps {
 }
 
 export const FinancialAnalyticsTab: React.FC<FinancialAnalyticsTabProps> = ({ config, results }) => {
+  const { formatCurrency: formatCurrencyHook } = useCurrency();
   
   // If no results yet, show a message
   if (!results || !config) {
@@ -117,23 +119,8 @@ export const FinancialAnalyticsTab: React.FC<FinancialAnalyticsTabProps> = ({ co
     };
   };
 
-  const formatCurrency = (amount: number) => {
-    const isNegative = amount < 0;
-    const absAmount = Math.abs(amount);
-    
-    let formatted = '';
-    if (absAmount >= 1e9) {
-      formatted = `$${(absAmount / 1e9).toFixed(2)}B`;
-    } else if (absAmount >= 1e6) {
-      formatted = `$${(absAmount / 1e6).toFixed(2)}M`;
-    } else if (absAmount >= 1e3) {
-      formatted = `$${(absAmount / 1e3).toFixed(0)}K`;
-    } else {
-      formatted = `$${absAmount.toFixed(0)}`;
-    }
-    
-    return isNegative ? `-${formatted}` : formatted;
-  };
+  // Use the currency hook for formatting
+  const formatCurrency = formatCurrencyHook;
 
   const formatPercent = (value: number) => `${value.toFixed(1)}%`;
 
