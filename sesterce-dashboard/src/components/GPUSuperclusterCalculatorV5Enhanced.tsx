@@ -555,24 +555,50 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     });
   };
 
-  const tabs = [
-    { id: 'calculator', label: 'Calculator', icon: <Calculator className="w-4 h-4" /> },
-    { id: 'financial', label: 'Revenue & EBITDA', icon: <TrendingUp className="w-4 h-4" /> },
-    { id: 'capex', label: 'Complete CAPEX', icon: <Package className="w-4 h-4" /> },
-    { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
-    { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
-    { id: 'pricing', label: 'Service Pricing', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'software', label: 'Software Stack', icon: <Cpu className="w-4 h-4" /> },
-    { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> },
-    { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
-    { id: 'references', label: 'References', icon: <FileText className="w-4 h-4" /> },
-    // Admin-only tabs
-    ...(isAdmin ? [
-      { id: 'documentation', label: 'Documentation', icon: <BookOpen className="w-4 h-4" /> },
-      { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
-      { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
-    ] : [])
+  // Organized tab structure with logical groupings
+  const tabGroups = [
+    {
+      title: 'User Input',
+      tabs: [
+        { id: 'calculator', label: 'Cluster Config Options', icon: <Calculator className="w-4 h-4" /> }
+      ]
+    },
+    {
+      title: 'Financials',
+      tabs: [
+        { id: 'financial', label: 'Revenue & EBITDA', icon: <TrendingUp className="w-4 h-4" /> },
+        { id: 'capex', label: 'Complete CAPEX', icon: <Package className="w-4 h-4" /> },
+        { id: 'pricing', label: 'Service Pricing', icon: <DollarSign className="w-4 h-4" /> }
+      ]
+    },
+    {
+      title: 'Technical Analysis',
+      tabs: [
+        { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
+        { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
+        { id: 'software', label: 'Software Stack', icon: <Cpu className="w-4 h-4" /> },
+        { id: 'cooling', label: 'Cooling & Power', icon: <Thermometer className="w-4 h-4" /> }
+      ]
+    },
+    {
+      title: 'Resources',
+      tabs: [
+        { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
+        { id: 'references', label: 'References', icon: <FileText className="w-4 h-4" /> },
+        ...(isAdmin ? [{ id: 'documentation', label: 'Documentation', icon: <BookOpen className="w-4 h-4" /> }] : [])
+      ]
+    },
+    ...(isAdmin ? [{
+      title: 'Designs',
+      tabs: [
+        { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
+        { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
+      ]
+    }] : [])
   ];
+
+  // Flatten tabs for compatibility with existing logic
+  const tabs = tabGroups.flatMap(group => group.tabs);
 
   const config = {
     gpuModel,
@@ -647,79 +673,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
           {/* Navigation Menu */}
           <nav className="flex-1 p-4 space-y-1">
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 px-3">
-              Analysis
-            </div>
-            {tabs.slice(0, 5).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                  ${activeTab === tab.id 
-                    ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }
-                `}
-              >
-                {React.cloneElement(tab.icon, { 
-                  className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
-                })}
-                {tab.label}
-              </button>
-            ))}
-            
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 mt-6 px-3">
-              Configuration
-            </div>
-            {tabs.slice(5, 8).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                  ${activeTab === tab.id 
-                    ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }
-                `}
-              >
-                {React.cloneElement(tab.icon, { 
-                  className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
-                })}
-                {tab.label}
-              </button>
-            ))}
-
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 mt-6 px-3">
-              Resources
-            </div>
-            {tabs.slice(8, 10).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                  ${activeTab === tab.id 
-                    ? 'bg-green-50 text-green-700 border-l-2 border-green-500' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }
-                `}
-              >
-                {React.cloneElement(tab.icon, { 
-                  className: `w-5 h-5 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}` 
-                })}
-                {tab.label}
-              </button>
-            ))}
-
-            {/* Admin Section */}
-            {isAdmin && (
-              <>
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 mt-6 px-3">
-                  Admin
+            {tabGroups.map((group, groupIndex) => (
+              <div key={group.title}>
+                {groupIndex > 0 && <div className="h-4"></div>}
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 px-3">
+                  {group.title}
                 </div>
-                {tabs.slice(10).map((tab) => (
+                {group.tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
@@ -737,8 +697,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                     {tab.label}
                   </button>
                 ))}
-              </>
-            )}
+              </div>
+            ))}
           </nav>
         </div>
 
@@ -752,19 +712,19 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                   {tabs.find(tab => tab.id === activeTab)?.label}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  {activeTab === 'calculator' && 'Configure your GPU cluster parameters'}
-                  {activeTab === 'financial' && 'Revenue projections and financial analysis'}
-                  {activeTab === 'capex' && 'Complete capital expenditure breakdown'}
-                  {activeTab === 'networking' && 'Network architecture and costs'}
-                  {activeTab === 'storage' && 'Storage configuration and analysis'}
-                  {activeTab === 'pricing' && 'Service tier pricing models'}
-                  {activeTab === 'software' && 'Software stack configuration'}
-                  {activeTab === 'cooling' && 'Power and cooling infrastructure'}
-                  {activeTab === 'formulas' && 'Calculation formulas and methodology'}
-                  {activeTab === 'references' && 'Technical references and sources'}
-                  {activeTab === 'documentation' && 'Complete system documentation'}
-                  {activeTab === 'design' && 'Generated design summary'}
-                  {activeTab === 'exercise' && 'Design exercise documentation'}
+                  {activeTab === 'calculator' && 'Configure your GPU cluster parameters and options'}
+                  {activeTab === 'financial' && 'Revenue projections, EBITDA, and financial analysis'}
+                  {activeTab === 'capex' && 'Complete capital expenditure breakdown and analysis'}
+                  {activeTab === 'pricing' && 'Service tier pricing models and revenue optimization'}
+                  {activeTab === 'networking' && 'Network architecture, topology, and infrastructure costs'}
+                  {activeTab === 'storage' && 'Storage configuration, tiers, and performance analysis'}
+                  {activeTab === 'software' && 'Software stack selection and licensing costs'}
+                  {activeTab === 'cooling' && 'Power distribution and cooling infrastructure'}
+                  {activeTab === 'formulas' && 'Calculation formulas and methodology reference'}
+                  {activeTab === 'references' && 'Technical references and industry sources'}
+                  {activeTab === 'documentation' && 'Complete system documentation and guides'}
+                  {activeTab === 'design' && 'Generated design summary and specifications'}
+                  {activeTab === 'exercise' && 'Comprehensive design exercise documentation'}
                 </p>
               </div>
               <div className="flex items-center gap-3">
