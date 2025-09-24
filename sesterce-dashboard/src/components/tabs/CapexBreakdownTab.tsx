@@ -175,27 +175,71 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Cluster Computing Load</span>
                 <span className="font-semibold text-yellow-700">
-                  {enterpriseCosts.powerRequirements?.gpuPowerKW?.toFixed(0) || '0'} kW
+                  {(() => {
+                    const gpuPowerKW = enterpriseCosts.powerRequirements?.gpuPowerKW;
+                    if ((!gpuPowerKW || gpuPowerKW === 0) && gpuCount && gpuModel) {
+                      const gpuPowerMap: Record<string, number> = {
+                        'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                      };
+                      const gpuPower = gpuPowerMap[gpuModel] || 700;
+                      return ((gpuCount * gpuPower) / 1000).toFixed(0);
+                    }
+                    return gpuPowerKW?.toFixed(0) || '0';
+                  })()} kW
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Cooling Systems</span>
                 <span className="font-semibold text-yellow-700">
-                  {enterpriseCosts.powerRequirements?.infrastructureOverheadKW ? 
-                    (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.6).toFixed(0) : '0'} kW
+                  {(() => {
+                    const infraPowerKW = enterpriseCosts.powerRequirements?.infrastructureOverheadKW;
+                    if ((!infraPowerKW || infraPowerKW === 0) && gpuCount && gpuModel) {
+                      const gpuPowerMap: Record<string, number> = {
+                        'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                      };
+                      const gpuPower = gpuPowerMap[gpuModel] || 700;
+                      const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
+                      const infrastructureOverheadKW = totalGpuPowerKW * 0.3;
+                      return (infrastructureOverheadKW * 0.6).toFixed(0);
+                    }
+                    return infraPowerKW ? (infraPowerKW * 0.6).toFixed(0) : '0';
+                  })()} kW
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Datacenter Ancillary</span>
                 <span className="font-semibold text-yellow-700">
-                  {enterpriseCosts.powerRequirements?.infrastructureOverheadKW ? 
-                    (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 0.4).toFixed(0) : '0'} kW
+                  {(() => {
+                    const infraPowerKW = enterpriseCosts.powerRequirements?.infrastructureOverheadKW;
+                    if ((!infraPowerKW || infraPowerKW === 0) && gpuCount && gpuModel) {
+                      const gpuPowerMap: Record<string, number> = {
+                        'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                      };
+                      const gpuPower = gpuPowerMap[gpuModel] || 700;
+                      const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
+                      const infrastructureOverheadKW = totalGpuPowerKW * 0.3;
+                      return (infrastructureOverheadKW * 0.4).toFixed(0);
+                    }
+                    return infraPowerKW ? (infraPowerKW * 0.4).toFixed(0) : '0';
+                  })()} kW
                 </span>
               </div>
               <div className="border-t pt-2 flex justify-between items-center">
                 <span className="font-medium text-gray-900">Total Power Draw</span>
                 <span className="text-xl font-bold text-yellow-900">
-                  {enterpriseCosts.powerRequirements?.totalClusterPowerMW?.toFixed(1) || '0.0'} MW
+                  {(() => {
+                    const totalPowerMW = enterpriseCosts.powerRequirements?.totalClusterPowerMW;
+                    if ((!totalPowerMW || totalPowerMW === 0) && gpuCount && gpuModel) {
+                      const gpuPowerMap: Record<string, number> = {
+                        'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                      };
+                      const gpuPower = gpuPowerMap[gpuModel] || 700;
+                      const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
+                      const totalClusterPowerKW = totalGpuPowerKW * 1.3;
+                      return (totalClusterPowerKW / 1000).toFixed(1);
+                    }
+                    return totalPowerMW?.toFixed(1) || '0.0';
+                  })()} MW
                 </span>
               </div>
             </div>
@@ -245,15 +289,36 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Heat Load (Computing)</span>
               <span className="font-semibold text-blue-700">
-                {enterpriseCosts.powerRequirements?.gpuPowerKW ? 
-                  (enterpriseCosts.powerRequirements.gpuPowerKW * 3.412).toFixed(0) : '0'} BTU/hr
+                {(() => {
+                  const gpuPowerKW = enterpriseCosts.powerRequirements?.gpuPowerKW;
+                  if ((!gpuPowerKW || gpuPowerKW === 0) && gpuCount && gpuModel) {
+                    const gpuPowerMap: Record<string, number> = {
+                      'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                    };
+                    const gpuPower = gpuPowerMap[gpuModel] || 700;
+                    const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
+                    return (totalGpuPowerKW * 3.412).toFixed(0);
+                  }
+                  return gpuPowerKW ? (gpuPowerKW * 3.412).toFixed(0) : '0';
+                })()} BTU/hr
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Infrastructure Heat</span>
               <span className="font-semibold text-blue-700">
-                {enterpriseCosts.powerRequirements?.infrastructureOverheadKW ? 
-                  (enterpriseCosts.powerRequirements.infrastructureOverheadKW * 3.412).toFixed(0) : '0'} BTU/hr
+                {(() => {
+                  const infraPowerKW = enterpriseCosts.powerRequirements?.infrastructureOverheadKW;
+                  if ((!infraPowerKW || infraPowerKW === 0) && gpuCount && gpuModel) {
+                    const gpuPowerMap: Record<string, number> = {
+                      'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
+                    };
+                    const gpuPower = gpuPowerMap[gpuModel] || 700;
+                    const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
+                    const infrastructureOverheadKW = totalGpuPowerKW * 0.3; // 30% overhead
+                    return (infrastructureOverheadKW * 3.412).toFixed(0);
+                  }
+                  return infraPowerKW ? (infraPowerKW * 3.412).toFixed(0) : '0';
+                })()} BTU/hr
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -268,8 +333,8 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
                 {(() => {
                   const powerKW = enterpriseCosts.powerRequirements?.totalClusterPowerKW;
                   
-                  // Fallback calculation if enterprise costs don't have power requirements
-                  if (!powerKW && gpuCount && gpuModel) {
+                  // Always use fallback calculation if primary is missing or zero
+                  if ((!powerKW || powerKW === 0) && gpuCount && gpuModel) {
                     const gpuPowerMap: Record<string, number> = {
                       'gb200': 1000, 'gb300': 1200, 'h100-sxm': 700, 'h100-pcie': 350, 'a100-sxm': 400, 'a100-pcie': 250
                     };
@@ -325,7 +390,10 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
       {/* Controls */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">Infrastructure Components</h3>
+          <div>
+            <h3 className="font-semibold text-gray-900">Infrastructure Components</h3>
+            <p className="text-xs text-gray-500 mt-1">Configure which enterprise infrastructure components to include in the analysis</p>
+          </div>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -333,7 +401,10 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
               onChange={(e) => setIncludeOptional(e.target.checked)}
               className="rounded border-gray-300 text-green-600 focus:ring-green-500"
             />
-            <span className="text-sm text-gray-600">Include optional components</span>
+            <div className="text-right">
+              <span className="text-sm text-gray-700 block">Include Optional Components</span>
+              <span className="text-xs text-gray-500">Advanced security, monitoring & platform services</span>
+            </div>
           </label>
         </div>
       </div>
