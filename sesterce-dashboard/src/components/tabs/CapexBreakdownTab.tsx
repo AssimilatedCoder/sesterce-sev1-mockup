@@ -32,6 +32,22 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
     return `$${amount.toFixed(0)}`;
   };
 
+  // Helper function to format cooling load with appropriate units based on cluster size
+  const formatCoolingLoad = (powerKW: number) => {
+    const coolingLoadBTU = powerKW * 3.412; // BTU/hr conversion
+    
+    if (coolingLoadBTU >= 1000000) {
+      // Use MMBTU/hr for large clusters (1M+ BTU/hr)
+      return `${(coolingLoadBTU / 1000000).toFixed(1)} MMBTU/hr`;
+    } else if (coolingLoadBTU >= 1000) {
+      // Use KBTU/hr for medium clusters (1K+ BTU/hr)
+      return `${(coolingLoadBTU / 1000).toFixed(0)} KBTU/hr`;
+    } else {
+      // Use BTU/hr for small clusters
+      return `${coolingLoadBTU.toFixed(0)} BTU/hr`;
+    }
+  };
+
   if (!results || !config) {
     return (
       <div className="p-8 text-center">
@@ -297,10 +313,10 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
                     };
                     const gpuPower = gpuPowerMap[gpuModel] || 700;
                     const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
-                    return (totalGpuPowerKW * 3.412).toFixed(0);
+                    return formatCoolingLoad(totalGpuPowerKW);
                   }
-                  return gpuPowerKW ? (gpuPowerKW * 3.412).toFixed(0) : '0';
-                })()} BTU/hr
+                  return gpuPowerKW ? formatCoolingLoad(gpuPowerKW) : '0 BTU/hr';
+                })()}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -315,10 +331,10 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
                     const gpuPower = gpuPowerMap[gpuModel] || 700;
                     const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
                     const infrastructureOverheadKW = totalGpuPowerKW * 0.3; // 30% overhead
-                    return (infrastructureOverheadKW * 3.412).toFixed(0);
+                    return formatCoolingLoad(infrastructureOverheadKW);
                   }
-                  return infraPowerKW ? (infraPowerKW * 3.412).toFixed(0) : '0';
-                })()} BTU/hr
+                  return infraPowerKW ? formatCoolingLoad(infraPowerKW) : '0 BTU/hr';
+                })()}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -341,12 +357,10 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
                     const gpuPower = gpuPowerMap[gpuModel] || 700;
                     const totalGpuPowerKW = (gpuCount * gpuPower) / 1000;
                     const totalClusterPowerKW = totalGpuPowerKW * 1.3; // 30% overhead
-                    const coolingLoadMMBTU = (totalClusterPowerKW * 3.412) / 1000000;
-                    return coolingLoadMMBTU.toFixed(1);
+                    return formatCoolingLoad(totalClusterPowerKW);
                   }
-                  return powerKW ? 
-                    ((powerKW * 3.412) / 1000000).toFixed(1) : '0.0';
-                })()} MMBTU/hr
+                  return powerKW ? formatCoolingLoad(powerKW) : '0 BTU/hr';
+                })()}
               </span>
             </div>
           </div>
