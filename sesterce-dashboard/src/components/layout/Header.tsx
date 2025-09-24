@@ -11,7 +11,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, currentUser }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+    <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
       <Container>
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

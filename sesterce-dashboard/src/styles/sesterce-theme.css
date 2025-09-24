@@ -1,0 +1,156 @@
+/* Sesterce-inspired Color Theme */
+:root {
+  /* Primary Sesterce Colors */
+  --sesterce-green-50: #f0f9f4;
+  --sesterce-green-100: #dcf4e3;
+  --sesterce-green-200: #bbf7d0;
+  --sesterce-green-300: #86efac;
+  --sesterce-green-400: #4ade80;
+  --sesterce-green-500: #22c55e;
+  --sesterce-green-600: #16a34a;
+  --sesterce-green-700: #15803d;
+  --sesterce-green-800: #166534;
+  --sesterce-green-900: #14532d;
+
+  /* Neutral Grays */
+  --sesterce-gray-50: #f9fafb;
+  --sesterce-gray-100: #f3f4f6;
+  --sesterce-gray-200: #e5e7eb;
+  --sesterce-gray-300: #d1d5db;
+  --sesterce-gray-400: #9ca3af;
+  --sesterce-gray-500: #6b7280;
+  --sesterce-gray-600: #4b5563;
+  --sesterce-gray-700: #374151;
+  --sesterce-gray-800: #1f2937;
+  --sesterce-gray-900: #111827;
+
+  /* Accent Colors */
+  --sesterce-blue-50: #eff6ff;
+  --sesterce-blue-100: #dbeafe;
+  --sesterce-blue-500: #3b82f6;
+  --sesterce-blue-600: #2563eb;
+
+  /* Status Colors */
+  --sesterce-yellow-50: #fefce8;
+  --sesterce-yellow-400: #facc15;
+  --sesterce-orange-50: #fff7ed;
+  --sesterce-orange-400: #fb923c;
+  --sesterce-red-50: #fef2f2;
+  --sesterce-red-400: #f87171;
+}
+
+/* Override existing color classes with Sesterce theme */
+.bg-white { background-color: #ffffff !important; }
+.bg-gray-50 { background-color: var(--sesterce-gray-50) !important; }
+.bg-gray-100 { background-color: var(--sesterce-gray-100) !important; }
+
+/* Green theme overrides */
+.bg-blue-50 { background-color: var(--sesterce-green-50) !important; }
+.bg-blue-100 { background-color: var(--sesterce-green-100) !important; }
+.border-blue-200 { border-color: var(--sesterce-green-200) !important; }
+.border-blue-400 { border-color: var(--sesterce-green-400) !important; }
+.text-blue-600 { color: var(--sesterce-green-600) !important; }
+.text-blue-700 { color: var(--sesterce-green-700) !important; }
+
+.bg-purple-50 { background-color: var(--sesterce-green-50) !important; }
+.border-purple-400 { border-color: var(--sesterce-green-400) !important; }
+
+.bg-cyan-50 { background-color: var(--sesterce-green-100) !important; }
+
+/* Status colors remain distinct */
+.bg-yellow-50 { background-color: var(--sesterce-yellow-50) !important; }
+.border-yellow-400 { border-color: var(--sesterce-yellow-400) !important; }
+.bg-orange-50 { background-color: var(--sesterce-orange-50) !important; }
+.border-orange-200 { border-color: var(--sesterce-orange-400) !important; }
+.bg-red-50 { background-color: var(--sesterce-red-50) !important; }
+.border-red-200 { border-color: var(--sesterce-red-400) !important; }
+
+/* Green accents */
+.bg-green-50 { background-color: var(--sesterce-green-50) !important; }
+.bg-green-100 { background-color: var(--sesterce-green-100) !important; }
+.bg-green-600 { background-color: var(--sesterce-green-600) !important; }
+.bg-green-700 { background-color: var(--sesterce-green-700) !important; }
+.border-green-200 { border-color: var(--sesterce-green-200) !important; }
+.border-green-400 { border-color: var(--sesterce-green-400) !important; }
+.text-green-600 { color: var(--sesterce-green-600) !important; }
+.text-green-700 { color: var(--sesterce-green-700) !important; }
+
+/* Hover states */
+.hover\:bg-green-700:hover { background-color: var(--sesterce-green-700) !important; }
+.hover\:bg-gray-50:hover { background-color: var(--sesterce-gray-50) !important; }
+
+/* Focus states */
+.focus\:ring-green-500:focus { --tw-ring-color: var(--sesterce-green-500) !important; }
+
+/* Gradient overrides */
+.from-blue-50 { --tw-gradient-from: var(--sesterce-green-50) !important; }
+.to-purple-50 { --tw-gradient-to: var(--sesterce-green-100) !important; }
+.from-indigo-50 { --tw-gradient-from: var(--sesterce-green-50) !important; }
+.to-purple-50 { --tw-gradient-to: var(--sesterce-green-100) !important; }
+
+/* Icon colors */
+.text-indigo-600 { color: var(--sesterce-green-600) !important; }
+.bg-indigo-100 { background-color: var(--sesterce-green-100) !important; }
+.border-indigo-200 { border-color: var(--sesterce-green-200) !important; }
+
+/* Tab and navigation colors */
+.border-b-2.border-gray-200 { border-color: var(--sesterce-green-200) !important; }
+
+/* Sesterce-specific components */
+.sesterce-card {
+  background: #ffffff;
+  border: 1px solid var(--sesterce-gray-200);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.sesterce-card-accent {
+  background: var(--sesterce-green-50);
+  border: 1px solid var(--sesterce-green-200);
+  border-left: 4px solid var(--sesterce-green-500);
+}
+
+.sesterce-button-primary {
+  background-color: var(--sesterce-green-600);
+  color: white;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sesterce-button-primary:hover {
+  background-color: var(--sesterce-green-700);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+.sesterce-input {
+  border: 1px solid var(--sesterce-gray-300);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.sesterce-input:focus {
+  outline: none;
+  border-color: var(--sesterce-green-500);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.sesterce-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid var(--sesterce-green-200) !important;
+}
+
+.sesterce-header-gradient {
+  background: linear-gradient(135deg, var(--sesterce-green-600) 0%, var(--sesterce-green-700) 100%);
+  color: white;
+}
+
+.sesterce-section {
+  background: var(--sesterce-gray-50);
+  border: 1px solid var(--sesterce-gray-200);
+  border-radius: 8px;
+}

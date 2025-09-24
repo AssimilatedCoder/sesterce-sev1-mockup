@@ -7,6 +7,7 @@ import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboard
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
 import { Activity, Calculator } from 'lucide-react';
+import './styles/sesterce-theme.css';
 
 interface AppContentProps {
   onLogout: () => void;
