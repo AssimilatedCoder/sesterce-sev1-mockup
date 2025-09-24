@@ -502,6 +502,35 @@ export const StorageTabProductionEnhanced: React.FC<StorageTabProductionEnhanced
           </div>
         </div>
       )}
+
+      {/* GPU Storage Platform Comparison */}
+      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <Database className="w-5 h-5 text-green-600" />
+            GPU Storage Platform Comparison (September 2024)
+          </h3>
+          <a 
+            href="/gpu-storage-comparison.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-green-600 hover:text-green-700 underline flex items-center gap-1"
+          >
+            <Info className="w-4 h-4" />
+            Open in new tab
+          </a>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Comprehensive analysis of enterprise storage solutions for AI/ML infrastructure, based on IO500 SC24 results and production deployments.
+        </p>
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <iframe 
+            src="/gpu-storage-comparison.html"
+            className="w-full h-[800px] border-0"
+            title="GPU Storage Platform Comparison"
+          />
+        </div>
+      </div>
     </div>
   );
 };
