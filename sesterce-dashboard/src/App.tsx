@@ -22,9 +22,12 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
       </div>
       
       <Header onLogout={onLogout} currentUser={currentUser} />
-      <WarningBanner />
       
-      <main className="pt-20 relative z-10">
+      <main className="pt-16 relative z-10">
+        {/* Warning Banner - aligned with content */}
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <WarningBanner />
+        </div>
 
         {/* Main Content - Only Calculator */}
         <div className="min-h-screen">

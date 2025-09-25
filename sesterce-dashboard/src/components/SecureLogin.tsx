@@ -46,12 +46,12 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Warning Banner */}
-      <WarningBanner />
-      
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
+      <div className="max-w-lg w-full">
+        {/* Warning Banner - floating above login */}
+        <div className="mb-8">
+          <WarningBanner />
+        </div>
         {/* Logo and Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-center gap-6 mb-6">
@@ -91,7 +91,7 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-xl shadow-xl p-8">
+        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md mx-auto">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
@@ -201,7 +201,6 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
