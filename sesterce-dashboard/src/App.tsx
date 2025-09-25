@@ -37,7 +37,7 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
     <div className="min-h-screen bg-gray-50 relative overflow-hidden">
       {/* Background decorative elements - very subtle */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-green-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-100/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
       </div>
       

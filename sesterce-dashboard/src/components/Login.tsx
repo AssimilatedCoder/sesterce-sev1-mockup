@@ -44,13 +44,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="bg-white p-4 rounded-full shadow-lg">
-              <img src="/Null Sector Systems.png" alt="Null Sector Systems LTD" className="h-16 w-auto" />
+              <img src="/NSS-square.png" alt="Null Sector Systems LTD" className="h-16 w-auto" />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Null Sector Systems LTD</h1>

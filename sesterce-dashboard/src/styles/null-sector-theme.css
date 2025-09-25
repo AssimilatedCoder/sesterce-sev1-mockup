@@ -5,7 +5,7 @@
   /* Primary Null Sector Colors - From Design Document */
   --null-sector-green: #00c896;      /* Primary Null Sector green */
   --null-sector-green-dark: #00b185; /* Darker Null Sector green */
-  --null-sector-green-light: #e8f5f1; /* Light green tint */
+  --null-sector-beige-light: #f5f3f0; /* Light beige tint */
 
   /* Professional Text Colors - From Design Document */
   --null-sector-text-primary: #2c3e50;   /* Primary text */
@@ -100,8 +100,11 @@ body, html {
 .text-blue-600 { color: var(--null-sector-green) !important; }
 .text-blue-700 { color: var(--null-sector-green-dark) !important; }
 
+/* Beige/Warm Colors - Professional & Clean */
+.bg-yellow-50 { background-color: #fdf8f3 !important; } /* Light beige */
+.bg-yellow-100 { background-color: #f5f1eb !important; } /* Slightly darker beige */
+
 /* Status Colors - Professional & Clear */
-.bg-yellow-50 { background-color: #fef9f0 !important; }
 .border-yellow-400 { border-color: var(--null-sector-warning) !important; }
 .bg-orange-50 { background-color: #fef9f0 !important; }
 .border-orange-200 { border-color: var(--null-sector-warning) !important; }
@@ -109,8 +112,8 @@ body, html {
 .border-red-200 { border-color: var(--null-sector-error) !important; }
 
 /* Success States */
-.bg-green-50 { background-color: var(--null-sector-green-light) !important; }
-.bg-green-100 { background-color: var(--null-sector-green-light) !important; }
+.bg-green-50 { background-color: var(--null-sector-beige-light) !important; }
+.bg-green-100 { background-color: var(--null-sector-beige-light) !important; }
 .border-green-200 { border-color: var(--null-sector-green) !important; }
 .border-green-400 { border-color: var(--null-sector-green) !important; }
 
@@ -121,7 +124,7 @@ body, html {
 .focus\:ring-green-500:focus { --tw-ring-color: var(--null-sector-green) !important; }
 
 /* Gradients - Professional */
-.from-green-50 { --tw-gradient-from: var(--null-sector-green-light) !important; }
+.from-green-50 { --tw-gradient-from: var(--null-sector-beige-light) !important; }
 .to-gray-100 { --tw-gradient-to: var(--null-sector-bg-secondary) !important; }
 .from-blue-50 { --tw-gradient-from: var(--null-sector-bg-secondary) !important; }
 .to-purple-50 { --tw-gradient-to: var(--null-sector-bg-secondary) !important; }
@@ -221,7 +224,7 @@ table.null-sector-table tr:nth-child(even) td {
 }
 
 table.null-sector-table tr:hover td {
-  background: var(--null-sector-green-light);
+  background: var(--null-sector-beige-light);
 }
 
 /* Modern Form Controls */
