@@ -82,6 +82,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Get current user from session storage (set by login)
   const currentUser = sessionStorage.getItem('nullSectorUser');
   const isAdmin = currentUser === 'admin' || currentUser === 'David';
+  const isSuperAdmin = currentUser === 'admin'; // Only admin can see access logs
   
   // Debug logging
   console.log('Current user:', currentUser);
@@ -99,7 +100,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise' || activeTab === 'documentation')) {
       setActiveTab('calculator');
     }
-  }, [activeTab, isAdmin]);
+    if (!isSuperAdmin && activeTab === 'logs') {
+      setActiveTab('calculator');
+    }
+  }, [activeTab, isAdmin, isSuperAdmin]);
   
   // Configuration state
   const [gpuModel, setGpuModel] = useState('gb200');
@@ -608,7 +612,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     ...(isAdmin ? [{
       title: 'Admin',
       tabs: [
-        { id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> },
+        ...(isSuperAdmin ? [{ id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> }] : []),
         { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
         { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
       ]
@@ -865,7 +869,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
               <ReferencesTab />
             )}
             
-            {activeTab === 'logs' && isAdmin && (
+            {activeTab === 'logs' && isSuperAdmin && (
               <AccessLogsTab config={config} results={results} />
             )}
             
