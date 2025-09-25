@@ -7,6 +7,7 @@ import { gpuSpecs } from '../../data/gpuSpecs';
 import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
 import { softwareStacks, recommendStack, calculateStackCost } from '../../data/softwareStacks';
 import { useCurrency } from '../../hooks/useCurrency';
+import { WarningBanner } from '../common/WarningBanner';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -1233,6 +1234,10 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       {/* Results Section */}
       {results && (
         <div className="mt-8 space-y-6">
+          {/* Warning Banner Above Results */}
+          <WarningBanner className="rounded-lg" />
+          
+          <div className="space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -1390,6 +1395,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>

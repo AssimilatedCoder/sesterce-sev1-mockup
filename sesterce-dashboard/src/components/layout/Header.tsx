@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, currentUser }) => {
                 <h1 
                   className="text-lg font-bold"
                   style={{
-                    fontFamily: 'Roboto, sans-serif',
+                    fontFamily: 'Rationale, sans-serif',
                     fontWeight: 700,
                     color: '#ff6b35',
                     textShadow: '0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)',
@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, currentUser }) => {
                 <h1 
                   className="text-lg font-bold"
                   style={{
-                    fontFamily: 'Roboto, sans-serif',
+                    fontFamily: 'Rationale, sans-serif',
                     fontWeight: 700,
                     color: '#ff6b35',
                     textShadow: '0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)',

@@ -58,8 +58,7 @@
 
 ### **New Login Credentials**
 **IMPORTANT**: Passwords have been updated for security (Star Wars themed):
-- **Youssef**: `Y0da!777`
-- **Maciej**: `H0th#88!`
+- **David**: `Sk7walk3r!`
 - **admin**: `Vader@66`
 
 ## 🔍 **SECURITY FEATURES IMPLEMENTED**

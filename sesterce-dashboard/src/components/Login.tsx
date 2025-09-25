@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, AlertCircle } from 'lucide-react';
+import { WarningBanner } from './common/WarningBanner';
 
 interface LoginProps {
   onLogin: (username: string) => void;
@@ -44,8 +45,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Warning Banner */}
+      <WarningBanner />
+      
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full">
         {/* Logo and Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-center gap-6 mb-6">
@@ -54,7 +59,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <h1 
                 className="text-4xl font-bold leading-tight"
                 style={{
-                  fontFamily: 'Roboto, sans-serif',
+                  fontFamily: 'Rationale, sans-serif',
                   fontWeight: 700,
                   color: '#ff6b35',
                   textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
@@ -66,7 +71,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <h1 
                 className="text-4xl font-bold leading-tight"
                 style={{
-                  fontFamily: 'Roboto, sans-serif',
+                  fontFamily: 'Rationale, sans-serif',
                   fontWeight: 700,
                   color: '#ff6b35',
                   textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
@@ -157,6 +162,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <p className="text-sm text-gray-600">
             Secure access to GPU cluster management
           </p>
+        </div>
         </div>
       </div>
     </div>

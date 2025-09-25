@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
+import { WarningBanner } from './components/common/WarningBanner';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
 import './styles/null-sector-theme.css';
@@ -21,8 +22,9 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
       </div>
       
       <Header onLogout={onLogout} currentUser={currentUser} />
+      <WarningBanner />
       
-      <main className="pt-16 relative z-10">
+      <main className="pt-20 relative z-10">
 
         {/* Main Content - Only Calculator */}
         <div className="min-h-screen">

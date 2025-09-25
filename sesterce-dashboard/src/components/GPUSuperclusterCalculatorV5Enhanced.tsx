@@ -80,7 +80,7 @@ const networkFabrics: Record<string, {
 const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Get current user from session storage (set by login)
   const currentUser = sessionStorage.getItem('nullSectorUser');
-  const isAdmin = currentUser === 'admin' || currentUser === 'Youssef' || currentUser === 'Maciej';
+  const isAdmin = currentUser === 'admin' || currentUser === 'David';
   
   // Debug logging
   console.log('Current user:', currentUser);
