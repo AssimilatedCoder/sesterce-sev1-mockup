@@ -44,17 +44,26 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="bg-white p-4 rounded-full shadow-lg">
-              <img src="/NSS-square.png" alt="Null Sector Systems LTD" className="h-16 w-auto" />
-            </div>
+          <div className="flex justify-center mb-6">
+            <img src="/testlogo.png" alt="Null Sector Systems LTD" className="h-24 w-auto" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Null Sector Systems LTD</h1>
-          <p className="text-gray-600 mt-2">GPU SuperCluster Calculator</p>
+          <h1 
+            className="text-4xl font-bold mb-2"
+            style={{
+              fontFamily: 'Roboto, sans-serif',
+              fontWeight: 700,
+              color: '#ff6b35',
+              textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
+              letterSpacing: '1px'
+            }}
+          >
+            NULL SECTOR SYSTEMS LTD
+          </h1>
+          <p className="text-gray-300 mt-2">GPU SuperCluster Calculator</p>
         </div>
 
         {/* Login Form */}
