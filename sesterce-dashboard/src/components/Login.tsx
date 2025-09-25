@@ -44,12 +44,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo and Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-center gap-6 mb-6">
-            <img src="/testlogo.png" alt="Null Sector Systems LTD" className="h-48 w-auto" />
+            <img src="/testlogo_white_bg.png" alt="Null Sector Systems LTD" className="h-48 w-auto" />
             <div className="flex flex-col">
               <h1 
                 className="text-4xl font-bold leading-tight"
@@ -77,7 +77,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </h1>
             </div>
           </div>
-          <p className="text-gray-300 mt-2">GPU SuperCluster Calculator</p>
+          <p className="text-gray-600 mt-2">GPU SuperCluster Calculator</p>
         </div>
 
         {/* Login Form */}
