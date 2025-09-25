@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
-import { Container } from './components/layout/Container';
-import { TabNavigation } from './components/features/TabNavigation';
-import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboardOriginal';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
-import { Activity, Calculator } from 'lucide-react';
 import './styles/null-sector-theme.css';
 
 interface AppContentProps {
@@ -15,23 +11,6 @@ interface AppContentProps {
 }
 
 function AppContent({ onLogout, currentUser }: AppContentProps) {
-  const location = useLocation();
-  const activeTab = location.pathname === '/calculator' ? 'calculator' : 'dashboard';
-
-  const tabs = [
-    {
-      id: 'dashboard',
-      label: 'SEV-1 War Room',
-      icon: <Activity className="w-5 h-5" />,
-      path: '/'
-    },
-    {
-      id: 'calculator',
-      label: 'GPU SuperCluster Calculator',
-      icon: <Calculator className="w-5 h-5" />,
-      path: '/calculator'
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 relative overflow-hidden">
@@ -44,22 +23,13 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
       <Header onLogout={onLogout} currentUser={currentUser} />
       
       <main className="pt-16 relative z-10">
-        {/* Tab Navigation */}
-        <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-40 shadow-sm">
-          <Container>
-            <TabNavigation
-              tabs={tabs}
-              activeTab={activeTab}
-            />
-          </Container>
-        </div>
 
-        {/* Tab Content */}
+        {/* Main Content - Only Calculator */}
         <div className="min-h-screen">
           <Routes>
-            <Route path="/" element={<GrafanaDashboardOriginal />} />
+            <Route path="/" element={<GPUSuperclusterCalculatorV5Enhanced />} />
             <Route path="/calculator" element={<GPUSuperclusterCalculatorV5Enhanced />} />
-            <Route path="/pricing" element={<Navigate to="/calculator" replace />} />
+            <Route path="/pricing" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
