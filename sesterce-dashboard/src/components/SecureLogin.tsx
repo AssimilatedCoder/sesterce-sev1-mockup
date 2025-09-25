@@ -48,22 +48,36 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo and Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <img src="/testlogo.png" alt="Null Sector Systems LTD" className="h-24 w-auto" />
+        <div className="flex flex-col items-center mb-8">
+          <div className="flex items-center justify-center gap-6 mb-6">
+            <img src="/testlogo.png" alt="Null Sector Systems LTD" className="h-48 w-auto" />
+            <div className="flex flex-col">
+              <h1 
+                className="text-4xl font-bold leading-tight"
+                style={{
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 700,
+                  color: '#ff6b35',
+                  textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
+                  letterSpacing: '1px'
+                }}
+              >
+                NULL SECTOR
+              </h1>
+              <h1 
+                className="text-4xl font-bold leading-tight"
+                style={{
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 700,
+                  color: '#ff6b35',
+                  textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
+                  letterSpacing: '1px'
+                }}
+              >
+                SYSTEMS LTD
+              </h1>
+            </div>
           </div>
-          <h1 
-            className="text-4xl font-bold mb-2"
-            style={{
-              fontFamily: 'Roboto, sans-serif',
-              fontWeight: 700,
-              color: '#ff6b35',
-              textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
-              letterSpacing: '1px'
-            }}
-          >
-            NULL SECTOR SYSTEMS LTD
-          </h1>
           <p className="text-gray-300 mt-2">Secure GPU SuperCluster Calculator</p>
           <div className="flex items-center justify-center gap-2 mt-2">
             <Shield className="w-4 h-4 text-green-400" />
