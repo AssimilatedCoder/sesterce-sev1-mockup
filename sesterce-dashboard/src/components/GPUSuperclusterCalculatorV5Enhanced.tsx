@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Cpu, HardDrive, Network, Thermometer,
-  FileText, BookOpen, DollarSign, TrendingUp, Package
+  FileText, BookOpen, DollarSign, TrendingUp, Package, Settings
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
@@ -20,6 +20,7 @@ import { DocumentationTab } from './tabs/DocumentationTab';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
+import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
@@ -282,7 +283,6 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const fabric = networkFabrics[fabricType];
     const isGB200 = gpuModel === 'gb200';
     const isGB300 = gpuModel === 'gb300';
-    const isHClass = gpuModel.startsWith('h100') || gpuModel.startsWith('h200');
     
     // Pod-based architecture (from design document)
     const gpusPerPod = isGB200 ? 1008 : 1024;
@@ -591,6 +591,12 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       ]
     },
     {
+      title: 'Operations',
+      tabs: [
+        { id: 'operations', label: 'Operations Playbook', icon: <Settings className="w-4 h-4" /> }
+      ]
+    },
+    {
       title: 'Resources',
       tabs: [
         { id: 'formulas', label: 'Formulas', icon: <FileText className="w-4 h-4" /> },
@@ -730,6 +736,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                   {activeTab === 'storage' && 'Storage configuration, tiers, and performance analysis'}
                   {activeTab === 'software' && 'Software stack selection and licensing costs'}
                   {activeTab === 'cooling' && 'Power distribution and cooling infrastructure'}
+                  {activeTab === 'operations' && 'Operations playbook and troubleshooting guides for NOC teams'}
                   {activeTab === 'formulas' && 'Calculation formulas and methodology reference'}
                   {activeTab === 'references' && 'Technical references and industry sources'}
                   {activeTab === 'documentation' && 'Complete system documentation and guides'}
@@ -837,6 +844,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'cooling' && (
               <CoolingPowerTabEnhanced config={config} results={results} />
+            )}
+            
+            {activeTab === 'operations' && (
+              <OperationsPlaybookTab config={config} results={results} />
             )}
             
             {activeTab === 'formulas' && (
