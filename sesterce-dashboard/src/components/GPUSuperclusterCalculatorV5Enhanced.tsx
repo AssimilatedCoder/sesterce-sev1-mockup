@@ -87,6 +87,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Debug logging
   console.log('Current user:', currentUser);
   console.log('Is admin:', isAdmin);
+  console.log('Is super admin:', isSuperAdmin);
   
   // State management
   const [activeTab, setActiveTab] = useState('calculator');
