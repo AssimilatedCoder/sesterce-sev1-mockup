@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Cpu, HardDrive, Network, Thermometer,
-  FileText, BookOpen, DollarSign, TrendingUp, Package, Settings
+  FileText, BookOpen, DollarSign, TrendingUp, Package, Settings, Shield
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
@@ -21,6 +21,7 @@ import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
+import { AccessLogsTab } from './tabs/AccessLogsTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
@@ -605,8 +606,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       ]
     },
     ...(isAdmin ? [{
-      title: 'Designs',
+      title: 'Admin',
       tabs: [
+        { id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> },
         { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
         { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
       ]
@@ -740,6 +742,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                   {activeTab === 'formulas' && 'Calculation formulas and methodology reference'}
                   {activeTab === 'references' && 'Technical references and industry sources'}
                   {activeTab === 'documentation' && 'Complete system documentation and guides'}
+                  {activeTab === 'logs' && 'Access logs and security monitoring for administrators'}
                   {activeTab === 'design' && 'Generated design summary and specifications'}
                   {activeTab === 'exercise' && 'Comprehensive design exercise documentation'}
                 </p>
@@ -860,6 +863,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'references' && (
               <ReferencesTab />
+            )}
+            
+            {activeTab === 'logs' && isAdmin && (
+              <AccessLogsTab config={config} results={results} />
             )}
             
             {activeTab === 'design' && isAdmin && (

@@ -10,6 +10,7 @@ import hashlib
 import time
 import os
 import jwt
+import json
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
@@ -37,6 +38,33 @@ USERS = {
 # Rate limiting (simple implementation)
 request_times = {}
 RATE_LIMIT = 10  # requests per minute
+
+# Login logging
+LOGIN_LOG_FILE = 'login_access.log'
+login_attempts = []  # In-memory log for quick access
+
+def log_login_attempt(client_ip, username, success, user_agent=None):
+    """Log login attempts with IP, timestamp, and outcome"""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    log_entry = {
+        'timestamp': timestamp,
+        'ip_address': client_ip,
+        'username': username,
+        'success': success,
+        'user_agent': user_agent or 'Unknown'
+    }
+    
+    # Add to in-memory log (keep last 1000 entries)
+    login_attempts.append(log_entry)
+    if len(login_attempts) > 1000:
+        login_attempts.pop(0)
+    
+    # Write to file log
+    try:
+        with open(LOGIN_LOG_FILE, 'a') as f:
+            f.write(json.dumps(log_entry) + '\n')
+    except Exception as e:
+        print(f"Failed to write login log: {e}")
 
 def check_rate_limit(client_ip):
     current_time = time.time()
@@ -115,17 +143,23 @@ def login():
     
     username = data['username']
     password = data['password']
+    user_agent = request.headers.get('User-Agent', 'Unknown')
     
     # Check user exists
     if username not in USERS:
+        log_login_attempt(client_ip, username, False, user_agent)
         time.sleep(1)  # Prevent timing attacks
         return jsonify({'error': 'Invalid credentials'}), 401
     
     # Verify password
     password_hash = hashlib.sha256(password.encode()).hexdigest()
     if password_hash != USERS[username]['password_hash']:
+        log_login_attempt(client_ip, username, False, user_agent)
         time.sleep(1)  # Prevent timing attacks
         return jsonify({'error': 'Invalid credentials'}), 401
+    
+    # Log successful login
+    log_login_attempt(client_ip, username, True, user_agent)
     
     # Generate JWT token
     token = generate_token(username, USERS[username]['role'])
@@ -145,6 +179,22 @@ def verify_token_endpoint():
         'valid': True,
         'username': request.user['username'],
         'role': request.user['role']
+    })
+
+@app.route('/api/access-logs', methods=['GET'])
+@require_auth
+def get_access_logs():
+    """Get access logs - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    # Return recent login attempts (last 100)
+    recent_attempts = login_attempts[-100:] if len(login_attempts) > 100 else login_attempts
+    
+    return jsonify({
+        'total_attempts': len(login_attempts),
+        'recent_attempts': recent_attempts,
+        'log_file': LOGIN_LOG_FILE
     })
 
 # GPU specifications (hidden from client)
