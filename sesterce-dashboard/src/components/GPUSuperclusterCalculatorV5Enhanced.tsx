@@ -79,7 +79,7 @@ const networkFabrics: Record<string, {
 
 const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Get current user from session storage (set by login)
-  const currentUser = sessionStorage.getItem('sesterceUser');
+  const currentUser = sessionStorage.getItem('nullSectorUser');
   const isAdmin = currentUser === 'admin' || currentUser === 'Youssef' || currentUser === 'Maciej';
   
   // Debug logging
@@ -164,7 +164,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Service tier pricing distribution and modifiers
   const [tierDistribution, setTierDistribution] = useState<{ tier1: number; tier2: number; tier3: number; tier4: number }>(() => {
     try {
-      const saved = localStorage.getItem('sesterceTierDistribution');
+      const saved = localStorage.getItem('nullSectorTierDistribution');
       if (saved) return JSON.parse(saved);
     } catch {}
     return { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
@@ -176,7 +176,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     sustainability: { renewable: boolean; carbon: boolean; netzero: boolean };
   }>(() => {
     try {
-      const saved = localStorage.getItem('sesterceServiceModifiers');
+      const saved = localStorage.getItem('nullSectorServiceModifiers');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
@@ -187,11 +187,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   });
 
   useEffect(() => {
-    try { localStorage.setItem('sesterceTierDistribution', JSON.stringify(tierDistribution)); } catch {}
+    try { localStorage.setItem('nullSectorTierDistribution', JSON.stringify(tierDistribution)); } catch {}
   }, [tierDistribution]);
 
   useEffect(() => {
-    try { localStorage.setItem('sesterceServiceModifiers', JSON.stringify(serviceModifiers)); } catch {}
+    try { localStorage.setItem('nullSectorServiceModifiers', JSON.stringify(serviceModifiers)); } catch {}
   }, [serviceModifiers]);
   
   // Results state

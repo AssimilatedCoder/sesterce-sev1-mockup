@@ -18,8 +18,8 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, currentUser }) => {
           <div className="flex-shrink-0">
             <a href="/" className="flex items-center">
               <img 
-                src="/sesterce.jpg" 
-                alt="Sesterce" 
+                src="/Null Sector Systems.png" 
+                alt="Null Sector Systems LTD" 
                 className="h-12 w-auto object-contain"
               />
             </a>

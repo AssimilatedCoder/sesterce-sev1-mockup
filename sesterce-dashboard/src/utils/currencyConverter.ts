@@ -40,12 +40,12 @@ export class CurrencyConverter {
   public setSelectedCurrency(currency: Currency): void {
     this.selectedCurrency = currency;
     // Persist to localStorage
-    localStorage.setItem('sesterceSelectedCurrency', currency);
+    localStorage.setItem('nullSectorSelectedCurrency', currency);
   }
 
   public getSelectedCurrency(): Currency {
     // Check localStorage first
-    const stored = localStorage.getItem('sesterceSelectedCurrency') as Currency;
+    const stored = localStorage.getItem('nullSectorSelectedCurrency') as Currency;
     if (stored && (stored === 'USD' || stored === 'EUR')) {
       this.selectedCurrency = stored;
     }

@@ -1,0 +1,295 @@
+/* Design Document Inspired Theme - Professional & Clean */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+  /* Primary Null Sector Colors - From Design Document */
+  --null-sector-green: #00c896;      /* Primary Null Sector green */
+  --null-sector-green-dark: #00b185; /* Darker Null Sector green */
+  --null-sector-green-light: #e8f5f1; /* Light green tint */
+
+  /* Professional Text Colors - From Design Document */
+  --null-sector-text-primary: #2c3e50;   /* Primary text */
+  --null-sector-text-secondary: #34495e; /* Secondary text */
+  --null-sector-text-muted: #6c757d;     /* Muted text */
+  --null-sector-text-light: #95a5a6;     /* Light text */
+
+  /* Neutral Backgrounds - From Design Document */
+  --null-sector-bg-primary: #ffffff;     /* Pure white */
+  --null-sector-bg-secondary: #f8f9fa;   /* Light grey panels */
+  --null-sector-bg-gradient: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+
+  /* Borders and Dividers - From Design Document */
+  --null-sector-border-light: #ecf0f1;   /* Light borders */
+  --null-sector-border-medium: #dee2e6;  /* Medium borders */
+  --null-sector-border-accent: #00c896;  /* Accent borders */
+
+  /* Status Colors - Professional */
+  --null-sector-success: #00c896;
+  --null-sector-warning: #ffc107;
+  --null-sector-error: #dc3545;
+  --null-sector-info: #17a2b8;
+
+  /* Typography - Roboto from Design Document */
+  --null-sector-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --null-sector-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Global Font Override - Modern Enterprise Typography */
+body, html {
+  font-family: var(--null-sector-font-family) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modern Enterprise UI Enhancements */
+* {
+  box-sizing: border-box;
+}
+
+/* Clean scrollbars for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Design Document Color Overrides */
+.bg-white { background-color: var(--null-sector-bg-primary) !important; }
+.bg-gray-50 { background-color: var(--null-sector-bg-secondary) !important; }
+.bg-gray-100 { background-color: var(--null-sector-bg-secondary) !important; }
+
+/* Text Colors - Professional Hierarchy */
+.text-gray-500 { color: var(--null-sector-text-muted) !important; }
+.text-gray-600 { color: var(--null-sector-text-secondary) !important; }
+.text-gray-700 { color: var(--null-sector-text-secondary) !important; }
+.text-gray-800 { color: var(--null-sector-text-primary) !important; }
+.text-gray-900 { color: var(--null-sector-text-primary) !important; }
+
+/* Borders - Professional & Clean */
+.border-gray-200 { border-color: var(--null-sector-border-medium) !important; }
+.border-gray-300 { border-color: var(--null-sector-border-medium) !important; }
+
+/* Primary Actions - Sesterce Green */
+.bg-green-600 { background-color: var(--null-sector-green) !important; }
+.bg-green-700 { background-color: var(--null-sector-green-dark) !important; }
+.text-green-600 { color: var(--null-sector-green) !important; }
+.text-green-700 { color: var(--null-sector-green-dark) !important; }
+.hover\:bg-green-700:hover { background-color: var(--null-sector-green-dark) !important; }
+
+/* Information Sections - Keep Professional */
+.bg-blue-50 { background-color: var(--null-sector-bg-secondary) !important; }
+.bg-purple-50 { background-color: var(--null-sector-bg-secondary) !important; }
+.bg-cyan-50 { background-color: var(--null-sector-bg-secondary) !important; }
+.border-blue-400 { border-color: var(--null-sector-green) !important; }
+.border-purple-400 { border-color: var(--null-sector-green) !important; }
+.text-blue-600 { color: var(--null-sector-green) !important; }
+.text-blue-700 { color: var(--null-sector-green-dark) !important; }
+
+/* Status Colors - Professional & Clear */
+.bg-yellow-50 { background-color: #fef9f0 !important; }
+.border-yellow-400 { border-color: var(--null-sector-warning) !important; }
+.bg-orange-50 { background-color: #fef9f0 !important; }
+.border-orange-200 { border-color: var(--null-sector-warning) !important; }
+.bg-red-50 { background-color: #fef5f5 !important; }
+.border-red-200 { border-color: var(--null-sector-error) !important; }
+
+/* Success States */
+.bg-green-50 { background-color: var(--null-sector-green-light) !important; }
+.bg-green-100 { background-color: var(--null-sector-green-light) !important; }
+.border-green-200 { border-color: var(--null-sector-green) !important; }
+.border-green-400 { border-color: var(--null-sector-green) !important; }
+
+/* Hover States */
+.hover\:bg-gray-50:hover { background-color: var(--null-sector-bg-secondary) !important; }
+
+/* Focus States */
+.focus\:ring-green-500:focus { --tw-ring-color: var(--null-sector-green) !important; }
+
+/* Gradients - Professional */
+.from-green-50 { --tw-gradient-from: var(--null-sector-green-light) !important; }
+.to-gray-100 { --tw-gradient-to: var(--null-sector-bg-secondary) !important; }
+.from-blue-50 { --tw-gradient-from: var(--null-sector-bg-secondary) !important; }
+.to-purple-50 { --tw-gradient-to: var(--null-sector-bg-secondary) !important; }
+.from-indigo-50 { --tw-gradient-from: var(--null-sector-bg-secondary) !important; }
+
+/* Design Document Components - Professional & Clean */
+.null-sector-card {
+  background: var(--null-sector-bg-primary);
+  border: 1px solid var(--null-sector-border-medium);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-family: var(--null-sector-font-family);
+}
+
+.null-sector-card-accent {
+  background: var(--null-sector-bg-secondary);
+  border: 1px solid var(--null-sector-border-medium);
+  border-left: 3px solid var(--null-sector-green);
+}
+
+.null-sector-button-primary {
+  background-color: var(--null-sector-green);
+  color: white;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  font-family: var(--null-sector-font-family);
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.null-sector-button-primary:hover {
+  background-color: var(--null-sector-green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 200, 150, 0.15);
+}
+
+.null-sector-input {
+  border: 1px solid var(--null-sector-border-medium);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  background: var(--null-sector-bg-primary);
+  font-family: var(--null-sector-font-family);
+  color: var(--null-sector-text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.null-sector-input:focus {
+  outline: none;
+  border-color: var(--null-sector-green);
+  box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.08);
+}
+
+.null-sector-section {
+  background: var(--null-sector-bg-secondary);
+  border: 1px solid var(--null-sector-border-medium);
+  border-radius: 8px;
+}
+
+/* Professional Typography Classes */
+.null-sector-text-primary { color: var(--null-sector-text-primary); }
+.null-sector-text-secondary { color: var(--null-sector-text-secondary); }
+.null-sector-text-muted { color: var(--null-sector-text-muted); }
+.null-sector-bg-subtle { background-color: var(--null-sector-bg-secondary); }
+.null-sector-border-subtle { border-color: var(--null-sector-border-medium); }
+
+/* Table Styling - From Design Document */
+table.null-sector-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 10pt;
+  background: var(--null-sector-bg-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-family: var(--null-sector-font-family);
+}
+
+table.null-sector-table th {
+  background: var(--null-sector-green);
+  color: #ffffff;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 10pt;
+  border: 1px solid var(--null-sector-green-dark);
+}
+
+table.null-sector-table td {
+  padding: 10px 15px;
+  border: 1px solid var(--null-sector-border-light);
+  vertical-align: top;
+  background: var(--null-sector-bg-primary);
+}
+
+table.null-sector-table tr:nth-child(even) td {
+  background: var(--null-sector-bg-secondary);
+}
+
+table.null-sector-table tr:hover td {
+  background: var(--null-sector-green-light);
+}
+
+/* Modern Form Controls */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  font-family: var(--null-sector-font-family) !important;
+  border: 1px solid var(--null-sector-border-medium) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background: white !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: var(--null-sector-green) !important;
+  box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.1) !important;
+}
+
+/* Modern Button Styling */
+button {
+  font-family: var(--null-sector-font-family) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Modern Card Styling */
+.bg-white.rounded-xl,
+.bg-white.rounded-lg {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Enhanced Table Styling */
+table {
+  font-family: var(--null-sector-font-family) !important;
+}
+
+th {
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+}
+
+/* Modern Typography Scale */
+h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+h2 { font-size: 1.5rem; font-weight: 600; line-height: 1.3; }
+h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+h4 { font-size: 1.125rem; font-weight: 500; line-height: 1.4; }
+h5 { font-size: 1rem; font-weight: 500; line-height: 1.5; }
+h6 { font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
+
+/* Professional spacing */
+.space-y-6 > * + * { margin-top: 1.5rem !important; }
+.space-y-4 > * + * { margin-top: 1rem !important; }
+.space-y-3 > * + * { margin-top: 0.75rem !important; }
+
+/* Clean focus states */
+*:focus {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+}

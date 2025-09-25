@@ -7,7 +7,7 @@ import { GrafanaDashboardOriginal } from './components/features/GrafanaDashboard
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
 import { Activity, Calculator } from 'lucide-react';
-import './styles/sesterce-theme.css';
+import './styles/null-sector-theme.css';
 
 interface AppContentProps {
   onLogout: () => void;
@@ -74,7 +74,7 @@ function App() {
 
   // Check if user is already logged in
   useEffect(() => {
-    const user = sessionStorage.getItem('sesterceUser');
+    const user = sessionStorage.getItem('nullSectorUser');
     if (user) {
       setIsAuthenticated(true);
       setCurrentUser(user);
@@ -84,13 +84,13 @@ function App() {
   const handleLogin = (username: string) => {
     setIsAuthenticated(true);
     setCurrentUser(username);
-    sessionStorage.setItem('sesterceUser', username);
+    sessionStorage.setItem('nullSectorUser', username);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser('');
-    sessionStorage.removeItem('sesterceUser');
+    sessionStorage.removeItem('nullSectorUser');
   };
 
   if (!isAuthenticated) {

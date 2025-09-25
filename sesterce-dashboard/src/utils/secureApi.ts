@@ -36,7 +36,7 @@ class SecureApiClient {
     this.token = null;
     localStorage.removeItem('authToken');
     localStorage.removeItem('tokenExpiry');
-    sessionStorage.removeItem('sesterceUser');
+    sessionStorage.removeItem('nullSectorUser');
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
@@ -84,7 +84,7 @@ class SecureApiClient {
     this.token = response.token;
     localStorage.setItem('authToken', response.token);
     localStorage.setItem('tokenExpiry', (Date.now() + response.expires_in * 1000).toString());
-    sessionStorage.setItem('sesterceUser', response.username);
+    sessionStorage.setItem('nullSectorUser', response.username);
 
     return response;
   }

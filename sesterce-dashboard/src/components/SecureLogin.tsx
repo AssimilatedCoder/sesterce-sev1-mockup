@@ -51,10 +51,10 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="bg-white p-4 rounded-full shadow-lg">
-              <img src="/sesterce.jpg" alt="Sesterce" className="h-16 w-auto" />
+              <img src="/Null Sector Systems.png" alt="Null Sector Systems LTD" className="h-16 w-auto" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Sesterce</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Null Sector Systems LTD</h1>
           <p className="text-gray-600 mt-2">Secure GPU SuperCluster Calculator</p>
           <div className="flex items-center justify-center gap-2 mt-2">
             <Shield className="w-4 h-4 text-green-600" />
@@ -145,7 +145,7 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              © 2025 Sesterce. All rights reserved. | Secured with JWT Authentication
+              © 2025 Null Sector Systems LTD. All rights reserved. | Secured with JWT Authentication
             </p>
           </div>
         </div>

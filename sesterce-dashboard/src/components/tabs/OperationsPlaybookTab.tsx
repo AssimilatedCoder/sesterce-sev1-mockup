@@ -312,10 +312,10 @@ const getTroubleshootingGuideHTML = () => `
     --panel: #f8f9fa;         /* light grey panels */
     --ink: #2c3e50;           /* dark blue-grey text */
     --muted: #6c757d;         /* muted grey text */
-    --accent: #00c896;        /* sesterce green */
-    --accent-2: #00b185;      /* darker sesterce green */
+    --accent: #00c896;        /* null sector green */
+    --accent-2: #00b185;      /* darker null sector green */
     --border: #dee2e6;        /* light grey borders */
-    --ok: #00c896;            /* sesterce green for success */
+    --ok: #00c896;            /* null sector green for success */
     --warn: #ffc107;          /* yellow for warnings */
     --bad: #dc3545;           /* red for errors */
     --mono: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -344,7 +344,7 @@ const getTroubleshootingGuideHTML = () => `
     padding: 0; 
   }
   
-  /* Document Header with Sesterce styling */
+  /* Document Header with Null Sector styling */
   header.hero {
     text-align: center;
     padding: 30px 0;
@@ -381,7 +381,7 @@ const getTroubleshootingGuideHTML = () => `
   nav.toc li { margin: 0.25rem 0; }
   section { margin-top: 2.2rem; }
   h1, h2, h3 { scroll-margin-top: 90px; }
-  /* Headings with Sesterce green accent */
+  /* Headings with Null Sector green accent */
   h1 { 
     font-size: 16pt; 
     font-weight: 500; 
@@ -453,7 +453,7 @@ const getTroubleshootingGuideHTML = () => `
   .alert-info { background: #d1ecf1; border-color: var(--accent); color: #0c5460; }
   .alert-success { background: #d4edda; border-color: var(--ok); color: #155724; }
   
-  /* Tables with Sesterce styling */
+  /* Tables with Null Sector styling */
   table { 
     width: 100%; 
     border-collapse: collapse; 
