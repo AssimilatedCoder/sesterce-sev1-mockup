@@ -330,8 +330,8 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
             <div className="flex-1">
               <div className="text-sm font-medium text-blue-800 mb-1">Security Information</div>
               <div className="text-sm text-blue-700">
-                Complete access logs are stored in <code className="bg-blue-100 px-1 rounded">{logs.log_file}</code> on the server. 
-                Total attempts logged: <strong>{logs.total_attempts}</strong>. 
+                Complete access logs are stored in <code className="bg-blue-100 px-1 rounded">{logs.login_log_file}</code> on the server. 
+                Total attempts logged: <strong>{logs.total_login_attempts}</strong>. 
                 Logs include IP addresses, timestamps, success/failure status, and user agents for security monitoring.
               </div>
             </div>
