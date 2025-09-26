@@ -38,8 +38,22 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
   const [error, setError] = useState('');
   const [selectedUser, setSelectedUser] = useState<string>('all');
   const [resetLoading, setResetLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(5); // seconds
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      const saved = localStorage.getItem('accessLogsAutoRefresh');
+      return saved ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+  const [refreshInterval, setRefreshInterval] = useState(() => {
+    try {
+      const saved = localStorage.getItem('accessLogsRefreshInterval');
+      return saved ? parseInt(saved) : 5;
+    } catch {
+      return 5;
+    }
+  }); // seconds
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchLogs = async () => {
@@ -101,6 +115,19 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
   useEffect(() => {
     fetchLogs();
   }, []);
+
+  // Save auto-refresh settings to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('accessLogsAutoRefresh', JSON.stringify(autoRefresh));
+    } catch {}
+  }, [autoRefresh]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('accessLogsRefreshInterval', refreshInterval.toString());
+    } catch {}
+  }, [refreshInterval]);
 
   // Auto-refresh functionality
   useEffect(() => {
