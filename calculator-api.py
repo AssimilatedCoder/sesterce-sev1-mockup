@@ -17,7 +17,7 @@ from functools import wraps
 app = Flask(__name__)
 
 # Configure CORS for your domain only
-CORS(app, origins=['http://localhost:3025', 'https://yourdomain.com'])
+CORS(app, origins=['http://localhost:3000', 'http://localhost:3025', 'https://yourdomain.com'])
 
 # Secret keys
 API_SECRET = os.environ.get('CALCULATOR_API_SECRET', 'change-this-secret-key-in-production')

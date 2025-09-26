@@ -9,7 +9,7 @@ interface ActivityLog {
 }
 
 class ActivityLogger {
-  private baseUrl = 'http://localhost:7779';
+  private baseUrl = '';  // Use relative URLs like login does
   private isEnabled = true;
 
   /**

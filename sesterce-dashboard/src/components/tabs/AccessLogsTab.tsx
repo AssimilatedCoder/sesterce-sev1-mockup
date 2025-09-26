@@ -43,7 +43,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
     
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:7779/api/access-logs', {
+      const response = await fetch('/api/access-logs', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
