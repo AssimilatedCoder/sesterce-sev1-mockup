@@ -104,6 +104,12 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
 
   // Category metadata
   const categoryInfo = {
+    cooling_infrastructure: {
+      name: 'Cooling Infrastructure',
+      icon: Thermometer,
+      description: 'Cooling systems, data center infrastructure, power distribution',
+      color: 'cyan'
+    },
     compute_hardware: {
       name: 'Complete Server Hardware',
       icon: Server,
@@ -411,12 +417,12 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
-        <div className="flex items-center justify-between">
+      {/* Infrastructure Components Control */}
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-semibold text-gray-900">Infrastructure Components</h3>
-            <p className="text-xs text-gray-500 mt-1">Configure which enterprise infrastructure components to include in the analysis</p>
+            <h3 className="font-semibold text-gray-900">Enterprise Infrastructure Components</h3>
+            <p className="text-sm text-gray-600 mt-1">Configure which enterprise infrastructure components to include in the analysis</p>
           </div>
           <label className="flex items-center gap-2">
             <input
@@ -427,9 +433,69 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
             />
             <div className="text-right">
               <span className="text-sm text-gray-700 block">Include Optional Components</span>
-              <span className="text-xs text-gray-500">Advanced security, monitoring & platform services</span>
+              <span className="text-xs text-gray-500">
+                +{formatCurrency(enterpriseCosts.totalCapex - enterpriseCosts.breakdown.filter(item => item.component.mandatory).reduce((sum, item) => sum + item.capex, 0))} CAPEX
+              </span>
             </div>
           </label>
+        </div>
+        
+        {/* Infrastructure Components Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+            <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Mandatory Components
+            </h4>
+            <div className="space-y-1 text-sm text-green-700">
+              <p>• Complete server hardware (chassis, memory, storage)</p>
+              <p>• Operations staff (24/7 datacenter + GPU engineers)</p>
+              <p>• Basic power & backup systems</p>
+              <p>• Essential security infrastructure</p>
+              <p>• Core backup & disaster recovery</p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-green-200">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-green-800">Mandatory CAPEX:</span>
+                <span className="font-bold text-green-900">
+                  {formatCurrency(enterpriseCosts.breakdown.filter(item => item.component.mandatory).reduce((sum, item) => sum + item.capex, 0))}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+            <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Optional Components
+            </h4>
+            <div className="space-y-1 text-sm text-blue-700">
+              <p>• Advanced security (SIEM, DPI, advanced firewalls)</p>
+              <p>• Comprehensive monitoring (Prometheus, Grafana, Jaeger)</p>
+              <p>• Cloud platform services (Kafka, Spark, Elasticsearch)</p>
+              <p>• Network management automation (UFM, Netris)</p>
+              <p>• Enhanced backup & DR capabilities</p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-blue-200">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-blue-800">Optional CAPEX:</span>
+                <span className="font-bold text-blue-900">
+                  {formatCurrency(enterpriseCosts.breakdown.filter(item => !item.component.mandatory).reduce((sum, item) => sum + item.capex, 0))}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-yellow-800">
+              <strong>Impact:</strong> Including optional components increases total CAPEX by {formatCurrency(enterpriseCosts.totalCapex - enterpriseCosts.breakdown.filter(item => item.component.mandatory).reduce((sum, item) => sum + item.capex, 0))} 
+              ({(((enterpriseCosts.totalCapex - enterpriseCosts.breakdown.filter(item => item.component.mandatory).reduce((sum, item) => sum + item.capex, 0)) / originalCapex) * 100).toFixed(1)}% of core infrastructure).
+              These components are essential for production enterprise deployments but may be omitted in development/testing environments.
+            </div>
+          </div>
         </div>
       </div>
 
@@ -468,8 +534,124 @@ export const CapexBreakdownTab: React.FC<CapexBreakdownTabProps> = ({ config, re
         </div>
       </div>
 
+      {/* Cooling Infrastructure Category */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <button
+          onClick={() => toggleCategory('cooling_infrastructure')}
+          className="w-full p-6 text-left hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Thermometer className="w-6 h-6 text-cyan-600" />
+              <div>
+                <h3 className="font-semibold text-gray-900">Cooling Infrastructure</h3>
+                <p className="text-sm text-gray-600">Cooling systems, data center infrastructure, power distribution</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-lg font-bold text-gray-900">{formatCurrency(coolingCapex + (results.datacenterCapex || 0))}</p>
+                <p className="text-sm text-gray-600">One-time CAPEX</p>
+              </div>
+              {expandedCategories.has('cooling_infrastructure') ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </div>
+          </div>
+        </button>
+
+        {expandedCategories.has('cooling_infrastructure') && (
+          <div className="px-6 pb-6 border-t border-gray-100">
+            <div className="space-y-3 mt-4">
+              {/* Cooling Systems */}
+              <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {config.coolingType === 'liquid' ? 'Liquid Cooling Systems' : 'Air Cooling Systems'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {config.coolingType === 'liquid' 
+                      ? 'CDUs, manifolds, pumps, heat exchangers, coolant distribution'
+                      : 'CRAC units, air handlers, ductwork, environmental controls'
+                    }
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    📊 {config.coolingType === 'liquid' ? '$400/kW' : '$300/kW'} • {results.totalPowerMW?.toFixed(1) || '0'} MW cooling capacity
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Technology: {config.coolingType === 'liquid' ? 'Direct liquid cooling with CDU' : 'Precision air conditioning'}
+                  </p>
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-medium text-gray-900">{formatCurrency(coolingCapex)}</p>
+                  <p className="text-xs text-gray-500">Cooling systems</p>
+                </div>
+              </div>
+
+              {/* Data Center Infrastructure */}
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">Data Center Infrastructure</h4>
+                  <p className="text-sm text-gray-600">
+                    Building shell, raised floor, cable management, fire suppression, security
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    📊 $10M/MW • {results.totalPowerMW?.toFixed(1) || '0'} MW facility capacity
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Standards: Tier III+ data center with N+1 redundancy
+                  </p>
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-medium text-gray-900">{formatCurrency(results.datacenterCapex || 0)}</p>
+                  <p className="text-xs text-gray-500">Facility infrastructure</p>
+                </div>
+              </div>
+
+              {/* Power Distribution */}
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">Power Distribution Systems</h4>
+                  <p className="text-sm text-gray-600">
+                    PDUs, transformers, switchgear, UPS systems, backup generators
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    📊 {Math.ceil((results.actualGPUs || config.numGPUs) / 72)} racks • 3x PDUs per rack (N+1)
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Configuration: 415V 3-phase, 32A per PDU
+                  </p>
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-medium text-gray-900">{formatCurrency(Math.ceil((results.actualGPUs || config.numGPUs) / 72) * 3 * 20000)}</p>
+                  <p className="text-xs text-gray-500">Power distribution</p>
+                </div>
+              </div>
+
+              {/* Environmental Controls */}
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">Environmental Controls</h4>
+                  <p className="text-sm text-gray-600">
+                    Temperature monitoring, humidity control, airflow management, sensors
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    📊 Precision environmental monitoring for {Math.ceil((results.actualGPUs || config.numGPUs) / 72)} racks
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Target: 18-22°C, 45-55% RH, positive pressure
+                  </p>
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-medium text-gray-900">{formatCurrency(Math.ceil((results.actualGPUs || config.numGPUs) / 72) * 5000)}</p>
+                  <p className="text-xs text-gray-500">Environmental systems</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Ancillary Infrastructure Categories */}
-      {Object.entries(categoryInfo).map(([categoryKey, categoryData]) => {
+      {Object.entries(categoryInfo).filter(([key]) => key !== 'cooling_infrastructure').map(([categoryKey, categoryData]) => {
         const components = categorizedComponents[categoryKey] || [];
         if (components.length === 0) return null;
 
