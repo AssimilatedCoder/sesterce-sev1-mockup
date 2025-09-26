@@ -12,7 +12,7 @@ The TCO Calculator now supports **five user accounts** with different permission
 | **David** | `Sk7walk3r!` | Admin | • Full access to all features<br/>• Access to admin-only tabs<br/>• Cannot view access logs<br/>• TCO Override access |
 | **Thomas** | `Th0mas@99` | Admin | • Full access to all features<br/>• Access to admin-only tabs<br/>• Cannot view access logs<br/>• TCO Override access |
 | **Kiko** | `K1ko#2025` | Admin | • Full access to all features<br/>• Access to admin-only tabs<br/>• Cannot view access logs<br/>• TCO Override access |
-| **Maciej** | `Mac1ej*77` | User | • All calculator features and tabs<br/>• No admin-only tabs<br/>• Cannot view access logs<br/>• TCO Override access |
+| **Maciej** | `Mac1ej*77` | Admin | • Full access to all features<br/>• Access to admin-only tabs<br/>• Cannot view access logs<br/>• TCO Override access |
 
 ### 📋 **Permission Levels**
 
@@ -22,13 +22,13 @@ The TCO Calculator now supports **five user accounts** with different permission
 - ✅ Access Logs tab (security monitoring)
 - ✅ TCO Override page (custom pricing)
 
-#### **Admin (David, Thomas & Kiko)**
+#### **Admin (David, Thomas, Kiko & Maciej)**
 - ✅ All calculator features and tabs
 - ✅ Admin-only tabs (Documentation, Design Summary, Design Exercise)
 - ❌ Access Logs tab (super admin only)
 - ✅ TCO Override page (custom pricing)
 
-#### **Regular Users (Maciej)**
+#### **Regular Users (if added in future)**
 - ✅ All calculator features and tabs
 - ❌ Admin-only tabs
 - ❌ Access Logs tab
