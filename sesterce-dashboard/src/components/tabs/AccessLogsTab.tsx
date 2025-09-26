@@ -38,6 +38,9 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
   const [error, setError] = useState('');
   const [selectedUser, setSelectedUser] = useState<string>('all');
   const [resetLoading, setResetLoading] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState(5); // seconds
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -55,6 +58,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
       if (response.ok) {
         const data = await response.json();
         setLogs(data);
+        setLastUpdated(new Date());
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to fetch logs');
@@ -98,6 +102,17 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
     fetchLogs();
   }, []);
 
+  // Auto-refresh functionality
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      fetchLogs();
+    }, refreshInterval * 1000);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, refreshInterval]);
+
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -134,12 +149,55 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
               <Shield className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">Access Logs</h2>
-              <p className="text-sm text-gray-600">Monitor login attempts and user access</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-800">Access Logs</h2>
+                {autoRefresh && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-600 font-medium">LIVE</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                {autoRefresh 
+                  ? `Real-time monitoring (updates every ${refreshInterval}s)`
+                  : 'Monitor login attempts and user access'
+                }
+                {lastUpdated && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    • Last updated: {lastUpdated.toLocaleTimeString()}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Auto-refresh Controls */}
+            <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={autoRefresh}
+                  onChange={(e) => setAutoRefresh(e.target.checked)}
+                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                Auto-refresh
+              </label>
+              {autoRefresh && (
+                <select
+                  value={refreshInterval}
+                  onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
+                  className="px-2 py-1 text-xs border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="2">2s</option>
+                  <option value="5">5s</option>
+                  <option value="10">10s</option>
+                  <option value="30">30s</option>
+                </select>
+              )}
+            </div>
+
             {/* User Filter */}
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-700">Filter User:</label>
@@ -173,10 +231,14 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
             <button
               onClick={fetchLogs}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
+                autoRefresh 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              <RefreshCw className={`w-4 h-4 ${loading || autoRefresh ? 'animate-spin' : ''}`} />
+              {autoRefresh ? `Auto (${refreshInterval}s)` : 'Refresh'}
             </button>
           </div>
         </div>
