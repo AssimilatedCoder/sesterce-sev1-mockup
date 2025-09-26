@@ -22,6 +22,7 @@ import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
 import { AccessLogsTab } from './tabs/AccessLogsTab';
+import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
@@ -167,6 +168,15 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [expertise, setExpertise] = useState<'basic' | 'intermediate' | 'advanced'>('intermediate');
   const [complianceRequirements, setComplianceRequirements] = useState<string[]>([]);
 
+  // TCO Override state
+  const [tcoOverrides, setTcoOverrides] = useState<TCOOverrides>(() => {
+    try {
+      const saved = localStorage.getItem('nullSectorTcoOverrides');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {};
+  });
+
   // Service tier pricing distribution and modifiers
   const [tierDistribution, setTierDistribution] = useState<{ tier1: number; tier2: number; tier3: number; tier4: number }>(() => {
     try {
@@ -199,6 +209,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   useEffect(() => {
     try { localStorage.setItem('nullSectorServiceModifiers', JSON.stringify(serviceModifiers)); } catch {}
   }, [serviceModifiers]);
+
+  useEffect(() => {
+    try { localStorage.setItem('nullSectorTcoOverrides', JSON.stringify(tcoOverrides)); } catch {}
+  }, [tcoOverrides]);
   
   // Results state
   const [results, setResults] = useState<any>(null);
@@ -249,15 +263,28 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const enhancedResults = calculateStorageWithSelectedTiers(enhancedStorageConfig);
     
     // Legacy compatibility - maintain existing structure for backward compatibility
-    const hotCapacityPB = totalStorage * (hotPercent / 100);
-    const warmCapacityPB = totalStorage * (warmPercent / 100);
-    const coldCapacityPB = totalStorage * (coldPercent / 100);
-    const archiveCapacityPB = totalStorage * (archivePercent / 100);
+    // Calculate storage costs per tier (with overrides)
+    const effectiveTotalStorage = tcoOverrides.totalStorage || totalStorage;
+    const effectiveHotPercent = tcoOverrides.hotPercent || hotPercent;
+    const effectiveWarmPercent = tcoOverrides.warmPercent || warmPercent;
+    const effectiveColdPercent = tcoOverrides.coldPercent || coldPercent;
+    const effectiveArchivePercent = tcoOverrides.archivePercent || archivePercent;
     
-    const hotCost = hotCapacityPB * 1000 * 1000 * storageVendors[hotVendor].pricePerGB; // PB -> GB conversion
-    const warmCost = warmCapacityPB * 1000 * 1000 * storageVendors[warmVendor].pricePerGB;
-    const coldCost = coldCapacityPB * 1000 * 1000 * storageVendors[coldVendor].pricePerGB;
-    const archiveCost = archiveCapacityPB * 1000 * 1000 * storageVendors[archiveVendor].pricePerGB;
+    const hotCapacityPB = effectiveTotalStorage * (effectiveHotPercent / 100);
+    const warmCapacityPB = effectiveTotalStorage * (effectiveWarmPercent / 100);
+    const coldCapacityPB = effectiveTotalStorage * (effectiveColdPercent / 100);
+    const archiveCapacityPB = effectiveTotalStorage * (effectiveArchivePercent / 100);
+    
+    // Use override prices if available
+    const hotPrice = tcoOverrides.vastPricePerGB || storageVendors[hotVendor].pricePerGB;
+    const warmPrice = tcoOverrides.purePricePerGB || storageVendors[warmVendor].pricePerGB;
+    const coldPrice = tcoOverrides.cephPricePerGB || storageVendors[coldVendor].pricePerGB;
+    const archivePrice = storageVendors[archiveVendor].pricePerGB;
+    
+    const hotCost = hotCapacityPB * 1000 * 1000 * hotPrice; // PB -> GB conversion
+    const warmCost = warmCapacityPB * 1000 * 1000 * warmPrice;
+    const coldCost = coldCapacityPB * 1000 * 1000 * coldPrice;
+    const archiveCost = archiveCapacityPB * 1000 * 1000 * archivePrice;
     
     const hotPower = hotCapacityPB * 1000 * storageVendors[hotVendor].powerPerTB / 1000;
     const warmPower = warmCapacityPB * 1000 * storageVendors[warmVendor].powerPerTB / 1000;
@@ -333,13 +360,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         // For OEM 8-GPU nodes (H100/H200), assume one DPU per node
         dpuCount = Math.ceil(numGPUs / 8);
       }
-      dpuCost = dpuCount * 2500; // BlueField-3 SuperNIC price
+      dpuCost = dpuCount * (tcoOverrides.dpuUnitPrice || 2500); // BlueField-3 SuperNIC price
       dpuPower = dpuCount * 150; // 150W per DPU (from design doc)
     }
     
-    const switchCost = totalSwitches * fabric.switchPrice;
-    const cableCost = cables * fabric.cablePrice;
-    const transceiverCost = transceivers * fabric.transceiverPrice;
+    const switchCost = totalSwitches * (tcoOverrides.switchPriceOverride || fabric.switchPrice);
+    const cableCost = cables * (tcoOverrides.cablePriceOverride || fabric.cablePrice);
+    const transceiverCost = transceivers * (tcoOverrides.transceiverPriceOverride || fabric.transceiverPrice);
     
     // Return structure compatible with NetworkingTabEnhanced
     return {
@@ -414,7 +441,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const actualGPUs = systemsNeeded * safeRackSize;
     
     // GPU costs - use override if provided, but calculate based on actual GPUs in complete systems
-    const gpuUnitPrice = gpuPriceOverride ? parseFloat(gpuPriceOverride) : spec.unitPrice;
+    const gpuUnitPrice = tcoOverrides.gpuUnitPrice || (gpuPriceOverride ? parseFloat(gpuPriceOverride) : spec.unitPrice);
     const gpuCapex = gpuUnitPrice * actualGPUs;
     
     // Calculate detailed storage
@@ -429,29 +456,29 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const perSystemPower = spec?.rackPower || (spec?.powerPerGPU || 1000) * safeRackSize;
     const rackPowerTotal = systemsTotal * perSystemPower;
     const gpuPowerMW = rackPowerTotal / 1000000; // Use actual rack power from design doc
-    const pueValue = pueOverride ? parseFloat(pueOverride) : ((spec?.pue || {})[coolingType] || regionData.pue);
+    const pueValue = tcoOverrides.pueOverride || (pueOverride ? parseFloat(pueOverride) : ((spec?.pue || {})[coolingType] || regionData.pue));
     
     // DPU power if enabled (per design doc: 4 DPUs per NVL72 system at 150W each)
     const dpuCount = enableBluefield ? 
       (gpuModel.startsWith('gb') ? systemsTotal * 4 : Math.ceil(actualGPUs / 8)) : 0;
     const dpuPowerMW = dpuCount * 150 / 1000000; // 150W per BlueField-3
-    const dpuCapex = dpuCount * 2500;
+    const dpuCapex = dpuCount * (tcoOverrides.dpuUnitPrice || 2500);
     
     // Total IT power including storage and DPUs
     const totalItPowerMW = gpuPowerMW + storage.power + dpuPowerMW;
     const totalPowerMW = totalItPowerMW * pueValue;
     // Use custom energy rate if provided, otherwise use region rate
-    const energyRate = customEnergyRate ? parseFloat(customEnergyRate) : regionData.rate;
-    const annualPowerCost = totalPowerMW * 1000 * energyRate * 8760;
+    const energyRate = tcoOverrides.customEnergyRate || (customEnergyRate ? parseFloat(customEnergyRate) : regionData.rate);
+    const annualPowerCost = totalPowerMW * 1000 * energyRate * 8760 * (tcoOverrides.powerCostMultiplier || 1);
     
     // Cooling infrastructure
     const numRacks = systemsTotal; // Use actual systems count
     const coolingCapex = coolingType === 'liquid' 
-      ? gpuPowerMW * 1000 * 400  // $400/kW for liquid
-      : gpuPowerMW * 1000 * 300; // $300/kW for air
+      ? gpuPowerMW * 1000 * (tcoOverrides.coolingCostPerKW || 400)  // $400/kW for liquid
+      : gpuPowerMW * 1000 * (tcoOverrides.coolingCostPerKW || 300); // $300/kW for air
     
     // Data center infrastructure
-    const datacenterCapex = totalPowerMW * 10000000; // $10M/MW
+    const datacenterCapex = totalPowerMW * (tcoOverrides.datacenterCostPerMW || 10000000); // $10M/MW
     
     // Calculate software stack costs FIRST (before using in capex)
     const stackCost = calculateStackCost(softwareStack, actualGPUs, 3, supportTier);
@@ -465,22 +492,26 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                       datacenterCapex + dpuCapex + softwareCapex;
     
     // Annual OPEX calculations
-    const annualCoolingOpex = annualPowerCost * (coolingType === 'liquid' ? 0.15 : 0.45);
-    const annualStaff = (Math.ceil(gpuPowerMW / 2) * 166000 + Math.ceil(actualGPUs / 5000) * 200000) * staffMultiplier;
-    const annualMaintenance = (gpuCapex + network.total + storage.total) * (maintenancePercent / 100);
-    const annualBandwidth = actualGPUs * 600; // $600/GPU/year (for actual GPUs)
+    const annualCoolingOpex = annualPowerCost * (tcoOverrides.coolingOpexMultiplier || (coolingType === 'liquid' ? 0.15 : 0.45));
+    const annualStaff = (Math.ceil(gpuPowerMW / 2) * 166000 + Math.ceil(actualGPUs / 5000) * 200000) * (tcoOverrides.staffMultiplier || staffMultiplier);
+    const annualMaintenance = (gpuCapex + network.total + storage.total) * ((tcoOverrides.maintenancePercent || maintenancePercent) / 100);
+    const annualBandwidth = actualGPUs * (tcoOverrides.bandwidthCostPerGPU || 600); // $600/GPU/year (for actual GPUs)
     
-    // Use the already calculated software stack costs
-    const annualLicenses = stackCost.annualCost; // Use dynamic software stack pricing
+    // Use the already calculated software stack costs (with override if available)
+    const annualLicenses = tcoOverrides.softwareLicenseCostPerGPU 
+      ? actualGPUs * tcoOverrides.softwareLicenseCostPerGPU 
+      : stackCost.annualCost; // Use dynamic software stack pricing
     
     const storageOpex = totalStorage * 1000000 * 0.015 * 12; // $0.015/GB/month
     
     const annualOpex = annualPowerCost + annualCoolingOpex + annualStaff + 
                       annualMaintenance + annualBandwidth + annualLicenses + storageOpex;
     
-    // Cost per GPU hour (based on actual GPUs)
-    const annualGpuHours = actualGPUs * 8760 * (utilization / 100);
-    const annualDepreciation = totalCapex / depreciation;
+    // Cost per GPU hour (based on actual GPUs, with overrides)
+    const effectiveUtilization = tcoOverrides.utilization || utilization;
+    const effectiveDepreciation = tcoOverrides.depreciation || depreciation;
+    const annualGpuHours = actualGPUs * 8760 * (effectiveUtilization / 100);
+    const annualDepreciation = totalCapex / effectiveDepreciation;
     const costPerHour = (annualDepreciation + annualOpex) / annualGpuHours;
     
     // Network bandwidth (Tbps)
@@ -576,7 +607,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     {
       title: 'User Input',
       tabs: [
-        { id: 'calculator', label: 'Cluster Config Options', icon: <Calculator className="w-4 h-4" /> }
+        { id: 'calculator', label: 'Cluster Config Options', icon: <Calculator className="w-4 h-4" /> },
+        { id: 'overrides', label: 'TCO Overrides', icon: <Settings className="w-4 h-4" /> }
       ]
     },
     {
@@ -815,6 +847,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 calculate={calculate}
                 results={results}
                 formatNumber={formatNumber}
+              />
+            )}
+
+            {activeTab === 'overrides' && (
+              <TCOOverrideTab
+                config={config}
+                onOverrideChange={setTcoOverrides}
+                currentOverrides={tcoOverrides}
               />
             )}
             
