@@ -33,6 +33,10 @@ USERS = {
         'password_hash': hashlib.sha256('Th0mas@99'.encode()).hexdigest(),
         'role': 'admin'
     },
+    'Kiko': {
+        'password_hash': hashlib.sha256('K1ko#2025'.encode()).hexdigest(),
+        'role': 'admin'
+    },
     'admin': {
         'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
         'role': 'admin'
