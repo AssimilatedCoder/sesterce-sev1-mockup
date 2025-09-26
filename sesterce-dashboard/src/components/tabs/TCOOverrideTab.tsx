@@ -149,6 +149,11 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                     <strong>💡 Pro Tip:</strong> Start with hardware overrides (GPU prices, networking costs) as these typically 
                     have the biggest impact on TCO. Then fine-tune operational costs based on your specific requirements.
                   </div>
+                  <div className="mt-3 p-3 bg-yellow-100 rounded text-sm">
+                    <strong>💰 Currency Note:</strong> All TCO calculations are based on USD pricing from US-based vendors. 
+                    When displaying in EUR, we use a 3-month rolling average USD/EUR conversion rate. 
+                    Price variance will primarily be USD-dependent due to vendor location and contracts.
+                  </div>
                 </div>
               )}
               <button
@@ -781,6 +786,11 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                   You have <strong>{getOverrideCount()} override{getOverrideCount() !== 1 ? 's' : ''}</strong> active. 
                   These custom values will be used in all TCO calculations instead of the default values.
                 </p>
+                <div className="mt-3 p-3 bg-green-100 rounded text-sm">
+                  <strong>💰 Currency Note:</strong> All TCO calculations are based on USD pricing from US-based vendors. 
+                  When displaying in EUR, we use a 3-month rolling average USD/EUR conversion rate. 
+                  Price variance will primarily be USD-dependent due to vendor location and contracts.
+                </div>
                 <div className="text-xs space-y-1">
                   {Object.entries(overrides).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
