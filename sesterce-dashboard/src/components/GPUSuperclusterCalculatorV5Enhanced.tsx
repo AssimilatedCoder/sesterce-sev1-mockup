@@ -83,7 +83,7 @@ const networkFabrics: Record<string, {
 const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Get current user from session storage (set by login)
   const currentUser = sessionStorage.getItem('nullSectorUser');
-  const isAdmin = currentUser === 'admin' || currentUser === 'David' || currentUser === 'Thomas' || currentUser === 'Kiko' || currentUser === 'Maciej';
+  const isAdmin = currentUser === 'admin' || currentUser === 'David' || currentUser === 'Thomas' || currentUser === 'Kiko';
   const isSuperAdmin = currentUser === 'admin'; // Only admin can see access logs
   
   // Debug logging
