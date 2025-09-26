@@ -65,7 +65,10 @@ function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser('');
+    // Clear all authentication data
     sessionStorage.removeItem('nullSectorUser');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('tokenExpiry');
   };
 
   if (!isAuthenticated) {

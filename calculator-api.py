@@ -234,6 +234,7 @@ def log_activity():
     client_ip = get_client_ip()
     user_agent = request.headers.get('User-Agent', 'Unknown')
     username = request.user['username']
+    print(f"DEBUG: Activity logged by user: {username}, role: {request.user.get('role')}")
     
     data = request.get_json()
     if not data or 'activity_type' not in data or 'details' not in data:
@@ -300,6 +301,7 @@ def reset_logs():
         client_ip = get_client_ip()
         user_agent = request.headers.get('User-Agent', 'Unknown')
         username = request.user['username']
+        print(f"DEBUG: Reset logs called by user: {username}, role: {request.user.get('role')}")
         log_user_activity(client_ip, username, 'admin_action', 'Reset all access logs', user_agent)
         
         return jsonify({
