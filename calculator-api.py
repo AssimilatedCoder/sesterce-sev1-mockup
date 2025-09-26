@@ -29,6 +29,10 @@ USERS = {
         'password_hash': hashlib.sha256('Sk7walk3r!'.encode()).hexdigest(),
         'role': 'admin'
     },
+    'Thomas': {
+        'password_hash': hashlib.sha256('Th0mas@99'.encode()).hexdigest(),
+        'role': 'admin'
+    },
     'admin': {
         'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
         'role': 'admin'
@@ -42,6 +46,10 @@ RATE_LIMIT = 10  # requests per minute
 # Login logging
 LOGIN_LOG_FILE = 'login_access.log'
 login_attempts = []  # In-memory log for quick access
+
+# User activity logging
+ACTIVITY_LOG_FILE = 'user_activity.log'
+user_activities = []  # In-memory log for quick access
 
 def log_login_attempt(client_ip, username, success, user_agent=None):
     """Log login attempts with IP, timestamp, and outcome"""
@@ -65,6 +73,30 @@ def log_login_attempt(client_ip, username, success, user_agent=None):
             f.write(json.dumps(log_entry) + '\n')
     except Exception as e:
         print(f"Failed to write login log: {e}")
+
+def log_user_activity(client_ip, username, activity_type, details, user_agent=None):
+    """Log user activities (tab clicks, actions, etc.)"""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    log_entry = {
+        'timestamp': timestamp,
+        'ip_address': client_ip,
+        'username': username,
+        'activity_type': activity_type,  # 'tab_click', 'calculation', 'override_change', etc.
+        'details': details,  # specific tab name, action details, etc.
+        'user_agent': user_agent or 'Unknown'
+    }
+    
+    # Add to in-memory log (keep last 5000 entries)
+    user_activities.append(log_entry)
+    if len(user_activities) > 5000:
+        user_activities.pop(0)
+    
+    # Write to file log
+    try:
+        with open(ACTIVITY_LOG_FILE, 'a') as f:
+            f.write(json.dumps(log_entry) + '\n')
+    except Exception as e:
+        print(f"Failed to write activity log: {e}")
 
 def check_rate_limit(client_ip):
     current_time = time.time()
@@ -128,10 +160,24 @@ def require_admin(f):
     return decorated_function
 
 # Authentication endpoints
+def get_client_ip():
+    """Get real client IP address, handling proxies"""
+    # Check for forwarded IP headers (common with proxies/load balancers)
+    if 'X-Forwarded-For' in request.headers:
+        # X-Forwarded-For can contain multiple IPs, get the first one
+        ip = request.headers['X-Forwarded-For'].split(',')[0].strip()
+        return ip
+    elif 'X-Real-IP' in request.headers:
+        return request.headers['X-Real-IP']
+    elif 'CF-Connecting-IP' in request.headers:  # Cloudflare
+        return request.headers['CF-Connecting-IP']
+    else:
+        return request.remote_addr
+
 @app.route('/api/login', methods=['POST'])
 def login():
     """Secure login endpoint"""
-    client_ip = request.remote_addr
+    client_ip = get_client_ip()
     
     # Rate limiting
     if not check_rate_limit(client_ip):
@@ -181,6 +227,26 @@ def verify_token_endpoint():
         'role': request.user['role']
     })
 
+@app.route('/api/log-activity', methods=['POST'])
+@require_auth
+def log_activity():
+    """Log user activity (tab clicks, actions, etc.)"""
+    client_ip = get_client_ip()
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    username = request.user['username']
+    
+    data = request.get_json()
+    if not data or 'activity_type' not in data or 'details' not in data:
+        return jsonify({'error': 'activity_type and details required'}), 400
+    
+    activity_type = data['activity_type']
+    details = data['details']
+    
+    # Log the activity
+    log_user_activity(client_ip, username, activity_type, details, user_agent)
+    
+    return jsonify({'status': 'logged'})
+
 @app.route('/api/access-logs', methods=['GET'])
 @require_auth
 def get_access_logs():
@@ -191,10 +257,16 @@ def get_access_logs():
     # Return recent login attempts (last 100)
     recent_attempts = login_attempts[-100:] if len(login_attempts) > 100 else login_attempts
     
+    # Return recent user activities (last 200)
+    recent_activities = user_activities[-200:] if len(user_activities) > 200 else user_activities
+    
     return jsonify({
-        'total_attempts': len(login_attempts),
-        'recent_attempts': recent_attempts,
-        'log_file': LOGIN_LOG_FILE
+        'total_login_attempts': len(login_attempts),
+        'recent_login_attempts': recent_attempts,
+        'total_activities': len(user_activities),
+        'recent_activities': recent_activities,
+        'login_log_file': LOGIN_LOG_FILE,
+        'activity_log_file': ACTIVITY_LOG_FILE
     })
 
 # GPU specifications (hidden from client)

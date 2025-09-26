@@ -14,10 +14,22 @@ interface LoginAttempt {
   user_agent: string;
 }
 
+interface UserActivity {
+  timestamp: string;
+  ip_address: string;
+  username: string;
+  activity_type: string;
+  details: string;
+  user_agent: string;
+}
+
 interface AccessLogsResponse {
-  total_attempts: number;
-  recent_attempts: LoginAttempt[];
-  log_file: string;
+  total_login_attempts: number;
+  recent_login_attempts: LoginAttempt[];
+  total_activities: number;
+  recent_activities: UserActivity[];
+  login_log_file: string;
+  activity_log_file: string;
 }
 
 export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
@@ -31,7 +43,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
     
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/access-logs', {
+      const response = await fetch('http://localhost:7779/api/access-logs', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -107,7 +119,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
                 <h3 className="font-semibold text-green-800">Successful Logins</h3>
               </div>
               <div className="text-2xl font-bold text-green-700">
-                {logs.recent_attempts.filter(attempt => attempt.success).length}
+                {logs.recent_login_attempts.filter(attempt => attempt.success).length}
               </div>
               <div className="text-sm text-green-600">Last 100 attempts</div>
             </div>
@@ -118,7 +130,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
                 <h3 className="font-semibold text-red-800">Failed Attempts</h3>
               </div>
               <div className="text-2xl font-bold text-red-700">
-                {logs.recent_attempts.filter(attempt => !attempt.success).length}
+                {logs.recent_login_attempts.filter(attempt => !attempt.success).length}
               </div>
               <div className="text-sm text-red-600">Last 100 attempts</div>
             </div>
@@ -129,7 +141,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
                 <h3 className="font-semibold text-blue-800">Unique IPs</h3>
               </div>
               <div className="text-2xl font-bold text-blue-700">
-                {new Set(logs.recent_attempts.map(attempt => attempt.ip_address)).size}
+                {new Set(logs.recent_login_attempts.map(attempt => attempt.ip_address)).size}
               </div>
               <div className="text-sm text-blue-600">Last 100 attempts</div>
             </div>
@@ -137,12 +149,93 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
         )}
       </div>
 
+      {/* User Activities Table */}
+      {logs && logs.recent_activities && (
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="p-6 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800">Recent User Activities</h3>
+            <p className="text-sm text-gray-600 mt-1">Last {logs.recent_activities.length} user actions</p>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Time
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Activity
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Details
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    IP Address
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {logs.recent_activities.slice().reverse().map((activity, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-900">
+                          {formatTimestamp(activity.timestamp)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {activity.username}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        activity.activity_type === 'tab_click' ? 'bg-blue-100 text-blue-800' :
+                        activity.activity_type === 'calculation' ? 'bg-green-100 text-green-800' :
+                        activity.activity_type === 'override_change' ? 'bg-purple-100 text-purple-800' :
+                        activity.activity_type === 'page_load' ? 'bg-gray-100 text-gray-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {activity.activity_type.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-900 max-w-xs truncate block">
+                        {activity.details}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <div className="text-sm text-gray-900">{activity.ip_address}</div>
+                          <div className="text-xs text-gray-500">{getIPLocation(activity.ip_address)}</div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Access Log Table */}
       {logs && (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800">Recent Access Attempts</h3>
-            <p className="text-sm text-gray-600 mt-1">Last {logs.recent_attempts.length} login attempts</p>
+            <h3 className="text-lg font-semibold text-gray-800">Recent Login Attempts</h3>
+            <p className="text-sm text-gray-600 mt-1">Last {logs.recent_login_attempts.length} login attempts</p>
           </div>
           
           <div className="overflow-x-auto">
@@ -176,7 +269,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {logs.recent_attempts
+                {logs.recent_login_attempts
                   .slice()
                   .reverse() // Show most recent first
                   .map((attempt, index) => (
@@ -220,7 +313,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
             </table>
           </div>
           
-          {logs.recent_attempts.length === 0 && (
+          {logs.recent_login_attempts.length === 0 && (
             <div className="p-8 text-center text-gray-500">
               <Shield className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <p>No access attempts logged yet.</p>

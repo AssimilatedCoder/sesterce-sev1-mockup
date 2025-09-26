@@ -26,6 +26,7 @@ import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
+import { activityLogger } from '../utils/activityLogger';
 
 // Region rates with more comprehensive data
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
@@ -82,7 +83,7 @@ const networkFabrics: Record<string, {
 const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Get current user from session storage (set by login)
   const currentUser = sessionStorage.getItem('nullSectorUser');
-  const isAdmin = currentUser === 'admin' || currentUser === 'David';
+  const isAdmin = currentUser === 'admin' || currentUser === 'David' || currentUser === 'Thomas';
   const isSuperAdmin = currentUser === 'admin'; // Only admin can see access logs
   
   // Debug logging
@@ -213,6 +214,25 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   useEffect(() => {
     try { localStorage.setItem('nullSectorTcoOverrides', JSON.stringify(tcoOverrides)); } catch {}
   }, [tcoOverrides]);
+
+  // Log page load
+  useEffect(() => {
+    activityLogger.logPageLoad('GPU Supercluster Calculator');
+  }, []);
+
+  // Enhanced tab click handler with activity logging
+  const handleTabClick = async (tabId: string) => {
+    // Find the tab info for logging
+    const allTabs = tabGroups.flatMap(group => group.tabs);
+    const tabInfo = allTabs.find(tab => tab.id === tabId);
+    const tabLabel = tabInfo?.label || tabId;
+    
+    // Log the tab click
+    await activityLogger.logTabClick(tabId, tabLabel);
+    
+    // Set the active tab
+    setActiveTab(tabId);
+  };
   
   // Results state
   const [results, setResults] = useState<any>(null);
@@ -433,6 +453,15 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   // Calculate comprehensive TCO
   const calculate = () => {
+    // Log calculation activity
+    activityLogger.logCalculation('TCO Calculation', {
+      gpuModel,
+      numGPUs,
+      region,
+      coolingType,
+      utilization
+    });
+
     const regionData = regionRates[region];
     
     // Calculate actual systems needed (can't buy partial systems)
@@ -737,7 +766,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                 {group.tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabClick(tab.id)}
                     className={`
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                       ${activeTab === tab.id 

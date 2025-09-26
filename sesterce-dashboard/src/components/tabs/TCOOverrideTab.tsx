@@ -3,6 +3,7 @@ import {
   Info, RotateCcw, Save, AlertTriangle, CheckCircle2,
   HardDrive, Network, DollarSign, Server, Thermometer
 } from 'lucide-react';
+import { activityLogger } from '../../utils/activityLogger';
 
 interface TCOOverrideTabProps {
   config: any;
@@ -74,14 +75,22 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
 
   const handleOverrideChange = (key: keyof TCOOverrides, value: number | string | undefined) => {
     const newOverrides = { ...overrides };
+    let finalValue: number | undefined;
+    
     if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
       delete newOverrides[key];
+      finalValue = undefined;
     } else {
       const numValue = typeof value === 'string' ? parseFloat(value) : value;
       if (!isNaN(numValue)) {
         newOverrides[key] = numValue;
+        finalValue = numValue;
       }
     }
+    
+    // Log the override change
+    activityLogger.logOverrideChange(key, finalValue);
+    
     setOverrides(newOverrides);
     setHasChanges(true);
   };
