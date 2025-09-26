@@ -4,6 +4,7 @@ import {
   HardDrive, Network, DollarSign, Server, Thermometer
 } from 'lucide-react';
 import { activityLogger } from '../../utils/activityLogger';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface TCOOverrideTabProps {
   config: any;
@@ -68,6 +69,9 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
   const [overrides, setOverrides] = useState<TCOOverrides>(currentOverrides || {});
   const [hasChanges, setHasChanges] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
+  
+  // Get currency formatting functions
+  const { formatCurrency, getCurrencySymbol } = useCurrency();
 
   useEffect(() => {
     setOverrides(currentOverrides || {});
@@ -108,9 +112,7 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
 
   const formatDefaultValue = (value: any): string => {
     if (typeof value === 'number') {
-      if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-      if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
-      return `$${value.toLocaleString()}`;
+      return formatCurrency(value);
     }
     return String(value);
   };
@@ -211,7 +213,7 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 GPU Unit Price Override
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.gpuUnitPrice || ''}
@@ -301,12 +303,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Cooling Cost per kW
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.coolingCostPerKW || ''}
                   onChange={(e) => handleOverrideChange('coolingCostPerKW', e.target.value)}
-                  placeholder={`Default: $${config.coolingType === 'liquid' ? '400' : '300'}`}
+                  placeholder={`Default: ${formatDefaultValue(config.coolingType === 'liquid' ? 400 : 300)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -341,12 +343,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Data Center Cost per MW
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.datacenterCostPerMW || ''}
                   onChange={(e) => handleOverrideChange('datacenterCostPerMW', e.target.value)}
-                  placeholder="Default: $10,000,000"
+                  placeholder={`Default: ${formatDefaultValue(10000000)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -373,12 +375,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Switch Price Override
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.switchPriceOverride || ''}
                   onChange={(e) => handleOverrideChange('switchPriceOverride', e.target.value)}
-                  placeholder={`Default: ${config.fabricType === 'infiniband' ? '$120,000' : '$85,000'}`}
+                  placeholder={`Default: ${formatDefaultValue(config.fabricType === 'infiniband' ? 120000 : 85000)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -392,12 +394,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Cable Price Override
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.cablePriceOverride || ''}
                   onChange={(e) => handleOverrideChange('cablePriceOverride', e.target.value)}
-                  placeholder={`Default: ${config.fabricType === 'infiniband' ? '$500' : '$200'}`}
+                  placeholder={`Default: ${formatDefaultValue(config.fabricType === 'infiniband' ? 500 : 200)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -413,12 +415,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Transceiver Price Override
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.transceiverPriceOverride || ''}
                   onChange={(e) => handleOverrideChange('transceiverPriceOverride', e.target.value)}
-                  placeholder={`Default: ${config.fabricType === 'infiniband' ? '$1,500' : '$800'}`}
+                  placeholder={`Default: ${formatDefaultValue(config.fabricType === 'infiniband' ? 1500 : 800)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -432,12 +434,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 DPU Unit Price Override
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.dpuUnitPrice || ''}
                   onChange={(e) => handleOverrideChange('dpuUnitPrice', e.target.value)}
-                  placeholder="Default: $2,500"
+                  placeholder={`Default: ${formatDefaultValue(2500)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -464,13 +466,13 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 VAST Data Price per GB
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   step="0.001"
                   value={overrides.vastPricePerGB || ''}
                   onChange={(e) => handleOverrideChange('vastPricePerGB', e.target.value)}
-                  placeholder="Default: $0.030"
+                  placeholder={`Default: ${formatDefaultValue(0.030)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -482,13 +484,13 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 WekaFS Price per GB
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   step="0.001"
                   value={overrides.wekaPricePerGB || ''}
                   onChange={(e) => handleOverrideChange('wekaPricePerGB', e.target.value)}
-                  placeholder="Default: $0.045"
+                  placeholder={`Default: ${formatDefaultValue(0.045)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -500,13 +502,13 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Pure Storage Price per GB
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   step="0.001"
                   value={overrides.purePricePerGB || ''}
                   onChange={(e) => handleOverrideChange('purePricePerGB', e.target.value)}
-                  placeholder="Default: $0.020"
+                  placeholder={`Default: ${formatDefaultValue(0.020)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -518,13 +520,13 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Ceph Price per GB
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   step="0.001"
                   value={overrides.cephPricePerGB || ''}
                   onChange={(e) => handleOverrideChange('cephPricePerGB', e.target.value)}
-                  placeholder="Default: $0.005"
+                  placeholder={`Default: ${formatDefaultValue(0.005)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -602,12 +604,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Bandwidth Cost per GPU/Year
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.bandwidthCostPerGPU || ''}
                   onChange={(e) => handleOverrideChange('bandwidthCostPerGPU', e.target.value)}
-                  placeholder="Default: $600"
+                  placeholder={`Default: ${formatDefaultValue(600)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -619,12 +621,12 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                 Software License Cost per GPU/Year
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">$</span>
+                <span className="text-xs text-gray-500">{getCurrencySymbol()}</span>
                 <input
                   type="number"
                   value={overrides.softwareLicenseCostPerGPU || ''}
                   onChange={(e) => handleOverrideChange('softwareLicenseCostPerGPU', e.target.value)}
-                  placeholder="Default: $500"
+                  placeholder={`Default: ${formatDefaultValue(500)}`}
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -784,7 +786,7 @@ export const TCOOverrideTab: React.FC<TCOOverrideTabProps> = ({
                     <div key={key} className="flex justify-between">
                       <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').toLowerCase()}:</span>
                       <span className="font-mono">
-                        {typeof value === 'number' && key.includes('Price') ? `$${value.toLocaleString()}` : value}
+                        {typeof value === 'number' && (key.includes('Price') || key.includes('Cost')) ? formatCurrency(value) : value}
                       </span>
                     </div>
                   ))}
