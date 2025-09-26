@@ -269,6 +269,49 @@ def get_access_logs():
         'activity_log_file': ACTIVITY_LOG_FILE
     })
 
+@app.route('/api/reset-logs', methods=['POST'])
+@require_auth
+def reset_logs():
+    """Reset all logs - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    global login_attempts, user_activities
+    
+    try:
+        # Clear in-memory logs
+        login_attempts.clear()
+        user_activities.clear()
+        
+        # Clear log files
+        try:
+            with open(LOGIN_LOG_FILE, 'w') as f:
+                f.write('')  # Clear the file
+        except Exception:
+            pass  # File might not exist yet
+            
+        try:
+            with open(ACTIVITY_LOG_FILE, 'w') as f:
+                f.write('')  # Clear the file
+        except Exception:
+            pass  # File might not exist yet
+        
+        # Log the reset action
+        client_ip = get_client_ip()
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        username = request.user['username']
+        log_user_activity(client_ip, username, 'admin_action', 'Reset all access logs', user_agent)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'All access logs have been cleared',
+            'cleared_by': username,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to reset logs: {str(e)}'}), 500
+
 # GPU specifications (hidden from client)
 GPU_SPECS = {
     'gb200': {

@@ -36,6 +36,8 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
   const [logs, setLogs] = useState<AccessLogsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedUser, setSelectedUser] = useState<string>('all');
+  const [resetLoading, setResetLoading] = useState(false);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -64,6 +66,34 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
     }
   };
 
+  const resetLogs = async () => {
+    setResetLoading(true);
+    setError('');
+    
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/reset-logs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Refresh logs after reset
+        await fetchLogs();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to reset logs');
+      }
+    } catch (err) {
+      setError('Network error. Could not reset logs.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
   }, []);
@@ -76,6 +106,22 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
     if (ip.startsWith('127.') || ip === 'localhost') return 'Local';
     if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) return 'Private Network';
     return 'External';
+  };
+
+  // Get unique users from logs
+  const getUniqueUsers = () => {
+    if (!logs) return [];
+    const loginUsers = logs.recent_login_attempts.map(attempt => attempt.username);
+    const activityUsers = logs.recent_activities?.map(activity => activity.username) || [];
+    const allUsers = [...loginUsers, ...activityUsers];
+    const uniqueUsers = Array.from(new Set(allUsers));
+    return uniqueUsers.sort();
+  };
+
+  // Filter functions
+  const filterByUser = (items: any[], userField: string = 'username') => {
+    if (selectedUser === 'all') return items;
+    return items.filter(item => item[userField] === selectedUser);
   };
 
   return (
@@ -92,14 +138,47 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
               <p className="text-sm text-gray-600">Monitor login attempts and user access</p>
             </div>
           </div>
-          <button
-            onClick={fetchLogs}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          
+          <div className="flex items-center gap-3">
+            {/* User Filter */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Filter User:</label>
+              <select
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="all">All Users</option>
+                {getUniqueUsers().map(user => (
+                  <option key={user} value={user}>{user}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Reset Logs Button */}
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to clear all access logs? This action cannot be undone.')) {
+                  resetLogs();
+                }
+              }}
+              disabled={resetLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              <XCircle className={`w-4 h-4 ${resetLoading ? 'animate-spin' : ''}`} />
+              Reset Logs
+            </button>
+            
+            {/* Refresh Button */}
+            <button
+              onClick={fetchLogs}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -112,40 +191,79 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
         )}
 
         {logs && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h3 className="font-semibold text-green-800">Successful Logins</h3>
+          <>
+            {/* Filter Status */}
+            {selectedUser !== 'all' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    Showing data for user: <strong>{selectedUser}</strong>
+                  </span>
+                  <button
+                    onClick={() => setSelectedUser('all')}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline ml-2"
+                  >
+                    Show All Users
+                  </button>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-green-700">
-                {logs.recent_login_attempts.filter(attempt => attempt.success).length}
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <h3 className="font-semibold text-green-800">Successful Logins</h3>
+                </div>
+                <div className="text-2xl font-bold text-green-700">
+                  {filterByUser(logs.recent_login_attempts).filter(attempt => attempt.success).length}
+                </div>
+                <div className="text-sm text-green-600">
+                  {selectedUser === 'all' ? 'All users' : selectedUser}
+                </div>
               </div>
-              <div className="text-sm text-green-600">Last 100 attempts</div>
-            </div>
 
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <XCircle className="w-5 h-5 text-red-600" />
-                <h3 className="font-semibold text-red-800">Failed Attempts</h3>
+              <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <XCircle className="w-5 h-5 text-red-600" />
+                  <h3 className="font-semibold text-red-800">Failed Attempts</h3>
+                </div>
+                <div className="text-2xl font-bold text-red-700">
+                  {filterByUser(logs.recent_login_attempts).filter(attempt => !attempt.success).length}
+                </div>
+                <div className="text-sm text-red-600">
+                  {selectedUser === 'all' ? 'All users' : selectedUser}
+                </div>
               </div>
-              <div className="text-2xl font-bold text-red-700">
-                {logs.recent_login_attempts.filter(attempt => !attempt.success).length}
-              </div>
-              <div className="text-sm text-red-600">Last 100 attempts</div>
-            </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Globe className="w-5 h-5 text-blue-600" />
-                <h3 className="font-semibold text-blue-800">Unique IPs</h3>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="w-5 h-5 text-purple-600" />
+                  <h3 className="font-semibold text-purple-800">User Activities</h3>
+                </div>
+                <div className="text-2xl font-bold text-purple-700">
+                  {logs.recent_activities ? filterByUser(logs.recent_activities).length : 0}
+                </div>
+                <div className="text-sm text-purple-600">
+                  {selectedUser === 'all' ? 'All users' : selectedUser}
+                </div>
               </div>
-              <div className="text-2xl font-bold text-blue-700">
-                {new Set(logs.recent_login_attempts.map(attempt => attempt.ip_address)).size}
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Globe className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-800">Unique IPs</h3>
+                </div>
+                <div className="text-2xl font-bold text-blue-700">
+                  {Array.from(new Set(filterByUser(logs.recent_login_attempts).map(attempt => attempt.ip_address))).length}
+                </div>
+                <div className="text-sm text-blue-600">
+                  {selectedUser === 'all' ? 'All users' : selectedUser}
+                </div>
               </div>
-              <div className="text-sm text-blue-600">Last 100 attempts</div>
             </div>
-          </div>
+          </>
         )}
       </div>
 
@@ -154,7 +272,12 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 bg-gray-50 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">Recent User Activities</h3>
-            <p className="text-sm text-gray-600 mt-1">Last {logs.recent_activities.length} user actions</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {selectedUser === 'all' 
+                ? `Last ${logs.recent_activities.length} user actions`
+                : `${filterByUser(logs.recent_activities).length} actions by ${selectedUser}`
+              }
+            </p>
           </div>
           
           <div className="overflow-x-auto">
@@ -179,7 +302,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {logs.recent_activities.slice().reverse().map((activity, index) => (
+                {filterByUser(logs.recent_activities).slice().reverse().map((activity, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -235,7 +358,12 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 bg-gray-50 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">Recent Login Attempts</h3>
-            <p className="text-sm text-gray-600 mt-1">Last {logs.recent_login_attempts.length} login attempts</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {selectedUser === 'all' 
+                ? `Last ${logs.recent_login_attempts.length} login attempts`
+                : `${filterByUser(logs.recent_login_attempts).length} attempts by ${selectedUser}`
+              }
+            </p>
           </div>
           
           <div className="overflow-x-auto">
@@ -269,7 +397,7 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {logs.recent_login_attempts
+                {filterByUser(logs.recent_login_attempts)
                   .slice()
                   .reverse() // Show most recent first
                   .map((attempt, index) => (
@@ -313,10 +441,15 @@ export const AccessLogsTab: React.FC<AccessLogsTabProps> = () => {
             </table>
           </div>
           
-          {logs.recent_login_attempts.length === 0 && (
+          {filterByUser(logs.recent_login_attempts).length === 0 && (
             <div className="p-8 text-center text-gray-500">
               <Shield className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>No access attempts logged yet.</p>
+              <p>
+                {selectedUser === 'all' 
+                  ? 'No access attempts logged yet.'
+                  : `No access attempts found for user: ${selectedUser}`
+                }
+              </p>
             </div>
           )}
         </div>
