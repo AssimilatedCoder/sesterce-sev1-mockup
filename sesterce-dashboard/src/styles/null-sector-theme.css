@@ -37,6 +37,43 @@
   --nscale-font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
+/* Nscale Neural Network Background Styles */
+:root {
+  --brand-bg-1: #06142e; /* near-black navy */
+  --brand-bg-2: #0b2a63; /* deep cobalt */
+  --brand-bg-3: #1340a4; /* accent blue used in the radial glow */
+  --vignette: rgba(0,0,0,.35);
+
+  /* Particle + line appearance */
+  --particle-rgb: 255,255,255;   /* white particles */
+  --link-alpha: .08;             /* baseline link opacity */
+  --glow-alpha: .25;             /* additive glow during pulses */
+}
+
+/* Subtle vignette to add depth at edges (over the gradient, under the particles) */
+.vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(120% 100% at 50% 50%, transparent 50%, var(--vignette) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* The animated canvas sits behind all content but above the gradient */
+canvas#nn-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none; /* don't block UI */
+  display: block;
+  /* Fallback if JS is disabled: let the gradient do the heavy lifting */
+}
+
+/* Respect user accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+  canvas#nn-bg { display: none; }
+}
+
 /* Global Font Override - Modern Nscale Typography */
 body, html {
   font-family: var(--nscale-font-family) !important;
@@ -281,6 +318,16 @@ button {
 .bg-white.rounded-lg {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
   background-color: var(--nscale-bg-primary) !important;
+}
+
+/* Update login background */
+.min-h-screen {
+  background:
+    radial-gradient(1200px 700px at 90% 0%,
+      color-mix(in oklab, var(--brand-bg-3) 40%, transparent) 0%,
+      color-mix(in oklab, var(--brand-bg-3) 16%, transparent) 38%,
+      transparent 62%),
+    linear-gradient(160deg, var(--brand-bg-1) 0%, var(--brand-bg-2) 55%, #0c2c6a 100%);
 }
 
 /* Enhanced Table Styling - Nscale */
