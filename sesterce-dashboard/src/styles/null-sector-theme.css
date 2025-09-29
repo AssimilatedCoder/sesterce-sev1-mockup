@@ -1,45 +1,50 @@
-/* Design Document Inspired Theme - Professional & Clean */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Rationale:wght@400&display=swap');
+/* Nscale Inspired Theme - Modern Light Professional */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* Primary Null Sector Colors - From Design Document */
-  --null-sector-green: #00c896;      /* Primary Null Sector green */
-  --null-sector-green-dark: #00b185; /* Darker Null Sector green */
-  --null-sector-beige-light: #f5f3f0; /* Light beige tint */
+  /* Nscale Primary Colors - Based on nscale.com */
+  --nscale-blue-primary: #2563eb;     /* Nscale primary blue */
+  --nscale-blue-dark: #1d4ed8;       /* Darker blue for hovers */
+  --nscale-blue-light: #3b82f6;      /* Lighter blue for accents */
+  --nscale-blue-subtle: #dbeafe;     /* Very light blue for backgrounds */
 
-  /* Professional Text Colors - From Design Document */
-  --null-sector-text-primary: #2c3e50;   /* Primary text */
-  --null-sector-text-secondary: #34495e; /* Secondary text */
-  --null-sector-text-muted: #6c757d;     /* Muted text */
-  --null-sector-text-light: #95a5a6;     /* Light text */
+  /* Professional Text Colors - Nscale Style */
+  --nscale-text-primary: #1f2937;     /* Dark gray for primary text */
+  --nscale-text-secondary: #374151;   /* Medium gray for secondary text */
+  --nscale-text-muted: #6b7280;       /* Light gray for muted text */
+  --nscale-text-light: #9ca3af;       /* Very light gray */
 
-  /* Neutral Backgrounds - From Design Document */
-  --null-sector-bg-primary: #ffffff;     /* Pure white */
-  --null-sector-bg-secondary: #f8f9fa;   /* Light grey panels */
-  --null-sector-bg-gradient: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  /* Clean Backgrounds - Nscale Style */
+  --nscale-bg-primary: #ffffff;       /* Pure white */
+  --nscale-bg-secondary: #f9fafb;     /* Very light gray */
+  --nscale-bg-tertiary: #f3f4f6;      /* Light gray panels */
+  --nscale-bg-gradient: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
 
-  /* Borders and Dividers - From Design Document */
-  --null-sector-border-light: #ecf0f1;   /* Light borders */
-  --null-sector-border-medium: #dee2e6;  /* Medium borders */
-  --null-sector-border-accent: #00c896;  /* Accent borders */
+  /* Modern Borders - Nscale Style */
+  --nscale-border-light: #f3f4f6;     /* Very light borders */
+  --nscale-border-medium: #e5e7eb;    /* Medium borders */
+  --nscale-border-strong: #d1d5db;    /* Strong borders */
+  --nscale-border-accent: #2563eb;    /* Blue accent borders */
 
-  /* Status Colors - Professional */
-  --null-sector-success: #00c896;
-  --null-sector-warning: #ffc107;
-  --null-sector-error: #dc3545;
-  --null-sector-info: #17a2b8;
+  /* Status Colors - Modern Professional */
+  --nscale-success: #10b981;          /* Modern green */
+  --nscale-warning: #f59e0b;          /* Modern amber */
+  --nscale-error: #ef4444;            /* Modern red */
+  --nscale-info: #2563eb;             /* Nscale blue for info */
 
-  /* Typography - Roboto from Design Document */
-  --null-sector-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --null-sector-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+  /* Typography - Modern Inter (Nscale Style) */
+  --nscale-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nscale-font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
-/* Global Font Override - Modern Enterprise Typography */
+/* Global Font Override - Modern Nscale Typography */
 body, html {
-  font-family: var(--null-sector-font-family) !important;
+  font-family: var(--nscale-font-family) !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
   font-weight: 400 !important;
+  color: var(--nscale-text-primary) !important;
+  background-color: var(--nscale-bg-primary) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -49,198 +54,209 @@ body, html {
   box-sizing: border-box;
 }
 
-/* Clean scrollbars for webkit browsers */
+/* Clean scrollbars for webkit browsers - Nscale Style */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--nscale-bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--nscale-border-strong);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--nscale-text-muted);
 }
 
-/* Design Document Color Overrides */
-.bg-white { background-color: var(--null-sector-bg-primary) !important; }
-.bg-gray-50 { background-color: var(--null-sector-bg-secondary) !important; }
-.bg-gray-100 { background-color: var(--null-sector-bg-secondary) !important; }
+/* Nscale Color Overrides */
+.bg-white { background-color: var(--nscale-bg-primary) !important; }
+.bg-gray-50 { background-color: var(--nscale-bg-secondary) !important; }
+.bg-gray-100 { background-color: var(--nscale-bg-tertiary) !important; }
 
-/* Text Colors - Professional Hierarchy */
-.text-gray-500 { color: var(--null-sector-text-muted) !important; }
-.text-gray-600 { color: var(--null-sector-text-secondary) !important; }
-.text-gray-700 { color: var(--null-sector-text-secondary) !important; }
-.text-gray-800 { color: var(--null-sector-text-primary) !important; }
-.text-gray-900 { color: var(--null-sector-text-primary) !important; }
+/* Text Colors - Nscale Hierarchy */
+.text-gray-500 { color: var(--nscale-text-muted) !important; }
+.text-gray-600 { color: var(--nscale-text-secondary) !important; }
+.text-gray-700 { color: var(--nscale-text-secondary) !important; }
+.text-gray-800 { color: var(--nscale-text-primary) !important; }
+.text-gray-900 { color: var(--nscale-text-primary) !important; }
 
-/* Borders - Professional & Clean */
-.border-gray-200 { border-color: var(--null-sector-border-medium) !important; }
-.border-gray-300 { border-color: var(--null-sector-border-medium) !important; }
+/* Borders - Nscale Clean */
+.border-gray-200 { border-color: var(--nscale-border-medium) !important; }
+.border-gray-300 { border-color: var(--nscale-border-strong) !important; }
 
-/* Primary Actions - Sesterce Green */
-.bg-green-600 { background-color: var(--null-sector-green) !important; }
-.bg-green-700 { background-color: var(--null-sector-green-dark) !important; }
-.text-green-600 { color: var(--null-sector-green) !important; }
-.text-green-700 { color: var(--null-sector-green-dark) !important; }
-.hover\:bg-green-700:hover { background-color: var(--null-sector-green-dark) !important; }
+/* Primary Actions - Nscale Blue */
+.bg-blue-600 { background-color: var(--nscale-blue-primary) !important; }
+.bg-blue-700 { background-color: var(--nscale-blue-dark) !important; }
+.text-blue-600 { color: var(--nscale-blue-primary) !important; }
+.text-blue-700 { color: var(--nscale-blue-dark) !important; }
+.hover\:bg-blue-700:hover { background-color: var(--nscale-blue-dark) !important; }
 
-/* Information Sections - Keep Professional */
-.bg-blue-50 { background-color: var(--null-sector-bg-secondary) !important; }
-.bg-purple-50 { background-color: var(--null-sector-bg-secondary) !important; }
-.bg-cyan-50 { background-color: var(--null-sector-bg-secondary) !important; }
-.border-blue-400 { border-color: var(--null-sector-green) !important; }
-.border-purple-400 { border-color: var(--null-sector-green) !important; }
-.text-blue-600 { color: var(--null-sector-green) !important; }
-.text-blue-700 { color: var(--null-sector-green-dark) !important; }
+/* Legacy Green Support (for existing components) */
+.bg-green-600 { background-color: var(--nscale-blue-primary) !important; }
+.bg-green-700 { background-color: var(--nscale-blue-dark) !important; }
+.text-green-600 { color: var(--nscale-blue-primary) !important; }
+.text-green-700 { color: var(--nscale-blue-dark) !important; }
+.hover\:bg-green-700:hover { background-color: var(--nscale-blue-dark) !important; }
+
+/* Information Sections - Nscale Professional */
+.bg-blue-50 { background-color: var(--nscale-blue-subtle) !important; }
+.bg-purple-50 { background-color: var(--nscale-bg-secondary) !important; }
+.bg-cyan-50 { background-color: var(--nscale-bg-secondary) !important; }
+.border-blue-400 { border-color: var(--nscale-blue-primary) !important; }
+.border-purple-400 { border-color: var(--nscale-blue-primary) !important; }
+.text-blue-600 { color: var(--nscale-blue-primary) !important; }
+.text-blue-700 { color: var(--nscale-blue-dark) !important; }
 
 /* Beige/Warm Colors - Professional & Clean */
 .bg-yellow-50 { background-color: #fdf8f3 !important; } /* Light beige */
 .bg-yellow-100 { background-color: #f5f1eb !important; } /* Slightly darker beige */
 
-/* Status Colors - Professional & Clear */
-.border-yellow-400 { border-color: var(--null-sector-warning) !important; }
+/* Status Colors - Nscale Professional */
+.border-yellow-400 { border-color: var(--nscale-warning) !important; }
 .bg-orange-50 { background-color: #fef9f0 !important; }
-.border-orange-200 { border-color: var(--null-sector-warning) !important; }
+.border-orange-200 { border-color: var(--nscale-warning) !important; }
 .bg-red-50 { background-color: #fef5f5 !important; }
-.border-red-200 { border-color: var(--null-sector-error) !important; }
+.border-red-200 { border-color: var(--nscale-error) !important; }
 
 /* Success States */
-.bg-green-50 { background-color: var(--null-sector-beige-light) !important; }
-.bg-green-100 { background-color: var(--null-sector-beige-light) !important; }
-.border-green-200 { border-color: var(--null-sector-green) !important; }
-.border-green-400 { border-color: var(--null-sector-green) !important; }
+.bg-green-50 { background-color: #f0fdf4 !important; }
+.bg-green-100 { background-color: #dcfce7 !important; }
+.border-green-200 { border-color: var(--nscale-success) !important; }
+.border-green-400 { border-color: var(--nscale-success) !important; }
 
 /* Hover States */
-.hover\:bg-gray-50:hover { background-color: var(--null-sector-bg-secondary) !important; }
+.hover\:bg-gray-50:hover { background-color: var(--nscale-bg-secondary) !important; }
 
 /* Focus States */
-.focus\:ring-green-500:focus { --tw-ring-color: var(--null-sector-green) !important; }
+.focus\:ring-blue-500:focus { --tw-ring-color: var(--nscale-blue-primary) !important; }
+.focus\:ring-green-500:focus { --tw-ring-color: var(--nscale-blue-primary) !important; }
 
-/* Gradients - Professional */
-.from-green-50 { --tw-gradient-from: var(--null-sector-beige-light) !important; }
-.to-gray-100 { --tw-gradient-to: var(--null-sector-bg-secondary) !important; }
-.from-blue-50 { --tw-gradient-from: var(--null-sector-bg-secondary) !important; }
-.to-purple-50 { --tw-gradient-to: var(--null-sector-bg-secondary) !important; }
-.from-indigo-50 { --tw-gradient-from: var(--null-sector-bg-secondary) !important; }
+/* Gradients - Nscale Professional */
+.from-green-50 { --tw-gradient-from: #f0fdf4 !important; }
+.to-gray-100 { --tw-gradient-to: var(--nscale-bg-tertiary) !important; }
+.from-blue-50 { --tw-gradient-from: var(--nscale-blue-subtle) !important; }
+.to-purple-50 { --tw-gradient-to: var(--nscale-bg-secondary) !important; }
+.from-indigo-50 { --tw-gradient-from: var(--nscale-bg-secondary) !important; }
 
-/* Design Document Components - Professional & Clean */
-.null-sector-card {
-  background: var(--null-sector-bg-primary);
-  border: 1px solid var(--null-sector-border-medium);
+/* Nscale Components - Modern & Clean */
+.nscale-card {
+  background: var(--nscale-bg-primary);
+  border: 1px solid var(--nscale-border-medium);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  font-family: var(--null-sector-font-family);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  font-family: var(--nscale-font-family);
 }
 
-.null-sector-card-accent {
-  background: var(--null-sector-bg-secondary);
-  border: 1px solid var(--null-sector-border-medium);
-  border-left: 3px solid var(--null-sector-green);
+.nscale-card-accent {
+  background: var(--nscale-bg-secondary);
+  border: 1px solid var(--nscale-border-medium);
+  border-left: 3px solid var(--nscale-blue-primary);
 }
 
-.null-sector-button-primary {
-  background-color: var(--null-sector-green);
+.nscale-button-primary {
+  background-color: var(--nscale-blue-primary);
   color: white;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
   font-weight: 500;
-  font-family: var(--null-sector-font-family);
+  font-family: var(--nscale-font-family);
   transition: all 0.2s ease;
   border: none;
 }
 
-.null-sector-button-primary:hover {
-  background-color: var(--null-sector-green-dark);
+.nscale-button-primary:hover {
+  background-color: var(--nscale-blue-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 200, 150, 0.15);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
-.null-sector-input {
-  border: 1px solid var(--null-sector-border-medium);
+.nscale-input {
+  border: 1px solid var(--nscale-border-medium);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
-  background: var(--null-sector-bg-primary);
-  font-family: var(--null-sector-font-family);
-  color: var(--null-sector-text-primary);
+  background: var(--nscale-bg-primary);
+  font-family: var(--nscale-font-family);
+  color: var(--nscale-text-primary);
   transition: border-color 0.2s ease;
 }
 
-.null-sector-input:focus {
+.nscale-input:focus {
   outline: none;
-  border-color: var(--null-sector-green);
-  box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.08);
+  border-color: var(--nscale-blue-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
-.null-sector-section {
-  background: var(--null-sector-bg-secondary);
-  border: 1px solid var(--null-sector-border-medium);
+.nscale-section {
+  background: var(--nscale-bg-secondary);
+  border: 1px solid var(--nscale-border-medium);
   border-radius: 8px;
 }
 
-/* Professional Typography Classes */
-.null-sector-text-primary { color: var(--null-sector-text-primary); }
-.null-sector-text-secondary { color: var(--null-sector-text-secondary); }
-.null-sector-text-muted { color: var(--null-sector-text-muted); }
-.null-sector-bg-subtle { background-color: var(--null-sector-bg-secondary); }
-.null-sector-border-subtle { border-color: var(--null-sector-border-medium); }
+/* Nscale Typography Classes */
+.nscale-text-primary { color: var(--nscale-text-primary); }
+.nscale-text-secondary { color: var(--nscale-text-secondary); }
+.nscale-text-muted { color: var(--nscale-text-muted); }
+.nscale-bg-subtle { background-color: var(--nscale-bg-secondary); }
+.nscale-border-subtle { border-color: var(--nscale-border-medium); }
 
-/* Table Styling - From Design Document */
-table.null-sector-table {
+/* Table Styling - Nscale Modern */
+table.nscale-table {
   width: 100%;
   border-collapse: collapse;
   margin: 20px 0;
   font-size: 10pt;
-  background: var(--null-sector-bg-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  font-family: var(--null-sector-font-family);
+  background: var(--nscale-bg-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  font-family: var(--nscale-font-family);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-table.null-sector-table th {
-  background: var(--null-sector-green);
+table.nscale-table th {
+  background: var(--nscale-blue-primary);
   color: #ffffff;
   padding: 12px 15px;
   text-align: left;
   font-weight: 500;
   font-size: 10pt;
-  border: 1px solid var(--null-sector-green-dark);
+  border: 1px solid var(--nscale-blue-dark);
 }
 
-table.null-sector-table td {
+table.nscale-table td {
   padding: 10px 15px;
-  border: 1px solid var(--null-sector-border-light);
+  border: 1px solid var(--nscale-border-light);
   vertical-align: top;
-  background: var(--null-sector-bg-primary);
+  background: var(--nscale-bg-primary);
 }
 
-table.null-sector-table tr:nth-child(even) td {
-  background: var(--null-sector-bg-secondary);
+table.nscale-table tr:nth-child(even) td {
+  background: var(--nscale-bg-secondary);
 }
 
-table.null-sector-table tr:hover td {
-  background: var(--null-sector-beige-light);
+table.nscale-table tr:hover td {
+  background: var(--nscale-blue-subtle);
 }
 
-/* Modern Form Controls */
+/* Modern Form Controls - Nscale Style */
 input[type="text"],
 input[type="number"],
 input[type="email"],
 select,
 textarea {
-  font-family: var(--null-sector-font-family) !important;
-  border: 1px solid var(--null-sector-border-medium) !important;
+  font-family: var(--nscale-font-family) !important;
+  border: 1px solid var(--nscale-border-medium) !important;
   border-radius: 6px !important;
   padding: 8px 12px !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-  background: white !important;
+  background: var(--nscale-bg-primary) !important;
+  color: var(--nscale-text-primary) !important;
 }
 
 input[type="text"]:focus,
@@ -249,26 +265,27 @@ input[type="email"]:focus,
 select:focus,
 textarea:focus {
   outline: none !important;
-  border-color: var(--null-sector-green) !important;
-  box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.1) !important;
+  border-color: var(--nscale-blue-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
 }
 
-/* Modern Button Styling */
+/* Modern Button Styling - Nscale */
 button {
-  font-family: var(--null-sector-font-family) !important;
+  font-family: var(--nscale-font-family) !important;
   font-weight: 500 !important;
   transition: all 0.2s ease !important;
 }
 
-/* Modern Card Styling */
+/* Modern Card Styling - Nscale */
 .bg-white.rounded-xl,
 .bg-white.rounded-lg {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  background-color: var(--nscale-bg-primary) !important;
 }
 
-/* Enhanced Table Styling */
+/* Enhanced Table Styling - Nscale */
 table {
-  font-family: var(--null-sector-font-family) !important;
+  font-family: var(--nscale-font-family) !important;
 }
 
 th {

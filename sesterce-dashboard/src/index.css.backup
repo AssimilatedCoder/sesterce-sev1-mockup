@@ -13,8 +13,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
-  color: #1f2937;
 }
 
 code {
@@ -22,51 +20,35 @@ code {
     monospace;
 }
 
-/* Grafana-specific styles for the embedded dashboard - Light Theme */
+/* Grafana-specific styles for the embedded dashboard */
 .grafana-dashboard {
-  background: #f9fafb;
-  color: #1f2937;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: #1f1f20;
+  color: #d9d9d9;
 }
 
 .grafana-dashboard .panel {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background: #2f2f32;
+  border: 1px solid #404043;
+  border-radius: 2px;
 }
 
 .grafana-dashboard .panel-title {
-  color: #1f2937;
+  color: #d9d9d9;
   font-size: 14px;
   font-weight: 500;
 }
 
 .grafana-dashboard .metric-value {
-  color: #2563eb;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .grafana-dashboard .metric-unit {
-  color: #6b7280;
+  color: #a7a7a7;
   font-size: 12px;
 }
 
-/* Chart.js overrides for light theme */
+/* Chart.js overrides for dark theme */
 .chart-container canvas {
   background: transparent !important;
 }
-
-/* Additional light theme overrides */
-.bg-slate-900 { background-color: #ffffff !important; }
-.bg-slate-800 { background-color: #f9fafb !important; }
-.text-white { color: #1f2937 !important; }
-.text-slate-300 { color: #6b7280 !important; }
-.text-slate-400 { color: #9ca3af !important; }
-
-/* Dark mode card overrides for light theme */
-.bg-gray-900 { background-color: #ffffff !important; }
-.bg-gray-800 { background-color: #f9fafb !important; }
-.border-gray-700 { border-color: #e5e7eb !important; }
-.border-gray-600 { border-color: #d1d5db !important; }
