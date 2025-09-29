@@ -137,18 +137,18 @@ export const CalculatorTabEnhanced: React.FC<CalculatorTabEnhancedProps> = ({
               onChange={(e) => setGpuModel(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             >
-              <optgroup label="🚀 NVIDIA Data Center (NVLink)">
+              <optgroup label="NVIDIA Data Center (NVLink)">
                 <option value="gb200">GB200 NVL72 (1,542W)</option>
                 <option value="gb300">GB300 NVL72 (1,715W - 2025)</option>
                 <option value="h100-sxm">H100 SXM5 (700W)</option>
                 <option value="h200-sxm">H200 SXM (700W)</option>
               </optgroup>
-              <optgroup label="💼 NVIDIA Professional (PCIe)">
+              <optgroup label="NVIDIA Professional (PCIe)">
                 <option value="h100-pcie">H100 PCIe (350W)</option>
                 <option value="h200-pcie">H200 PCIe (600W)</option>
                 <option value="rtx6000-blackwell">RTX 6000 Blackwell (300W)</option>
               </optgroup>
-              <optgroup label="🔴 AMD Instinct (Infinity Fabric)">
+              <optgroup label="AMD Instinct (Infinity Fabric)">
                 <option value="mi355x">AMD MI355X (750W)</option>
                 <option value="mi300x">AMD MI300X (750W)</option>
               </optgroup>
