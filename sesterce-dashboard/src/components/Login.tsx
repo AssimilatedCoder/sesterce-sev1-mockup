@@ -45,18 +45,19 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" 
+         style={{ background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)' }}>
       <div className="max-w-lg w-full">
-        {/* Warning Banner - floating above login */}
+        {/* Warning Banner - Enhanced for blue background */}
         <div className="mb-8">
           <WarningBanner />
         </div>
-        {/* Clean Header - Nscale Style */}
+        {/* Clean Header - Nscale Style with white text */}
         <div className="flex flex-col items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2 text-center">
             GPU SuperCluster Calculator
           </h1>
-          <p className="text-gray-600">Secure access to GPU cluster management</p>
+          <p className="text-blue-100">Secure access to GPU cluster management</p>
         </div>
 
         {/* Login Form */}
