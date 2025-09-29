@@ -252,13 +252,50 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               onChange={(e) => setGpuModel(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             >
-              <option value="gb200">GB200 NVL72</option>
-              <option value="gb300">GB300 NVL72</option>
-              <option value="h100-sxm">H100 SXM</option>
-              <option value="h100-pcie">H100 PCIe</option>
-              <option value="h200-sxm">H200 SXM</option>
-              <option value="h200-pcie">H200 PCIe</option>
+              <optgroup label="🚀 NVIDIA Data Center (NVLink)">
+                <option value="gb200">GB200 NVL72 (1,542W)</option>
+                <option value="gb300">GB300 NVL72 (1,715W - 2025)</option>
+                <option value="h100-sxm">H100 SXM5 (700W)</option>
+                <option value="h200-sxm">H200 SXM (700W)</option>
+              </optgroup>
+              <optgroup label="💼 NVIDIA Professional (PCIe)">
+                <option value="h100-pcie">H100 PCIe (350W)</option>
+                <option value="h200-pcie">H200 PCIe (600W)</option>
+                <option value="rtx6000-blackwell">RTX 6000 Blackwell (300W)</option>
+              </optgroup>
+              <optgroup label="🔴 AMD Instinct (Infinity Fabric)">
+                <option value="mi355x">AMD MI355X (750W)</option>
+                <option value="mi300x">AMD MI300X (750W)</option>
+              </optgroup>
             </select>
+            {/* GPU Architecture Warnings */}
+            {(() => {
+              const spec = gpuSpecs[config.gpuModel];
+              if (!spec) return null;
+              
+              return (
+                <div className="mt-2 space-y-1">
+                  {spec.warnings && spec.warnings.map((warning, index) => (
+                    <div key={index} className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      {warning}
+                    </div>
+                  ))}
+                  {spec.vendor === 'amd' && (
+                    <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      AMD ROCm software stack required
+                    </div>
+                  )}
+                  {spec.interconnect !== 'nvlink' && config.numGPUs > 10000 && (
+                    <div className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Non-NVLink architecture - consider networking implications for large scale
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
           
           <div>
