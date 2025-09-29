@@ -334,13 +334,31 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Calculate network costs based on topology and oversubscription
   const calculateNetworkCosts = () => {
     const fabric = networkFabrics[fabricType];
+    const spec = gpuSpecs[gpuModel];
     const isGB200 = gpuModel === 'gb200';
     const isGB300 = gpuModel === 'gb300';
+    const isAMD = spec?.vendor === 'amd';
+    const isRTX = gpuModel.includes('rtx');
     
-    // Pod-based architecture (from design document)
-    const gpusPerPod = isGB200 ? 1008 : 1024;
+    // GPU architecture-specific networking considerations
+    const gpusPerPod = isGB200 ? 1008 : 
+                      isAMD ? 512 :  // AMD typically uses smaller pods for Infinity Fabric
+                      isRTX ? 256 :  // RTX professional cards use smaller clusters
+                      1024;          // Standard for H100/H200
+    
     const numPods = Math.ceil(numGPUs / gpusPerPod);
-    const railsPerGPU = (isGB200 || isGB300) ? 9 : 8;
+    
+    // Rails per GPU based on architecture and interconnect
+    let railsPerGPU;
+    if (isGB200 || isGB300) {
+      railsPerGPU = 9; // NVLink + network rails
+    } else if (isAMD) {
+      railsPerGPU = 4; // AMD Infinity Fabric typically uses fewer network rails
+    } else if (isRTX) {
+      railsPerGPU = 2; // Professional cards, limited multi-GPU scaling
+    } else {
+      railsPerGPU = 8; // Standard H100/H200
+    }
     
     // Adjust switch counts based on topology and oversubscription
     const oversubRatio = parseFloat(oversubscription.split(':')[0]);
@@ -376,12 +394,23 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     if (enableBluefield) {
       if (isGB200 || isGB300) {
         dpuCount = Math.ceil(numGPUs / 72) * 4; // 4 dual-port BlueField-3 per NVL72
+      } else if (isAMD) {
+        // AMD systems typically don't use BlueField DPUs - use native AMD networking
+        dpuCount = 0;
+        dpuCost = 0;
+        dpuPower = 0;
+      } else if (isRTX) {
+        // RTX professional systems typically use fewer DPUs
+        dpuCount = Math.ceil(numGPUs / 16); // 1 DPU per 16 GPUs for professional workloads
       } else {
         // For OEM 8-GPU nodes (H100/H200), assume one DPU per node
         dpuCount = Math.ceil(numGPUs / 8);
       }
-      dpuCost = dpuCount * (tcoOverrides.dpuUnitPrice || 2500); // BlueField-3 SuperNIC price
-      dpuPower = dpuCount * 150; // 150W per DPU (from design doc)
+      
+      if (dpuCount > 0) {
+        dpuCost = dpuCount * (tcoOverrides.dpuUnitPrice || 2500); // BlueField-3 SuperNIC price
+        dpuPower = dpuCount * 150; // 150W per DPU (from design doc)
+      }
     }
     
     const switchCost = totalSwitches * (tcoOverrides.switchPriceOverride || fabric.switchPrice);

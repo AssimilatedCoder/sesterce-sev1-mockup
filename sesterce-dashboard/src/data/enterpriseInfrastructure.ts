@@ -559,12 +559,17 @@ export const enterpriseInfrastructure: InfrastructureComponent[] = [
 const calculatePowerRequirements = (gpuCount: number, rackCount: number, gpuModel: string) => {
   // Power consumption per GPU (including CPU, memory, networking)
   const gpuPowerMap: Record<string, number> = {
-    'gb200': 1000, // 1000W per GB200 GPU (includes Grace CPU)
-    'gb300': 1200, // 1200W per GB300 GPU
+    'gb200': 1542, // 1542W per GB200 GPU (includes Grace CPU, from design doc)
+    'gb300': 1715, // 1715W per GB300 GPU
     'h100-sxm': 700, // 700W per H100 SXM
     'h100-pcie': 350, // 350W per H100 PCIe
-    'a100-sxm': 400, // 400W per A100 SXM
-    'a100-pcie': 250  // 250W per A100 PCIe
+    'h200-sxm': 700, // 700W per H200 SXM
+    'h200-pcie': 600, // 600W per H200 PCIe
+    'rtx6000-blackwell': 300, // 300W per RTX 6000 Blackwell
+    'mi355x': 750, // 750W per AMD MI355X
+    'mi300x': 750, // 750W per AMD MI300X
+    'a100-sxm': 400, // 400W per A100 SXM (legacy)
+    'a100-pcie': 250  // 250W per A100 PCIe (legacy)
   };
 
   const gpuPower = gpuPowerMap[gpuModel] || 700; // Default to H100 SXM
