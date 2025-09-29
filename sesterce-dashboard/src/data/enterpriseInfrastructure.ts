@@ -565,8 +565,8 @@ const calculatePowerRequirements = (gpuCount: number, rackCount: number, gpuMode
     'h100-pcie': 350, // 350W per H100 PCIe
     'h200-sxm': 700, // 700W per H200 SXM
     'h200-pcie': 600, // 600W per H200 PCIe
-    'rtx6000-blackwell': 300, // 300W per RTX 6000 Blackwell
-    'mi355x': 750, // 750W per AMD MI355X
+    'rtx6000-blackwell': 320, // 320W per RTX 6000 Blackwell (refined)
+    'mi355x': 600, // 600W per AMD MI355X (refined based on CDNA3)
     'mi300x': 750, // 750W per AMD MI300X
     'a100-sxm': 400, // 400W per A100 SXM (legacy)
     'a100-pcie': 250  // 250W per A100 PCIe (legacy)

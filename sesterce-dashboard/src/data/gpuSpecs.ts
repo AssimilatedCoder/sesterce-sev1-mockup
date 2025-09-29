@@ -119,39 +119,49 @@ export const gpuSpecs: Record<string, GPUSpec> = {
   // NVIDIA RTX 6000 Blackwell (Professional/Multi-tenant)
   'rtx6000-blackwell': {
     name: 'RTX 6000 Blackwell',
-    powerPerGPU: 300, // Professional card, lower TDP
-    memoryPerGPU: 48, // 48GB GDDR6X
-    unitPrice: 8000, // Professional pricing
+    powerPerGPU: 320, // Professional card TDP (refined estimate)
+    memoryPerGPU: 48, // 48GB GDDR6X (professional standard)
+    unitPrice: 9500, // Professional workstation pricing (refined)
     rackSize: 4, // 4x GPUs per 2U server (multi-tenant optimal)
-    rackPower: 2800, // ~2.8kW for 4x RTX6000 + server
+    rackPower: 3200, // ~3.2kW for 4x RTX6000 + server overhead
     coolingOptions: ['air'],
-    pue: { air: 1.3 },
+    pue: { air: 1.25 }, // Better efficiency for professional workloads
     reference: '/assets/NVIDIA RTX 6000 blackwell Generation - Complete Technical Pack.pdf',
     vendor: 'nvidia',
     architecture: 'Blackwell',
     interconnect: 'pcie',
     networkingRecommendation: 'ethernet',
     multiTenantOptimal: true,
-    warnings: ['No NVLink - limited multi-GPU scaling', 'Optimized for multi-tenant workloads', 'Professional driver stack']
+    warnings: [
+      'No NVLink - all GPU-to-GPU via network', 
+      'Professional drivers - different licensing model',
+      'Optimal for inference and multi-tenant workloads',
+      'Limited scaling vs data center GPUs'
+    ]
   },
 
   // AMD MI355X (Instinct Platform)
   'mi355x': {
     name: 'AMD MI355X',
-    powerPerGPU: 750, // High-performance AI accelerator
-    memoryPerGPU: 192, // 192GB HBM3e
-    unitPrice: 45000, // Enterprise AI pricing
-    rackSize: 8, // 8x GPUs per server
-    rackPower: 12000, // ~12kW per 8x MI355X server
+    powerPerGPU: 600, // CDNA3 architecture (refined based on MI300 series)
+    memoryPerGPU: 192, // 192GB HBM3e (enterprise AI standard)
+    unitPrice: 42000, // Enterprise AI accelerator pricing (competitive with H100)
+    rackSize: 8, // 8x GPUs per server (AMD standard configuration)
+    rackPower: 10800, // ~10.8kW per 8x MI355X server (600W x 8 + 2.4kW server)
     coolingOptions: ['air', 'liquid'],
-    pue: { air: 1.4, liquid: 1.2 },
+    pue: { air: 1.35, liquid: 1.15 }, // AMD efficiency improvements
     reference: '/assets/AMD MI355X and Instinct Platform - Complete Technical Pack.pdf',
     vendor: 'amd',
     architecture: 'CDNA3',
     interconnect: 'infinity-fabric',
     networkingRecommendation: 'roce',
     multiTenantOptimal: true,
-    warnings: ['AMD ROCm software stack required', 'Different networking topology vs NVIDIA', 'Infinity Fabric interconnect']
+    warnings: [
+      'AMD ROCm software stack required - different from CUDA',
+      'Infinity Fabric interconnect - AMD native technology',
+      'RoCE over Ethernet recommended for networking',
+      'HIP programming model vs CUDA'
+    ]
   },
 
   // AMD MI300X (Current generation for comparison)

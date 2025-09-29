@@ -353,9 +353,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     if (isGB200 || isGB300) {
       railsPerGPU = 9; // NVLink + network rails
     } else if (isAMD) {
-      railsPerGPU = 4; // AMD Infinity Fabric typically uses fewer network rails
+      railsPerGPU = 6; // AMD Infinity Fabric + network rails (refined)
     } else if (isRTX) {
-      railsPerGPU = 2; // Professional cards, limited multi-GPU scaling
+      railsPerGPU = 4; // Professional cards, network-dependent (refined)
     } else {
       railsPerGPU = 8; // Standard H100/H200
     }
