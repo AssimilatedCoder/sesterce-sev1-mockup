@@ -14,42 +14,12 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, currentUser }) => {
     <header className="fixed top-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
       <Container>
         <div className="flex items-center justify-between h-16">
-          {/* Logo and Company Name */}
+          {/* Clean Brand - Nscale Style */}
           <div className="flex-shrink-0">
-            <a href="/" className="flex items-center gap-4">
-              <img 
-                src="/testlogo_white_bg.png" 
-                alt="Null Sector Systems LTD" 
-                className="h-12 w-auto object-contain"
-              />
-              <div className="flex flex-col leading-tight">
-                <h1 
-                  className="text-lg font-bold"
-                  style={{
-                    fontFamily: 'Rationale, sans-serif',
-                    fontWeight: 700,
-                    color: '#ff6b35',
-                    textShadow: '0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)',
-                    letterSpacing: '0.5px',
-                    lineHeight: '1.1'
-                  }}
-                >
-                  NULL SECTOR
-                </h1>
-                <h1 
-                  className="text-lg font-bold"
-                  style={{
-                    fontFamily: 'Rationale, sans-serif',
-                    fontWeight: 700,
-                    color: '#ff6b35',
-                    textShadow: '0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)',
-                    letterSpacing: '0.5px',
-                    lineHeight: '1.1'
-                  }}
-                >
-                  SYSTEMS
-                </h1>
-              </div>
+            <a href="/" className="flex items-center">
+              <h1 className="text-xl font-bold text-blue-600">
+                GPU SuperCluster Calculator
+              </h1>
             </a>
           </div>
 

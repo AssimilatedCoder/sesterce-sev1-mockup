@@ -52,41 +52,15 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
         <div className="mb-8">
           <WarningBanner />
         </div>
-        {/* Logo and Header */}
+        {/* Clean Header - Nscale Style */}
         <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <img src="/testlogo_white_bg.png" alt="Null Sector Systems LTD" className="h-48 w-auto" />
-            <div className="flex flex-col">
-              <h1 
-                className="text-4xl font-bold leading-tight"
-                style={{
-                  fontFamily: 'Rationale, sans-serif',
-                  fontWeight: 700,
-                  color: '#ff6b35',
-                  textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
-                  letterSpacing: '1px'
-                }}
-              >
-                NULL SECTOR
-              </h1>
-              <h1 
-                className="text-4xl font-bold leading-tight"
-                style={{
-                  fontFamily: 'Rationale, sans-serif',
-                  fontWeight: 700,
-                  color: '#ff6b35',
-                  textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6)',
-                  letterSpacing: '1px'
-                }}
-              >
-                SYSTEMS LTD
-              </h1>
-            </div>
-          </div>
-          <p className="text-gray-600 mt-2">Secure GPU SuperCluster Calculator</p>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <Shield className="w-4 h-4 text-green-600" />
-            <span className="text-sm text-green-600">Protected by JWT Authentication</span>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            GPU SuperCluster Calculator
+          </h1>
+          <p className="text-gray-600 mb-3">Secure access to GPU cluster management</p>
+          <div className="flex items-center justify-center gap-2">
+            <Shield className="w-4 h-4 text-blue-600" />
+            <span className="text-sm text-blue-600">Protected by JWT Authentication</span>
           </div>
         </div>
 
