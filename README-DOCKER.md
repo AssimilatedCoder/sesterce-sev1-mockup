@@ -142,6 +142,13 @@ The `deploy-secure.sh` script now **automatically detects Docker** and uses the 
 2. **Run Docker deployment**: `./deploy-docker.sh`
 3. **Update bookmarks**: Change from `http://localhost:3025` to `http://localhost:2053`
 
+### **Troubleshooting**
+```bash
+./troubleshoot-remote.sh          # Comprehensive diagnostics
+./check-status.sh                # Quick status check
+./docker-manage.sh logs          # View container logs
+```
+
 ### Legacy Support
 The legacy deployment method is still available if Docker is not installed, but **Docker is strongly recommended**.
 
