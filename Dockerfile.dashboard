@@ -16,9 +16,10 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # Set working directory
 WORKDIR /app
 
-# Copy dashboard files
+# Copy dashboard files and server script
 COPY sev1-warroom-dashboard.html ./
 COPY dashboard-data-loader.js ./
+COPY dashboard-server.py ./
 COPY superpod_sev1_fake_telemetry/ ./superpod_sev1_fake_telemetry/
 
 # Create necessary directories and set permissions
@@ -35,26 +36,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 7777
 
-# Start command (using the existing server.py functionality)
-CMD ["python3", "-c", "
-import http.server
-import socketserver
-import os
-from pathlib import Path
-
-class DashboardHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == '/' or self.path == '':
-            self.path = '/sev1-warroom-dashboard.html'
-        return super().do_GET()
-
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Cache-Control', 'no-cache')
-        super().end_headers()
-
-os.chdir('/app')
-with socketserver.TCPServer(('', 7777), DashboardHandler) as httpd:
-    print('Dashboard server running on port 7777...')
-    httpd.serve_forever()
-"]
+# Start command using the dedicated server script
+CMD ["python3", "dashboard-server.py"]
