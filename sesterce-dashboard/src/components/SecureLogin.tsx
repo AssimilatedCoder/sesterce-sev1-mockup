@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, User, AlertCircle, Shield } from 'lucide-react';
 import { WarningBanner } from './common/WarningBanner';
+import { MeshWaveBackground } from './common/MeshWaveBackground';
 
 interface SecureLoginProps {
   onLogin: (token: string, username: string, role: string) => void;
@@ -46,27 +47,28 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" 
-         style={{ background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)' }}>
-      <div className="max-w-lg w-full">
-        {/* Warning Banner - Enhanced for blue background */}
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-white overflow-hidden">
+      <MeshWaveBackground />
+      <div className="max-w-lg w-full relative z-10">
+        {/* Warning Banner - Enhanced for mesh background */}
         <div className="mb-8">
           <WarningBanner />
         </div>
-        {/* Clean Header - Nscale Style with white text */}
+        {/* Clean Header - Mesh Wave Style */}
         <div className="flex flex-col items-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
             GPU SuperCluster Calculator
           </h1>
-          <p className="text-blue-100 mb-3">Secure access to GPU cluster management</p>
+          <p className="text-gray-600 mb-3">Secure access to GPU cluster management</p>
           <div className="flex items-center justify-center gap-2">
-            <Shield className="w-4 h-4 text-white" />
-            <span className="text-sm text-blue-100">Protected by JWT Authentication</span>
+            <Shield className="w-4 h-4 text-blue-600" />
+            <span className="text-sm text-blue-600">Protected by JWT Authentication</span>
           </div>
         </div>
 
-        {/* Login Form */}
-        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md mx-auto">
+        {/* Login Form - Glass Morphism */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-md mx-auto border border-blue-100/20" 
+             style={{ boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.15)' }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
