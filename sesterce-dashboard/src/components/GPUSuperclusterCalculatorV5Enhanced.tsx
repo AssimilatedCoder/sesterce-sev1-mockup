@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calculator, Cpu, HardDrive, Network, Thermometer, Zap,
+import {
+  Calculator, Cpu, HardDrive, Network, Thermometer, Zap, AlertTriangle,
   FileText, BookOpen, DollarSign, TrendingUp, Package, Settings, Shield
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
@@ -759,6 +759,28 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     window.location.href = '/'; // Redirect to login page
   };
 
+  const scrollToCalculateButton = () => {
+    // Find the calculate button by looking for buttons with green background or "Calculate" text
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const calculateButton = buttons.find(btn =>
+      btn.textContent?.toLowerCase().includes('calculate') ||
+      btn.className.includes('bg-green-600') ||
+      btn.className.includes('bg-green-700')
+    );
+
+    if (calculateButton) {
+      calculateButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add a brief highlight effect
+      calculateButton.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        calculateButton.style.transform = 'scale(1)';
+      }, 200);
+    } else {
+      // Fallback: scroll to bottom of page
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Modern Enterprise Layout with Left Sidebar */}
@@ -840,7 +862,15 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                   <span>{totalStorage}PB</span>
                 </div>
                 {/* TCO Status Indicator */}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full text-sm">
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm cursor-pointer transition-colors ${
+                    results
+                      ? 'bg-green-50 hover:bg-green-100'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  onClick={!results ? scrollToCalculateButton : undefined}
+                  title={!results ? 'Click to scroll to calculate button' : 'TCO calculation complete'}
+                >
                   {results ? (
                     <>
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -848,8 +878,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <span className="text-gray-600">Pending</span>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                      <span className="text-gray-600">TCO Pending</span>
                     </>
                   )}
                 </div>
@@ -857,6 +887,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
               
               {/* Right side - User controls */}
               <div className="flex items-center gap-3">
+                <span className="px-4 py-2 bg-red-50 text-red-700 font-medium rounded-lg flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  !CAUTION: EXPERIMENTAL SYSTEM!
+                </span>
                 <span className="px-4 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg flex items-center gap-2">
                   <Cpu className="w-4 h-4" />
                   {currentUser || 'Unknown'}
