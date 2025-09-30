@@ -11,6 +11,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Remove default nginx configuration and HTML files to prevent conflicts
+RUN rm -f /etc/nginx/sites-enabled/default \
+    && rm -f /etc/nginx/sites-available/default \
+    && rm -rf /usr/share/nginx/html/* \
+    && rm -rf /var/www/html/*
+
 # Note: Health check endpoint is configured in the main nginx config file
 
 # Expose port 80
