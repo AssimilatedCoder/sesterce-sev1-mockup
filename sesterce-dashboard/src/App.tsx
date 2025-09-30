@@ -23,15 +23,7 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
       
       <Header onLogout={onLogout} currentUser={currentUser} />
       
-      <main className="pt-16 relative z-10">
-        {/* Warning Banner - aligned with content */}
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <WarningBanner
-            title="Active Session"
-            message="Cluster configuration changes are tracked and audited for compliance."
-          />
-        </div>
-
+      <main className="relative z-10">
         {/* Main Content - Only Calculator */}
         <div className="min-h-screen">
           <Routes>
