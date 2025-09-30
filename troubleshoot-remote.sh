@@ -36,6 +36,13 @@ if [ "$EUID" -ne 0 ]; then
     print_warning "Some checks require root privileges. Run with: sudo $0"
 fi
 
+# Check if we're actually on Ubuntu (not macOS simulation)
+if [[ "$OSTYPE" == "darwin"* ]] || [[ "$(uname -s)" == "Darwin" ]]; then
+    print_warning "⚠️  This script is designed for Ubuntu Linux, not macOS"
+    print_info "For Ubuntu deployment troubleshooting, run this script on your Ubuntu server"
+    exit 1
+fi
+
 echo ""
 print_info "📋 System Information:"
 echo "---------------------"
@@ -59,14 +66,25 @@ print_info "🐳 Docker Status:"
 echo "----------------"
 
 # Docker daemon status
-if systemctl is-active --quiet docker; then
-    print_status "Docker daemon: RUNNING"
-    echo "Docker version: $(docker --version)"
-    echo "Docker Compose: $(docker-compose --version 2>/dev/null || echo 'Not available')"
+if command -v systemctl >/dev/null 2>&1; then
+    if systemctl is-active --quiet docker; then
+        print_status "Docker daemon: RUNNING"
+        echo "Docker version: $(docker --version)"
+        echo "Docker Compose: $(docker-compose --version 2>/dev/null || echo 'Not available')"
+    else
+        print_error "Docker daemon: NOT RUNNING"
+        echo "💡 Fix: sudo systemctl start docker"
+        exit 1
+    fi
 else
-    print_error "Docker daemon: NOT RUNNING"
-    echo "💡 Fix: sudo systemctl start docker"
-    exit 1
+    # Fallback for systems without systemctl (like some containers)
+    if docker ps >/dev/null 2>&1; then
+        print_status "Docker daemon: RUNNING"
+        echo "Docker version: $(docker --version)"
+    else
+        print_error "Docker daemon: NOT RUNNING or not accessible"
+        exit 1
+    fi
 fi
 
 # Check Docker user permissions
@@ -113,25 +131,39 @@ echo ""
 print_info "🔌 Port Analysis:"
 echo "----------------"
 
-# Check port 2053 usage
-PORT_2053_PID=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1 | awk '{print $7}' | cut -d'/' -f1 || echo "")
-SS_PORT_2053=$(ss -tulpn 2>/dev/null | grep :2053 || echo "")
+# Check port 2053 usage using multiple methods
+PORT_2053_INFO=""
 
-if [ -n "$PORT_2053_PID" ] || [ -n "$SS_PORT_2053" ]; then
+# Method 1: Use lsof if available (most reliable for Docker containers)
+if command -v lsof >/dev/null 2>&1; then
+    PORT_2053_INFO=$(lsof -i :2053 2>/dev/null | head -2)
+fi
+
+# Method 2: Use netstat if lsof not available or didn't find anything
+if [ -z "$PORT_2053_INFO" ] && command -v netstat >/dev/null 2>&1; then
+    PORT_2053_INFO=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1)
+fi
+
+# Method 3: Use ss if available
+if [ -z "$PORT_2053_INFO" ] && command -v ss >/dev/null 2>&1; then
+    PORT_2053_INFO=$(ss -tulpn 2>/dev/null | grep :2053 | head -1)
+fi
+
+if [ -n "$PORT_2053_INFO" ]; then
     print_status "Port 2053: IN USE"
 
-    if [[ $PORT_2053_PID =~ ^[0-9]+$ ]]; then
-        PROCESS_NAME=$(ps -p $PORT_2053_PID -o comm= 2>/dev/null || echo "unknown")
-        print_info "  Process ID: $PORT_2053_PID"
-        print_info "  Process Name: $PROCESS_NAME"
-    fi
-
-    if echo "$SS_PORT_2053" | grep -q "nginx"; then
+    # Check if it's our Docker container
+    if echo "$PORT_2053_INFO" | grep -q "docker\|nullsector-nginx"; then
+        print_status "  Service: nullsector-nginx (Docker container)"
+        print_info "  Status: Our application container"
+    elif echo "$PORT_2053_INFO" | grep -q "nginx"; then
         print_status "  Service: nginx (Docker container)"
-    elif echo "$SS_PORT_2053" | grep -q "docker"; then
-        print_status "  Service: Docker container"
+    elif echo "$PORT_2053_INFO" | grep -q "com.docke"; then
+        print_status "  Service: Docker container (likely our nginx)"
+        print_info "  Note: This is normal for Docker port binding"
     else
         print_warning "  Service: Other application"
+        print_info "  Details: $PORT_2053_INFO"
     fi
 
 else
@@ -245,11 +277,17 @@ echo "----------------------------"
 # Check for common issues
 ISSUES_FOUND=0
 
-# Port conflicts
-if [ -n "$PORT_2053_PID" ] && ! echo "$PORT_2053_PID" | grep -q docker; then
-    print_error "Port 2053 conflict detected!"
-    echo "💡 Fix: Kill conflicting process: sudo kill $PORT_2053_PID"
-    ((ISSUES_FOUND++))
+# Port conflicts - check if port is used by something other than our Docker container
+if [ -n "$PORT_2053_INFO" ]; then
+    if ! echo "$PORT_2053_INFO" | grep -q "docker\|nullsector-nginx\|com.docke"; then
+        print_error "Port 2053 conflict detected!"
+        print_info "  Details: $PORT_2053_INFO"
+        echo "💡 Fix: Kill conflicting process: sudo lsof -ti:2053 | xargs sudo kill -9"
+        ((ISSUES_FOUND++))
+    fi
+else
+    print_warning "Port 2053 not detected - container may not be running"
+    echo "💡 Check: docker-compose ps"
 fi
 
 # UFW blocking

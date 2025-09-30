@@ -57,22 +57,39 @@ else
     print_info "🔍 Running pre-deployment checks for remote server..."
 
     # Check if Docker daemon is running
-    if ! systemctl is-active --quiet docker; then
-        print_warning "Docker daemon is not running"
-        print_info "💡 Fix: sudo systemctl start docker"
-        print_info "💡 Enable on boot: sudo systemctl enable docker"
+    if command -v systemctl >/dev/null 2>&1; then
+        if ! systemctl is-active --quiet docker; then
+            print_warning "Docker daemon is not running"
+            print_info "💡 Fix: sudo systemctl start docker"
+            print_info "💡 Enable on boot: sudo systemctl enable docker"
+        else
+            print_status "Docker daemon: RUNNING"
+        fi
     else
-        print_status "Docker daemon: RUNNING"
+        # Fallback for systems without systemctl
+        if docker ps >/dev/null 2>&1; then
+            print_status "Docker daemon: RUNNING"
+        else
+            print_warning "Cannot check Docker daemon status"
+        fi
     fi
 
     # Check port 2053 availability
-    PORT_2053_PID=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1 | awk '{print $7}' | cut -d'/' -f1 || echo "")
-    if [ -n "$PORT_2053_PID" ]; then
-        print_warning "Port 2053 is already in use by PID: $PORT_2053_PID"
-        PROCESS_NAME=$(ps -p $PORT_2053_PID -o comm= 2>/dev/null || echo "unknown")
-        print_info "Process: $PROCESS_NAME"
-        print_info "💡 Fix: sudo kill $PORT_2053_PID"
-        print_info "💡 Or use: sudo lsof -ti:2053 | xargs sudo kill -9"
+    PORT_2053_INFO=""
+    if command -v lsof >/dev/null 2>&1; then
+        PORT_2053_INFO=$(lsof -i :2053 2>/dev/null | head -1)
+    elif command -v netstat >/dev/null 2>&1; then
+        PORT_2053_INFO=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1)
+    fi
+
+    if [ -n "$PORT_2053_INFO" ]; then
+        if echo "$PORT_2053_INFO" | grep -q "docker\|nullsector-nginx\|com.docke"; then
+            print_status "Port 2053: Used by Docker container (likely our nginx)"
+        else
+            print_warning "Port 2053 is already in use by another application"
+            print_info "  Details: $PORT_2053_INFO"
+            print_info "💡 Fix: sudo lsof -ti:2053 | xargs sudo kill -9"
+        fi
     else
         print_status "Port 2053: AVAILABLE"
     fi
@@ -187,7 +204,13 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
     sleep 5
 
     # Check if port 2053 is now listening
-    PORT_CHECK=$(netstat -tulpn 2>/dev/null | grep :2053 || ss -tulpn 2>/dev/null | grep :2053 || echo "")
+    PORT_CHECK=""
+    if command -v lsof >/dev/null 2>&1; then
+        PORT_CHECK=$(lsof -i :2053 2>/dev/null | head -1)
+    elif command -v netstat >/dev/null 2>&1; then
+        PORT_CHECK=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1)
+    fi
+
     if [ -n "$PORT_CHECK" ]; then
         print_status "✅ Port 2053: NOW LISTENING"
         print_info "🎉 Deployment successful! Application accessible at:"
