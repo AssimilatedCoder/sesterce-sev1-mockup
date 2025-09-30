@@ -580,4 +580,4 @@ def health():
 
 if __name__ == '__main__':
     # For production, use gunicorn or similar
-    app.run(host='127.0.0.1', port=7779, debug=False)
+    app.run(host='0.0.0.0', port=7779, debug=False)

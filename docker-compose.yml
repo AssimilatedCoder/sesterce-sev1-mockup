@@ -16,7 +16,7 @@ services:
     networks:
       - nullsector-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7779/api/health"]
+      test: ["CMD", "curl", "-f", "http://api:7779/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35,7 +35,7 @@ services:
     networks:
       - nullsector-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://frontend:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,7 +58,7 @@ services:
     networks:
       - nullsector-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://nginx:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
