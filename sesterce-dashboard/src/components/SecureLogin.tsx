@@ -60,12 +60,8 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-[420px] border border-gray-100" 
              style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
           
-          {/* Header inside login box */}
+          {/* Security indicator */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-blue-600 mb-2" 
-                style={{ fontFamily: 'Roboto, sans-serif' }}>
-              SuperCluster Calculator
-            </h1>
             <div className="flex items-center justify-center gap-2">
               <Shield className="w-4 h-4 text-blue-600" />
               <span className="text-sm text-blue-600">Protected by JWT Authentication</span>

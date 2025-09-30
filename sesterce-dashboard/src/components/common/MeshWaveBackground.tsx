@@ -164,7 +164,7 @@ export const MeshWaveBackground: React.FC = () => {
               const brightness = 0.15 + amplitude * 0.3; // Reduced brightness
               const lineWidth = Math.min(0.3 + amplitude * 0.5, 0.8); // Thinner lines, capped
 
-              ctx.strokeStyle = `rgba(37, 99, 235, ${opacity * brightness * 0.6})`;
+              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * brightness * 0.6})`;
               ctx.lineWidth = lineWidth;
               ctx.beginPath();
               ctx.moveTo(point.x, point.y);
@@ -178,7 +178,7 @@ export const MeshWaveBackground: React.FC = () => {
         const nodeSize = Math.min(0.8 + point.amplitude * 1.2, 2.0); // Smaller, capped size
         const nodeOpacity = 0.15 + point.amplitude * 0.4; // Reduced opacity
 
-        ctx.fillStyle = `rgba(37, 99, 235, ${nodeOpacity})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${nodeOpacity})`;
         ctx.beginPath();
         ctx.arc(point.x, point.y, nodeSize, 0, Math.PI * 2);
         ctx.fill();

@@ -59,13 +59,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-[420px] border border-gray-100" 
              style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
           
-          {/* Header inside login box */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-blue-600 mb-2" 
-                style={{ fontFamily: 'Roboto, sans-serif' }}>
-              SuperCluster Calculator
-            </h1>
-          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
