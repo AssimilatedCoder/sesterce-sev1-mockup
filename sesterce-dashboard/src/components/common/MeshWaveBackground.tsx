@@ -35,15 +35,15 @@ class Point {
       const distY = this.baseY - wave.y;
       const distance = Math.sqrt(distX * distX + distY * distY);
 
-        if (distance < wave.radius) {
-          const waveStrength = (1 - distance / wave.radius) * wave.strength;
-          const angle = Math.atan2(distY, distX);
-          const displacement = Math.sin(distance * 0.02 - wave.phase) * waveStrength * 8; // Reduced displacement
+      if (distance < wave.radius) {
+        const waveStrength = (1 - distance / wave.radius) * wave.strength;
+        const angle = Math.atan2(distY, distX);
+        const displacement = Math.sin(distance * 0.02 - wave.phase) * waveStrength * 8;
 
-          dx += Math.cos(angle) * displacement;
-          dy += Math.sin(angle) * displacement;
-          totalAmplitude += waveStrength * 0.5; // Reduced amplitude effect
-        }
+        dx += Math.cos(angle) * displacement;
+        dy += Math.sin(angle) * displacement;
+        totalAmplitude += waveStrength * 0.5;
+      }
     });
 
     // Add mouse influence
@@ -84,8 +84,8 @@ class Wave {
     this.y = y;
     this.radius = 0;
     this.maxRadius = maxRadius;
-    this.speed = 3; // Slower wave propagation
-    this.strength = 0.6; // Gentler strength
+    this.speed = 3;
+    this.strength = 0.6;
     this.phase = 0;
     this.lifespan = 1;
   }
@@ -120,7 +120,6 @@ export const MeshWaveBackground: React.FC = () => {
 
     let width: number, height: number;
     const gridSize = 25;
-
 
     const resize = () => {
       width = canvas.width = window.innerWidth;
@@ -167,8 +166,8 @@ export const MeshWaveBackground: React.FC = () => {
             if (distance < gridSize * 1.8) {
               const opacity = Math.max(0, 1 - distance / (gridSize * 1.8));
               const amplitude = (point.amplitude + otherPoint.amplitude) / 2;
-              const brightness = 0.15 + amplitude * 0.3; // Reduced brightness
-              const lineWidth = Math.min(0.3 + amplitude * 0.5, 0.8); // Thinner lines, capped
+              const brightness = 0.15 + amplitude * 0.3;
+              const lineWidth = Math.min(0.3 + amplitude * 0.5, 0.8);
 
               ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * brightness * 0.6})`;
               ctx.lineWidth = lineWidth;
@@ -181,16 +180,14 @@ export const MeshWaveBackground: React.FC = () => {
         });
 
         // Draw nodes - smaller and more refined
-        const nodeSize = Math.min(0.8 + point.amplitude * 1.2, 2.0); // Smaller, capped size
-        const nodeOpacity = 0.15 + point.amplitude * 0.4; // Reduced opacity
+        const nodeSize = Math.min(0.8 + point.amplitude * 1.2, 2.0);
+        const nodeOpacity = 0.15 + point.amplitude * 0.4;
 
         ctx.fillStyle = `rgba(255, 255, 255, ${nodeOpacity})`;
         ctx.beginPath();
         ctx.arc(point.x, point.y, nodeSize, 0, Math.PI * 2);
         ctx.fill();
       });
-
-      // Remove wave circles visualization for cleaner look
     };
 
     const animate = () => {
@@ -200,14 +197,14 @@ export const MeshWaveBackground: React.FC = () => {
       wavesRef.current = wavesRef.current.filter(wave => wave.update());
 
       // Generate gentle waves more randomly across the surface (lake-like)
-      if (timeRef.current % 120 === 0) { // Less frequent
+      if (timeRef.current % 120 === 0) {
         const x = Math.random() * width;
         const y = Math.random() * height;
         wavesRef.current.push(new Wave(x, y, Math.max(width, height)));
       }
 
       // Occasionally add subtle waves from random positions
-      if (timeRef.current % 180 === 0) { // Even less frequent
+      if (timeRef.current % 180 === 0) {
         const x = Math.random() * width;
         const y = Math.random() * height;
         wavesRef.current.push(new Wave(x, y, Math.max(width, height)));
