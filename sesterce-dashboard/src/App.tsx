@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
-import { WarningBanner } from './components/common/WarningBanner';
+import WarningBanner from './components/common/WarningBanner';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
 import './styles/null-sector-theme.css';
@@ -26,7 +26,10 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
       <main className="pt-16 relative z-10">
         {/* Warning Banner - aligned with content */}
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <WarningBanner />
+          <WarningBanner
+            title="Active Session"
+            message="Cluster configuration changes are tracked and audited for compliance."
+          />
         </div>
 
         {/* Main Content - Only Calculator */}

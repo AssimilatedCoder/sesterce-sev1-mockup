@@ -7,7 +7,7 @@ import { gpuSpecs } from '../../data/gpuSpecs';
 import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
 import { softwareStacks, recommendStack, calculateStackCost } from '../../data/softwareStacks';
 import { useCurrency } from '../../hooks/useCurrency';
-import { WarningBanner } from '../common/WarningBanner';
+import WarningBanner from '../common/WarningBanner';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -223,18 +223,11 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   return (
     <div className="space-y-4">
       {/* Software Licensing Warning Banner */}
-      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-          <div>
-            <h4 className="text-sm font-semibold text-green-800 mb-1">Software Stack Pricing</h4>
-            <p className="text-sm text-green-700">
-              This TCO calculator now includes dynamic software stack pricing with multiple pre-configured options. 
-              Select your preferred stack in the Software Stack Configuration section above. Prices reflect real-world licensing costs and FTE requirements.
-            </p>
-          </div>
-        </div>
-      </div>
+      <WarningBanner
+        title="Software Stack Pricing"
+        message="This TCO calculator now includes dynamic software stack pricing with multiple pre-configured options. Select your preferred stack in the Software Stack Configuration section above. Prices reflect real-world licensing costs and FTE requirements."
+        className="mb-4 mx-0"
+      />
 
       
 
@@ -1272,7 +1265,11 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       {results && (
         <div className="mt-8 space-y-6">
           {/* Warning Banner Above Results */}
-          <WarningBanner className="rounded-lg" />
+          <WarningBanner
+            className="rounded-lg"
+            title="Preliminary Results"
+            message="These calculations use current overrides and assumptions. Adjust parameters above to refine the model before sharing externally."
+          />
           
           <div className="space-y-6">
           {/* Key Metrics */}

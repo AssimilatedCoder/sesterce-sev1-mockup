@@ -27,6 +27,7 @@ import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
 import { activityLogger } from '../utils/activityLogger';
+import { MeshWaveBackground } from './common/MeshWaveBackground';
 
 // Region rates with more comprehensive data
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
@@ -757,6 +758,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     complianceRequirements
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('nullSectorUser');
+    window.location.href = '/'; // Redirect to login page
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Modern Enterprise Layout with Left Sidebar */}
@@ -816,47 +822,47 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          <div className="absolute inset-0">
+            <MeshWaveBackground />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/20"></div>
+          </div>
           {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {tabs.find(tab => tab.id === activeTab)?.label}
-                </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {activeTab === 'calculator' && 'Configure your GPU cluster parameters and options'}
-                  {activeTab === 'financial' && 'Revenue projections, EBITDA, and financial analysis'}
-                  {activeTab === 'capex' && 'Complete capital expenditure breakdown and analysis'}
-                  {activeTab === 'pricing' && 'Service tier pricing models and revenue optimization'}
-                  {activeTab === 'networking' && 'Network architecture, topology, and infrastructure costs'}
-                  {activeTab === 'storage' && 'Storage configuration, tiers, and performance analysis'}
-                  {activeTab === 'software' && 'Software stack selection and licensing costs'}
-                  {activeTab === 'cooling' && 'Power distribution and cooling infrastructure'}
-                  {activeTab === 'operations' && 'Operations playbook and troubleshooting guides for NOC teams'}
-                  {activeTab === 'formulas' && 'Calculation formulas and methodology reference'}
-                  {activeTab === 'references' && 'Technical references and industry sources'}
-                  {activeTab === 'documentation' && 'Complete system documentation and guides'}
-                  {activeTab === 'logs' && 'Access logs and security monitoring for administrators'}
-                  {activeTab === 'design' && 'Generated design summary and specifications'}
-                  {activeTab === 'exercise' && 'Comprehensive design exercise documentation'}
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
+          <div className="relative z-10 px-6 pt-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center gap-3">
                 <CurrencySelector compact={true} />
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-white/80">
                   {numGPUs.toLocaleString()} GPUs • {gpuModel.toUpperCase()}
                 </span>
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="px-4 py-2 bg-white/90 text-blue-700 font-medium rounded-lg shadow backdrop-blur-sm flex items-center gap-2">
+                  <Cpu className="w-4 h-4" />
+                  {currentUser || 'Unknown'}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-white/90 text-blue-600 font-medium rounded-lg shadow backdrop-blur-sm flex items-center gap-2 transition hover:bg-white"
+                >
+                  <Shield className="w-4 h-4" />
+                  Sign Out
+                </button>
               </div>
             </div>
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-auto bg-gray-50">
-            <div className="p-6">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[calc(100vh-200px)]">
-                <div className="p-6">
+          <div className="flex-1 overflow-auto relative z-10">
+            <div className="p-2 md:p-6">
+              <div className="bg-white/95 rounded-2xl shadow-xl border border-white/40 backdrop-blur-lg">
+                <div className="p-4 md:p-8">
+                  {activeTab === 'calculator' && (
+                    <div className="mb-4 text-gray-600">
+                      Configure your GPU cluster parameters and options.
+                    </div>
+                  )}
             {activeTab === 'calculator' && (
               <CalculatorTabRedesigned
                 config={config}
