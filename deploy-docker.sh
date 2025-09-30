@@ -74,21 +74,22 @@ else
         fi
     fi
 
-    # Check port 2053 availability
+    # Check port 2053 availability using ss (more reliable for Docker)
     PORT_2053_INFO=""
-    if command -v lsof >/dev/null 2>&1; then
-        PORT_2053_INFO=$(lsof -i :2053 2>/dev/null | head -1)
+    if command -v ss >/dev/null 2>&1; then
+        PORT_2053_INFO=$(ss -tuln | grep :2053 2>/dev/null | head -1)
     elif command -v netstat >/dev/null 2>&1; then
         PORT_2053_INFO=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1)
     fi
 
     if [ -n "$PORT_2053_INFO" ]; then
-        if echo "$PORT_2053_INFO" | grep -q "docker\|nullsector-nginx\|com.docke"; then
-            print_status "Port 2053: Used by Docker container (likely our nginx)"
+        # Check if it's a Docker container or external process
+        if curl -s --max-time 5 http://localhost:2053 >/dev/null 2>&1; then
+            print_status "Port 2053: AVAILABLE (existing Docker service will be replaced)"
         else
             print_warning "Port 2053 is already in use by another application"
             print_info "  Details: $PORT_2053_INFO"
-            print_info "💡 Fix: sudo lsof -ti:2053 | xargs sudo kill -9"
+            print_info "💡 Fix: sudo ./kill-port-2053.sh"
         fi
     else
         print_status "Port 2053: AVAILABLE"
@@ -203,21 +204,15 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
 
     # Services should already be ready after the main wait period
 
-    # Check if port 2053 is now listening
-    PORT_CHECK=""
-    if command -v lsof >/dev/null 2>&1; then
-        PORT_CHECK=$(lsof -i :2053 2>/dev/null | head -1)
-    elif command -v netstat >/dev/null 2>&1; then
-        PORT_CHECK=$(netstat -tulpn 2>/dev/null | grep :2053 | head -1)
-    fi
-
-    if [ -n "$PORT_CHECK" ]; then
-        print_status "✅ Port 2053: NOW LISTENING"
+    # Check if port 2053 is accessible by testing the application
+    print_info "🔄 Testing port 2053 accessibility..."
+    if curl -s --max-time 10 http://localhost:2053 >/dev/null 2>&1; then
+        print_status "✅ Port 2053: ACCESSIBLE and responding"
         print_info "🎉 Deployment successful! Application accessible at:"
         echo "   🌐 http://localhost:2053"
         echo "   🔒 http://YOUR_SERVER_IP:2053"
     else
-        print_warning "⚠️  Port 2053: Still not listening"
+        print_warning "⚠️  Port 2053: Not accessible"
         print_info "💡 Troubleshooting: Run ./troubleshoot-remote.sh"
     fi
 
