@@ -49,8 +49,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen bg-black overflow-hidden relative">
       <MeshWaveBackground />
       
-      {/* Warning Banner - Positioned at 15% from top */}
-      <div className="absolute top-[15%] left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4 z-10">
+      {/* Warning Banner - Positioned at 5% from bottom, 40% longer */}
+      <div className="absolute bottom-[5%] left-1/2 transform -translate-x-1/2 w-full max-w-6xl px-4 z-10">
         <WarningBanner />
       </div>
 
@@ -83,7 +83,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Enter your username"
+                  placeholder="Username"
                   required
                   autoFocus
                 />
@@ -105,7 +105,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   required
                 />
               </div>

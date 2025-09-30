@@ -7,7 +7,7 @@ interface WarningBannerProps {
 
 export const WarningBanner: React.FC<WarningBannerProps> = ({ className = '' }) => {
   return (
-    <div className={`bg-white/90 backdrop-blur-xl border border-red-200 border-l-4 border-l-red-500 rounded-xl py-3 px-6 shadow-xl ${className}`}>
+    <div className={`bg-white/90 backdrop-blur-xl border-l-4 border-l-red-500 rounded-xl py-3 px-6 shadow-xl ${className}`}>
       <div className="flex items-center gap-3">
         <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
         <div className="flex-1">

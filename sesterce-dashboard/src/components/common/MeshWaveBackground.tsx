@@ -141,8 +141,14 @@ export const MeshWaveBackground: React.FC = () => {
         }
       }
 
-      // Start with a central wave
-      wavesRef.current = [new Wave(width / 2, height / 2, Math.max(width, height))];
+      // Start with multiple waves behind login box area
+      wavesRef.current = [
+        new Wave(width / 2, height / 2, Math.max(width, height)),
+        new Wave(width * 0.3, height * 0.4, Math.max(width, height)),
+        new Wave(width * 0.7, height * 0.6, Math.max(width, height)),
+        new Wave(width * 0.4, height * 0.7, Math.max(width, height)),
+        new Wave(width * 0.6, height * 0.3, Math.max(width, height))
+      ];
     };
 
     const drawMesh = () => {
