@@ -39,10 +39,19 @@ if ! command -v docker-compose &> /dev/null && ! docker --help | grep -q compose
     exit 1
 fi
 
+# Detect environment (local dev vs remote deployment)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS - Local development
+    COMPOSE_CMD="docker-compose"
+else
+    # Linux - Remote deployment
+    COMPOSE_CMD="docker-compose"
+fi
+
 case "$1" in
     start)
         print_info "Starting NullSector Docker containers..."
-        if docker-compose up -d; then
+        if $COMPOSE_CMD up -d; then
             print_status "Containers started successfully"
             echo ""
             echo "🌐 Access the application at: http://localhost:2053"
@@ -54,7 +63,7 @@ case "$1" in
 
     stop)
         print_info "Stopping NullSector Docker containers..."
-        if docker-compose down; then
+        if $COMPOSE_CMD down; then
             print_status "Containers stopped successfully"
         else
             print_error "Failed to stop containers"
@@ -64,7 +73,7 @@ case "$1" in
 
     restart)
         print_info "Restarting NullSector Docker containers..."
-        if docker-compose restart; then
+        if $COMPOSE_CMD restart; then
             print_status "Containers restarted successfully"
         else
             print_error "Failed to restart containers"
@@ -74,7 +83,7 @@ case "$1" in
 
     build)
         print_info "Building NullSector Docker images..."
-        if docker-compose build; then
+        if $COMPOSE_CMD build; then
             print_status "Images built successfully"
         else
             print_error "Failed to build images"
@@ -85,15 +94,15 @@ case "$1" in
     logs)
         print_info "Showing container logs..."
         if [ -n "$2" ]; then
-            docker-compose logs -f "$2"
+            $COMPOSE_CMD logs -f "$2"
         else
-            docker-compose logs -f
+            $COMPOSE_CMD logs -f
         fi
         ;;
 
     status)
         print_info "Container status:"
-        docker-compose ps
+        $COMPOSE_CMD ps
         echo ""
         print_info "Service health:"
         echo "  API Health: $(curl -s http://localhost:7779/api/health || echo '❌ Unreachable')"
@@ -107,7 +116,7 @@ case "$1" in
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             print_info "Cleaning up Docker resources..."
-            docker-compose down --volumes --rmi all
+            $COMPOSE_CMD down --volumes --rmi all
             docker system prune -f
             print_status "Cleanup completed"
         else

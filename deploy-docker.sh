@@ -43,6 +43,17 @@ if ! command -v docker-compose &> /dev/null && ! docker --help | grep -q compose
     exit 1
 fi
 
+# Detect environment (local dev vs remote deployment)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS - Local development
+    print_info "Detected macOS environment - running local development deployment"
+    COMPOSE_CMD="docker-compose"
+else
+    # Linux - Remote deployment
+    print_info "Detected Linux environment - running remote production deployment"
+    COMPOSE_CMD="docker-compose"
+fi
+
 # Generate secure environment variables for the API
 print_info "Generating secure environment variables..."
 API_SECRET=$(openssl rand -hex 32)
@@ -57,11 +68,16 @@ FLASK_ENV=production
 FLASK_DEBUG=False
 EOF
 
+# Also create a .env file for docker-compose if it doesn't exist
+if [ ! -f ".env.local" ]; then
+    cp .env .env.local
+fi
+
 print_status "Environment variables generated"
 
 # Build the application images
 print_info "Building Docker images..."
-if docker-compose build; then
+if $COMPOSE_CMD build; then
     print_status "Docker images built successfully"
 else
     print_error "Failed to build Docker images"
@@ -74,7 +90,7 @@ mkdir -p logs
 
 # Start the services
 print_info "Starting NullSector services..."
-if docker-compose up -d; then
+if $COMPOSE_CMD up -d; then
     print_status "Services started successfully"
 else
     print_error "Failed to start services"
@@ -87,7 +103,7 @@ sleep 10
 
 # Check service health
 print_info "Checking service health..."
-if docker-compose ps | grep -q "Up"; then
+if $COMPOSE_CMD ps | grep -q "Up"; then
     print_status "All services are running"
 
     # Show service status
@@ -96,10 +112,9 @@ if docker-compose ps | grep -q "Up"; then
     docker-compose ps
 
     echo ""
-    echo "🎉 NullSector Calculator is now running!"
+    echo "🎉 NullSector TCO Calculator is now running!"
     echo "🌐 Access the application at: http://localhost:2053"
     echo "🔒 API: http://localhost:7779 (internal only)"
-    echo "📊 Dashboard: http://localhost:2053/sev1/ (internal routing)"
     echo ""
     echo "🛡️  Security Features:"
     echo "   • All services run in isolated containers"

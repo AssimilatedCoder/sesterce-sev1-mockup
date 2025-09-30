@@ -1,6 +1,6 @@
-# 🐳 NullSector Docker Deployment Guide
+# 🐳 NullSector TCO Calculator Docker Deployment Guide
 
-This document describes the Docker-based deployment of the NullSector GPU SuperCluster Calculator, which replaces the previous manual deployment process with containerized services.
+This document describes the Docker-based deployment of the NullSector GPU SuperCluster TCO Calculator, which replaces the previous manual deployment process with containerized services.
 
 ## 🚀 Quick Start
 
@@ -28,20 +28,19 @@ open http://localhost:2053
 
 ## 🏗️ Architecture
 
-The application now runs as **4 containerized services**:
+The application now runs as **3 containerized services**:
 
 ### Services Overview
 
 | Service | Container | Port | Purpose |
 |---------|-----------|------|---------|
 | **API Backend** | `nullsector-api` | 7779 | Flask API with JWT auth |
-| **Frontend** | `nullsector-frontend` | 80 | React app (Nginx) |
-| **Dashboard** | `nullsector-dashboard` | 7777 | Static SEV-1 dashboard |
+| **Frontend** | `nullsector-frontend` | 80 | React TCO Calculator (Nginx) |
 | **Nginx Proxy** | `nullsector-nginx` | **2053** | Reverse proxy & load balancer |
 
 ### Network Architecture
 ```
-Internet → Nginx (2053) → Frontend/API/Dashboard (internal network)
+Internet → Nginx (2053) → Frontend/API (internal network)
 ```
 
 ## 🔧 Management Commands
@@ -221,9 +220,14 @@ ports:
 
 ## 📝 Changelog
 
+### v2.1.0 - TCO Calculator Only
+- ✅ **Removed SEV-1 Grafana dashboard** (TCO calculator only)
+- ✅ **Simplified architecture** (API, Frontend, Nginx)
+- ✅ **Updated nginx configuration** for TCO calculator routing
+
 ### v2.0.0 - Docker Migration
 - ✅ **Complete containerization** with Ubuntu 22.04 LTS base
-- ✅ **Multi-service architecture** (API, Frontend, Dashboard, Nginx)
+- ✅ **Multi-service architecture** (API, Frontend, Nginx)
 - ✅ **Port change**: 3025 → 2053
 - ✅ **Health checks** and monitoring
 - ✅ **Security hardening** with non-root containers
