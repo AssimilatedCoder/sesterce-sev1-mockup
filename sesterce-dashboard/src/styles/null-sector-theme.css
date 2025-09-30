@@ -288,7 +288,6 @@ textarea {
   font-family: var(--nscale-font-family) !important;
   border: 1px solid var(--nscale-border-medium) !important;
   border-radius: 6px !important;
-  padding: 8px 12px !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
