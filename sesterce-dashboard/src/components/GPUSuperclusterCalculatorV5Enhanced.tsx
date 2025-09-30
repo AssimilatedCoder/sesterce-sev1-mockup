@@ -711,9 +711,6 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     }] : [])
   ];
 
-  // Flatten tabs for compatibility with existing logic
-  const tabs = tabGroups.flatMap(group => group.tabs);
-
   const config = {
     gpuModel,
     numGPUs,
@@ -822,15 +819,14 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden relative">
-          <div className="absolute inset-0">
-            <MeshWaveBackground />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/20"></div>
-          </div>
-          {/* Top Bar */}
-          <div className="relative z-10 px-6 pt-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-3">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="relative px-6 pt-6 pb-8">
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+              <MeshWaveBackground variant="contained" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60 opacity-90"></div>
+            </div>
+            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center gap-3 text-white">
                 <CurrencySelector compact={true} />
                 <span className="text-sm text-white/80">
                   {numGPUs.toLocaleString()} GPUs • {gpuModel.toUpperCase()}
@@ -854,9 +850,9 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-auto relative z-10">
+          <div className="flex-1 overflow-auto bg-gray-50">
             <div className="p-2 md:p-6">
-              <div className="bg-white/95 rounded-2xl shadow-xl border border-white/40 backdrop-blur-lg">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200">
                 <div className="p-4 md:p-8">
                   {activeTab === 'calculator' && (
                     <div className="mb-4 text-gray-600">

@@ -53,8 +53,8 @@ export const SecureLogin: React.FC<SecureLoginProps> = ({ onLogin }) => {
       {/* Warning Banner - Positioned at 5% from bottom, 40% longer */}
       <div className="absolute bottom-[5%] left-1/2 transform -translate-x-1/2 w-full max-w-6xl px-4 z-10">
         <WarningBanner
-          title="Security Notice"
-          message="Authorized access only. All login attempts and activities are monitored."
+          title="Experimental Platform"
+          message="This is an early and experimental SuperCluster platform. Use at your own risk."
         />
       </div>
 

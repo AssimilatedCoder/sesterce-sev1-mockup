@@ -1,5 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 
+interface MeshWaveBackgroundProps {
+  variant?: 'full' | 'contained';
+  className?: string;
+}
+
 class Point {
   baseX: number;
   baseY: number;
@@ -103,7 +108,7 @@ class Wave {
   }
 }
 
-export const MeshWaveBackground: React.FC = () => {
+export const MeshWaveBackground: React.FC<MeshWaveBackgroundProps> = ({ variant = 'full', className = '' }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const pointsRef = useRef<Point[]>([]);
@@ -121,9 +126,21 @@ export const MeshWaveBackground: React.FC = () => {
     let width: number, height: number;
     const gridSize = 25;
 
+    const getContainerRect = () => {
+      if (variant === 'full') {
+        return { width: window.innerWidth, height: window.innerHeight };
+      }
+      const parentRect = canvas.parentElement?.getBoundingClientRect();
+      return {
+        width: parentRect?.width ?? window.innerWidth,
+        height: parentRect?.height ?? 320
+      };
+    };
+
     const resize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      const rect = getContainerRect();
+      width = canvas.width = rect.width;
+      height = canvas.height = rect.height;
     };
 
     const init = () => {
@@ -224,13 +241,22 @@ export const MeshWaveBackground: React.FC = () => {
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
+      if (variant === 'full') {
+        mouseRef.current.x = e.clientX;
+        mouseRef.current.y = e.clientY;
+      } else {
+        const rect = canvas.getBoundingClientRect();
+        mouseRef.current.x = e.clientX - rect.left;
+        mouseRef.current.y = e.clientY - rect.top;
+      }
     };
 
     const handleClick = (e: MouseEvent) => {
-      if (e.target === canvas) {
-        wavesRef.current.push(new Wave(e.clientX, e.clientY, Math.max(window.innerWidth, window.innerHeight)));
+      if (variant === 'full' || e.target === canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = variant === 'full' ? e.clientX : e.clientX - rect.left;
+        const clickY = variant === 'full' ? e.clientY : e.clientY - rect.top;
+        wavesRef.current.push(new Wave(clickX, clickY, Math.max(width, height)));
       }
     };
 
@@ -251,13 +277,17 @@ export const MeshWaveBackground: React.FC = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('click', handleClick);
     };
-  }, []);
+  }, [variant]);
+
+  const baseClass = variant === 'full'
+    ? 'fixed inset-0 w-full h-full pointer-events-none'
+    : 'absolute inset-0 w-full h-full pointer-events-none';
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 1 }}
+      className={`${baseClass} ${className}`.trim()}
+      style={{ zIndex: variant === 'full' ? 1 : 0 }}
       aria-hidden="true"
     />
   );
