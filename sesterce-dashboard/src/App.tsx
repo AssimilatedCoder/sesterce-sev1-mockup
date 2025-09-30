@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Header } from './components/layout/Header';
 import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
 import './styles/null-sector-theme.css';
 
-interface AppContentProps {
-  onLogout: () => void;
-  currentUser: string;
-}
-
-function AppContent({ onLogout, currentUser }: AppContentProps) {
+function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 relative overflow-hidden">
@@ -19,8 +13,6 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
         <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-100/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
       </div>
-      
-      <Header onLogout={onLogout} currentUser={currentUser} />
       
       <main className="relative z-10">
         {/* Main Content - Only Calculator */}
@@ -39,30 +31,18 @@ function AppContent({ onLogout, currentUser }: AppContentProps) {
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState('');
 
   // Check if user is already logged in
   useEffect(() => {
     const user = sessionStorage.getItem('nullSectorUser');
     if (user) {
       setIsAuthenticated(true);
-      setCurrentUser(user);
     }
   }, []);
 
   const handleLogin = (username: string) => {
     setIsAuthenticated(true);
-    setCurrentUser(username);
     sessionStorage.setItem('nullSectorUser', username);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentUser('');
-    // Clear all authentication data
-    sessionStorage.removeItem('nullSectorUser');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('tokenExpiry');
   };
 
   if (!isAuthenticated) {
@@ -71,7 +51,7 @@ function App() {
 
   return (
     <Router>
-      <AppContent onLogout={handleLogout} currentUser={currentUser} />
+      <AppContent />
     </Router>
   );
 }

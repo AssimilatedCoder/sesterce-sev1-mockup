@@ -27,7 +27,6 @@ import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
 import { activityLogger } from '../utils/activityLogger';
-import WarningBanner from './common/WarningBanner';
 
 // Region rates with more comprehensive data
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
@@ -762,19 +761,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Warning Banner - Black background, full width */}
-      <div className="bg-black py-3 px-2.5 fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-screen-xl mx-auto">
-          <WarningBanner
-            title="Experimental Platform"
-            message="This is an early release of an experimental SuperCluster Design/Cost modeling platform. Cost Modeling and Design Rules are being updated regularly based on Vendor Specifications, Market-Rate fluctuation, etc. Use with caution! Feedback welcome."
-            className="bg-white/95 backdrop-blur-sm"
-          />
-        </div>
-      </div>
-
       {/* Modern Enterprise Layout with Left Sidebar */}
-      <div className="flex h-screen pt-16">
+      <div className="flex h-screen">
         {/* Left Sidebar Navigation */}
         <div className="w-72 bg-white border-r border-gray-200 flex flex-col">
           {/* Header */}
