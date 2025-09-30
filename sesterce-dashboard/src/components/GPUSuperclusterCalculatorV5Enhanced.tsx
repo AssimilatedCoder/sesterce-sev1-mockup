@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calculator, Cpu, HardDrive, Network, Thermometer,
+  Calculator, Cpu, HardDrive, Network, Thermometer, Zap,
   FileText, BookOpen, DollarSign, TrendingUp, Package, Settings, Shield
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
@@ -27,7 +27,7 @@ import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
 import { activityLogger } from '../utils/activityLogger';
-import { MeshWaveBackground } from './common/MeshWaveBackground';
+import WarningBanner from './common/WarningBanner';
 
 // Region rates with more comprehensive data
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
@@ -762,8 +762,19 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Top Warning Banner - Black background, full width */}
+      <div className="bg-black py-3 px-2.5 fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-screen-xl mx-auto">
+          <WarningBanner
+            title="Experimental Platform"
+            message="This is an early release of an experimental SuperCluster Design/Cost modeling platform. Cost Modeling and Design Rules are being updated regularly based on Vendor Specifications, Market-Rate fluctuation, etc. Use with caution! Feedback welcome."
+            className="bg-white/95 backdrop-blur-sm"
+          />
+        </div>
+      </div>
+
       {/* Modern Enterprise Layout with Left Sidebar */}
-      <div className="flex h-screen">
+      <div className="flex h-screen pt-16">
         {/* Left Sidebar Navigation */}
         <div className="w-72 bg-white border-r border-gray-200 flex flex-col">
           {/* Header */}
@@ -820,27 +831,51 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="relative px-6 pt-6 pb-8">
-            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-              <MeshWaveBackground variant="contained" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60 opacity-90"></div>
-            </div>
-            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-3 text-white">
-                <CurrencySelector compact={true} />
-                <span className="text-sm text-white/80">
-                  {numGPUs.toLocaleString()} GPUs • {gpuModel.toUpperCase()}
-                </span>
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+          {/* Dynamic Island Header */}
+          <div className="bg-white border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              {/* Left side - Key parameters */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full text-sm">
+                  <CurrencySelector compact={true} />
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full text-sm text-blue-700">
+                  <Cpu className="w-4 h-4" />
+                  <span>{numGPUs.toLocaleString()} × {gpuModel.toUpperCase()}</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-full text-sm text-purple-700">
+                  <Zap className="w-4 h-4" />
+                  <span>{regionRates[region]?.name || region}</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full text-sm text-orange-700">
+                  <HardDrive className="w-4 h-4" />
+                  <span>{totalStorage}PB</span>
+                </div>
+                {/* TCO Status Indicator */}
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full text-sm">
+                  {results ? (
+                    <>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-green-700">TCO Ready</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-gray-600">Pending</span>
+                    </>
+                  )}
+                </div>
               </div>
+              
+              {/* Right side - User controls */}
               <div className="flex items-center gap-3">
-                <span className="px-4 py-2 bg-white/90 text-blue-700 font-medium rounded-lg shadow backdrop-blur-sm flex items-center gap-2">
+                <span className="px-4 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg flex items-center gap-2">
                   <Cpu className="w-4 h-4" />
                   {currentUser || 'Unknown'}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-white/90 text-blue-600 font-medium rounded-lg shadow backdrop-blur-sm flex items-center gap-2 transition hover:bg-white"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg flex items-center gap-2 transition hover:bg-gray-200"
                 >
                   <Shield className="w-4 h-4" />
                   Sign Out
