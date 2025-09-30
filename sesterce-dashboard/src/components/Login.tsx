@@ -46,24 +46,26 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-white overflow-hidden">
+    <div className="min-h-screen bg-black overflow-hidden relative">
       <MeshWaveBackground />
-      <div className="max-w-lg w-full relative z-10">
-        {/* Warning Banner - Enhanced for blue background */}
-        <div className="mb-8">
-          <WarningBanner />
-        </div>
-        {/* Clean Header - Mesh Wave Style */}
-        <div className="flex flex-col items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-            GPU SuperCluster Calculator
-          </h1>
-          <p className="text-gray-600">Secure access to GPU cluster management</p>
-        </div>
+      
+      {/* Warning Banner - Positioned at 15% from top */}
+      <div className="absolute top-[15%] left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4 z-10">
+        <WarningBanner />
+      </div>
 
-        {/* Login Form - Glass Morphism */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-md mx-auto border border-blue-100/20" 
-             style={{ boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.15)' }}>
+      {/* Login Form - Dead center */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 w-[420px] border border-gray-100" 
+             style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+          
+          {/* Header inside login box */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-blue-600 mb-2" 
+                style={{ fontFamily: 'Roboto, sans-serif' }}>
+              SuperCluster Calculator
+            </h1>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
@@ -87,7 +89,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Enter your username"
                   required
                   autoFocus
@@ -109,7 +111,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Enter your password"
                   required
                 />
@@ -119,26 +121,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-medium py-2.5 px-4 rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg"
-              style={{ backgroundColor: '#00c896' }}
+              className="w-full bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg"
             >
               Sign In
             </button>
           </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              © 2025 Null Sector Systems LTD. All rights reserved.
-            </p>
-          </div>
-        </div>
-
-        {/* Security Note */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Secure access to GPU cluster management
-          </p>
         </div>
       </div>
     </div>
