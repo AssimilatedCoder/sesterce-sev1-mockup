@@ -4,10 +4,10 @@
 # Uses a simple HTTP server for static files
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
 
-echo "🚀 Starting Sesterce Calculator (Simple Mode)..."
+echo "🚀 Starting NullSector Calculator (Simple Mode)..."
 
 # Check if build directory exists and is recent
 # Also check if git has newer commits than the build
@@ -80,7 +80,7 @@ echo $HTTP_PID > ../http.pid
 echo "✅ Static server started on http://localhost:3025 (PID: $HTTP_PID)"
 
 echo ""
-echo "🎉 Sesterce Calculator is running!"
+echo "🎉 NullSector Calculator is running!"
 echo "🌐 Frontend: http://localhost:3025"
 echo "🔒 API: http://localhost:7779"
 echo ""

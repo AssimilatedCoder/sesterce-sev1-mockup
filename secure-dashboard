@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Secure Sesterce Dashboard Management Script
+# Secure NullSector Dashboard Management Script
 # Now with backend API security
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
-NGINX_CONF="$SCRIPT_DIR/nginx-sesterce-dashboard.conf"
+NGINX_CONF="$SCRIPT_DIR/nginx-NullSector-dashboard.conf"
 API_PID_FILE="$SCRIPT_DIR/api.pid"
 
 # Load environment variables (skip comments and empty lines)
@@ -64,7 +64,7 @@ stop_api() {
 }
 
 start_services() {
-    echo "🚀 Starting secure Sesterce dashboard services..."
+    echo "🚀 Starting secure NullSector dashboard services..."
     
     # Check if React build is needed
     if [ ! -d "$BUILD_DIR" ] || [ "$REACT_DIR/src" -nt "$BUILD_DIR" ] || [ "$REACT_DIR/package.json" -nt "$BUILD_DIR" ]; then
@@ -110,11 +110,11 @@ start_services() {
     # Start Nginx with proper configuration
     if command -v nginx >/dev/null 2>&1; then
         # Update the config with correct path
-        sed "s|root /home/ubuntu/Projects/sesterce-sev1-mockup/sesterce-dashboard/build;|root $BUILD_DIR;|g" "$NGINX_CONF" > /tmp/sesterce-dashboard.conf
+        sed "s|root /home/ubuntu/Projects/NullSector-sev1-mockup/NullSector-dashboard/build;|root $BUILD_DIR;|g" "$NGINX_CONF" > /tmp/NullSector-dashboard.conf
         
         # Copy our config to sites-available and enable it
-        sudo cp /tmp/sesterce-dashboard.conf /etc/nginx/sites-available/sesterce-dashboard
-        sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/sesterce-dashboard
+        sudo cp /tmp/NullSector-dashboard.conf /etc/nginx/sites-available/NullSector-dashboard
+        sudo ln -sf /etc/nginx/sites-available/NullSector-dashboard /etc/nginx/sites-enabled/NullSector-dashboard
         
         # Remove default site if it exists
         sudo rm -f /etc/nginx/sites-enabled/default
@@ -146,14 +146,14 @@ start_services() {
         fi
         
         # Clean up temp file
-        rm -f /tmp/sesterce-dashboard.conf
+        rm -f /tmp/NullSector-dashboard.conf
     else
         echo "❌ Nginx not found. Please install nginx."
         return 1
     fi
     
     echo ""
-    echo "🎉 Secure Sesterce Dashboard is now running!"
+    echo "🎉 Secure NullSector Dashboard is now running!"
     echo "🌐 Access: http://localhost:3025"
     echo "🔒 API: http://localhost:7779"
     echo "🛡️  Security: JWT Authentication + Server-side calculations"
@@ -177,7 +177,7 @@ stop_services() {
     fi
     
     # Remove our site configuration
-    sudo rm -f /etc/nginx/sites-enabled/sesterce-dashboard
+    sudo rm -f /etc/nginx/sites-enabled/NullSector-dashboard
     
     echo "✅ All services stopped"
 }
@@ -217,7 +217,7 @@ case "$1" in
     *)
         echo "Usage: $0 {start|stop|restart|api-start|api-stop|status}"
         echo ""
-        echo "🔒 Secure Sesterce Dashboard Management"
+        echo "🔒 Secure NullSector Dashboard Management"
         echo "   start     - Start both API and Nginx"
         echo "   stop      - Stop both services"
         echo "   restart   - Restart both services"

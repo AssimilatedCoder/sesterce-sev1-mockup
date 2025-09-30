@@ -59,7 +59,7 @@ Scripts automatically rebuild when:
 ### **First Time Setup:**
 ```bash
 git clone <repository>
-cd sesterce-sev1-mockup
+cd nullsector-sev1-mockup
 ./deploy-secure.sh
 ```
 
@@ -97,7 +97,7 @@ When auto-build triggers:
 
 ### **Build Fails:**
 ```bash
-cd sesterce-dashboard
+cd nullsector-dashboard
 npm install --force
 npm run build
 cd ..

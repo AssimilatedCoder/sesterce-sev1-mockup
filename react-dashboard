@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Sesterce React Dashboard Management Script
+# NullSector React Dashboard Management Script
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$SCRIPT_DIR/sesterce-dashboard/build"
+BUILD_DIR="$SCRIPT_DIR/NullSector-dashboard/build"
 
 case "$1" in
     start)
-        echo "🚀 Starting Sesterce React Dashboard..."
+        echo "🚀 Starting NullSector React Dashboard..."
         
         # Detect OS
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -17,7 +17,7 @@ case "$1" in
         fi
         
         # Check if React app exists
-        if [ ! -d "$SCRIPT_DIR/sesterce-dashboard" ]; then
+        if [ ! -d "$SCRIPT_DIR/NullSector-dashboard" ]; then
             echo "❌ React app directory not found. Run setup first:"
             echo "   ./setup-react-dashboard.sh"
             exit 1
@@ -26,7 +26,7 @@ case "$1" in
         # Build if needed
         if [ ! -d "$BUILD_DIR" ]; then
             echo "📦 Building React app..."
-            cd "$SCRIPT_DIR/sesterce-dashboard"
+            cd "$SCRIPT_DIR/NullSector-dashboard"
             
             # Install dependencies if needed
             if [ ! -d "node_modules" ]; then
@@ -60,7 +60,7 @@ case "$1" in
         sudo pkill nginx 2>/dev/null || true
         
         # Create nginx config with correct paths
-        cat > /tmp/nginx-sesterce-dashboard.conf << EOF
+        cat > /tmp/nginx-NullSector-dashboard.conf << EOF
 server {
     listen 7777;
     listen [::]:7777;
@@ -115,12 +115,12 @@ EOF
         
         # Install nginx config
         if [ "$IS_UBUNTU" = true ]; then
-            sudo cp /tmp/nginx-sesterce-dashboard.conf /etc/nginx/sites-available/sesterce-dashboard
-            sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/
+            sudo cp /tmp/nginx-NullSector-dashboard.conf /etc/nginx/sites-available/NullSector-dashboard
+            sudo ln -sf /etc/nginx/sites-available/NullSector-dashboard /etc/nginx/sites-enabled/
             sudo rm -f /etc/nginx/sites-enabled/default
         else
             sudo mkdir -p /usr/local/etc/nginx/servers
-            sudo cp /tmp/nginx-sesterce-dashboard.conf /usr/local/etc/nginx/servers/sesterce-dashboard.conf
+            sudo cp /tmp/nginx-NullSector-dashboard.conf /usr/local/etc/nginx/servers/NullSector-dashboard.conf
         fi
         
         # Fix permissions
@@ -128,7 +128,7 @@ EOF
             chmod 755 "$HOME" 2>/dev/null || true
             chmod 755 "$HOME/Projects" 2>/dev/null || true
             chmod 755 "$SCRIPT_DIR"
-            chmod 755 "$SCRIPT_DIR/sesterce-dashboard"
+            chmod 755 "$SCRIPT_DIR/NullSector-dashboard"
             chmod -R 755 "$BUILD_DIR"
         else
             chmod -R 755 "$BUILD_DIR"
@@ -163,17 +163,17 @@ EOF
         fi
         
         # Clean up
-        rm -f /tmp/nginx-sesterce-dashboard.conf
+        rm -f /tmp/nginx-NullSector-dashboard.conf
         ;;
     
     stop)
-        echo "🛑 Stopping Sesterce React Dashboard..."
+        echo "🛑 Stopping NullSector React Dashboard..."
         sudo nginx -s stop 2>/dev/null || sudo pkill nginx 2>/dev/null || true
         echo "✅ Dashboard stopped"
         ;;
     
     restart)
-        echo "🔄 Restarting Sesterce React Dashboard..."
+        echo "🔄 Restarting NullSector React Dashboard..."
         $0 stop
         sleep 2
         $0 start
@@ -181,7 +181,7 @@ EOF
     
     build)
         echo "📦 Building React app..."
-        cd "$SCRIPT_DIR/sesterce-dashboard"
+        cd "$SCRIPT_DIR/NullSector-dashboard"
         
         # Install dependencies if needed
         if [ ! -d "node_modules" ]; then
@@ -253,7 +253,7 @@ EOF
         ;;
     
     *)
-        echo "Sesterce React Dashboard Control Script"
+        echo "NullSector React Dashboard Control Script"
         echo ""
         echo "Usage: $0 {start|stop|restart|build|status|logs|test}"
         echo ""

@@ -6,7 +6,7 @@ Your calculator currently exposes **ALL sensitive business data** in client-side
 
 ### **1. EXPOSED CREDENTIALS** 
 ✅ **CONFIRMED**: All login credentials are visible in minified JS:
-- `Sesterce2025` (Youssef's password)
+- `NullSector2025` (Youssef's password)
 - `PathFinder2025` (Maciej's password) 
 - `Arno7747` (Admin password)
 
@@ -42,8 +42,8 @@ Your calculator currently exposes **ALL sensitive business data** in client-side
 
 ```bash
 # Passwords found in minified JS:
-grep -o "Arno7747\|Sesterce2025\|PathFinder2025" build/static/js/main.*.js
-> Sesterce2025
+grep -o "Arno7747\|NullSector2025\|PathFinder2025" build/static/js/main.*.js
+> NullSector2025
 > PathFinder2025  
 > Arno7747
 
@@ -63,7 +63,7 @@ find build -name "*.map" | wc -l
    ```javascript
    // Instead of client-side password checking:
    const users = [
-     { username: 'Youssef', password: 'Sesterce2025' }, // ❌ EXPOSED
+     { username: 'Youssef', password: 'NullSector2025' }, // ❌ EXPOSED
    ];
    
    // Use server-side authentication:

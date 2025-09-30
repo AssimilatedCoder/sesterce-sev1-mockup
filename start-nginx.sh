@@ -4,10 +4,10 @@
 # Uses Nginx for proper web server functionality
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
 
-echo "🚀 Starting Sesterce Calculator (Production Mode with Nginx)..."
+echo "🚀 Starting NullSector Calculator (Production Mode with Nginx)..."
 
 # Check if build directory exists and is recent
 NEEDS_BUILD=false
@@ -108,7 +108,7 @@ if ! command -v nginx >/dev/null 2>&1; then
 fi
 
 # Create dynamic Nginx config with correct paths
-NGINX_CONF="/tmp/sesterce-nginx.conf"
+NGINX_CONF="/tmp/NullSector-nginx.conf"
 cat > "$NGINX_CONF" << EOF
 server {
     listen 3025;
@@ -179,8 +179,8 @@ server {
 EOF
 
 # Copy config and start Nginx (open firewall and ensure correct state)
-sudo cp "$NGINX_CONF" /etc/nginx/sites-available/sesterce-dashboard
-sudo ln -sf /etc/nginx/sites-available/sesterce-dashboard /etc/nginx/sites-enabled/sesterce-dashboard
+sudo cp "$NGINX_CONF" /etc/nginx/sites-available/NullSector-dashboard
+sudo ln -sf /etc/nginx/sites-available/NullSector-dashboard /etc/nginx/sites-enabled/NullSector-dashboard
 
 # Remove default site
 sudo rm -f /etc/nginx/sites-enabled/default
@@ -221,7 +221,7 @@ fi
 rm -f "$NGINX_CONF"
 
 echo ""
-echo "🎉 Production Sesterce Calculator is running!"
+echo "🎉 Production NullSector Calculator is running!"
 echo "🌐 Frontend: http://localhost:3025 (Nginx)"
 echo "🔒 API: http://localhost:7779 (Flask)"
 echo "🛡️  Features: Security headers, gzip compression, API proxying"

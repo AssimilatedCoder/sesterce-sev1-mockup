@@ -3,7 +3,7 @@
 # Force rebuild script - ensures React app is rebuilt with latest changes
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/nullsector-dashboard"
 
 echo "🔄 Force rebuilding React application..."
 

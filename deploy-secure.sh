@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Secure Deployment Script for Sesterce Calculator
+# Secure Deployment Script for NullSector Calculator
 # This script deploys the secure backend API and updated frontend
 
 set -e
 
-echo "🔒 Deploying Secure Sesterce Calculator..."
+echo "🔒 Deploying Secure NullSector Calculator..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -75,7 +75,7 @@ print_status "Environment variables generated"
 
 # Update React app to use secure API
 print_info "Building secure React application..."
-cd sesterce-dashboard
+cd NullSector-dashboard
 
 # Install Node dependencies safely
 if [ ! -d "node_modules" ]; then
@@ -117,9 +117,9 @@ print_info "Updating deployment scripts..."
 if command -v systemctl &> /dev/null; then
     print_info "Creating systemd service for secure API..."
     
-    sudo tee /etc/systemd/system/sesterce-api.service > /dev/null << EOF
+    sudo tee /etc/systemd/system/NullSector-api.service > /dev/null << EOF
 [Unit]
-Description=Sesterce Calculator Secure API
+Description=NullSector Calculator Secure API
 After=network.target
 
 [Service]
@@ -137,7 +137,7 @@ WantedBy=multi-user.target
 EOF
 
     sudo systemctl daemon-reload
-    sudo systemctl enable sesterce-api
+    sudo systemctl enable NullSector-api
     print_status "Systemd service created"
 fi
 
@@ -145,13 +145,13 @@ fi
 cat > secure-dashboard << 'EOF'
 #!/bin/bash
 
-# Secure Sesterce Dashboard Management Script
+# Secure NullSector Dashboard Management Script
 # Now with backend API security
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
-NGINX_CONF="$SCRIPT_DIR/nginx-sesterce-dashboard.conf"
+NGINX_CONF="$SCRIPT_DIR/nginx-NullSector-dashboard.conf"
 API_PID_FILE="$SCRIPT_DIR/api.pid"
 
 # Load environment variables
@@ -207,7 +207,7 @@ stop_api() {
 }
 
 start_services() {
-    echo "🚀 Starting secure Sesterce dashboard services..."
+    echo "🚀 Starting secure NullSector dashboard services..."
     
     # Start API first
     start_api
@@ -227,7 +227,7 @@ start_services() {
     fi
     
     echo ""
-    echo "🎉 Secure Sesterce Dashboard is now running!"
+    echo "🎉 Secure NullSector Dashboard is now running!"
     echo "🌐 Access: http://localhost:3025"
     echo "🔒 API: http://localhost:7778"
     echo "🛡️  Security: JWT Authentication + Server-side calculations"
@@ -288,7 +288,7 @@ case "$1" in
     *)
         echo "Usage: $0 {start|stop|restart|api-start|api-stop|status}"
         echo ""
-        echo "🔒 Secure Sesterce Dashboard Management"
+        echo "🔒 Secure NullSector Dashboard Management"
         echo "   start     - Start both API and Nginx"
         echo "   stop      - Stop both services"
         echo "   restart   - Restart both services"
@@ -314,7 +314,7 @@ print_status "Network Security: CORS + security headers"
 print_status "Password Security: Salted hashes (no plaintext)"
 echo ""
 print_warning "IMPORTANT: Update your passwords!"
-echo "   • Youssef: Sesterce2025_SECURE_v2"
+echo "   • Youssef: NullSector2025_SECURE_v2"
 echo "   • Maciej: PathFinder2025_SECURE_v2"
 echo "   • admin: Arno7747_SECURE_v2"
 echo ""

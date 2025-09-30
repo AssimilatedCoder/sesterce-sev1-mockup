@@ -84,7 +84,7 @@ body, html {
 .border-gray-200 { border-color: var(--null-sector-border-medium) !important; }
 .border-gray-300 { border-color: var(--null-sector-border-medium) !important; }
 
-/* Primary Actions - Sesterce Green */
+/* Primary Actions - NullSector Green */
 .bg-green-600 { background-color: var(--null-sector-green) !important; }
 .bg-green-700 { background-color: var(--null-sector-green-dark) !important; }
 .text-green-600 { color: var(--null-sector-green) !important; }

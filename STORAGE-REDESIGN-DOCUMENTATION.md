@@ -23,7 +23,7 @@ This document provides comprehensive documentation for the complete storage arch
 ## 🏗️ **Technical Implementation**
 
 ### **1. Production-Proven Vendor Database**
-**File:** `sesterce-dashboard/src/data/storageVendorsEnhanced.ts`
+**File:** `nullsector-dashboard/src/data/storageVendorsEnhanced.ts`
 
 #### **Tier 1 Vendors (10,000+ GPU Scale):**
 - **WEKA**: 720 GB/s, 18.3M IOPS, 32,000 GPU validation
@@ -56,7 +56,7 @@ const storageTiers = {
 ```
 
 ### **2. Enhanced Calculation Engine**
-**File:** `sesterce-dashboard/src/utils/storageCalculationsEnhanced.ts`
+**File:** `nullsector-dashboard/src/utils/storageCalculationsEnhanced.ts`
 
 #### **Key Calculation Functions:**
 
@@ -123,7 +123,7 @@ function selectOptimalVendors(config: StorageConfig) {
 ```
 
 ### **3. Production-Enhanced Storage Tab**
-**File:** `sesterce-dashboard/src/components/tabs/StorageTabProductionEnhanced.tsx`
+**File:** `nullsector-dashboard/src/components/tabs/StorageTabProductionEnhanced.tsx`
 
 #### **Key Features:**
 - **Automated vendor selection** with rationale
@@ -160,7 +160,7 @@ function selectOptimalVendors(config: StorageConfig) {
 ```
 
 ### **4. Configurable Workload & Tenant Options**
-**File:** `sesterce-dashboard/src/components/tabs/CalculatorTabEnhanced.tsx`
+**File:** `nullsector-dashboard/src/components/tabs/CalculatorTabEnhanced.tsx`
 
 #### **Enhanced Configuration UI:**
 ```typescript
@@ -200,7 +200,7 @@ function selectOptimalVendors(config: StorageConfig) {
 ```
 
 ### **5. Enhanced Design Tab**
-**File:** `sesterce-dashboard/src/components/tabs/DesignTab.tsx`
+**File:** `nullsector-dashboard/src/components/tabs/DesignTab.tsx`
 
 #### **Storage Architecture Integration:**
 ```typescript
@@ -297,7 +297,7 @@ const burstBandwidthTBps = sustainedBandwidthTBps * (numGPUs > 50000 ? 10 : 5);
 
 ### **File Structure:**
 ```
-sesterce-dashboard/src/
+nullsector-dashboard/src/
 ├── data/
 │   └── storageVendorsEnhanced.ts          # Production vendor database
 ├── utils/

@@ -69,10 +69,10 @@ All input parameters from the GPU supercluster TCO calculator were analyzed and 
 ### 3. Technical Implementation
 
 #### **New Files Created**
-- `/sesterce-dashboard/src/components/tabs/TCOOverrideTab.tsx` - Main override component
+- `/nullsector-dashboard/src/components/tabs/TCOOverrideTab.tsx` - Main override component
 
 #### **Modified Files**
-- `/sesterce-dashboard/src/components/GPUSuperclusterCalculatorV5Enhanced.tsx` - Integrated override logic into main calculator
+- `/nullsector-dashboard/src/components/GPUSuperclusterCalculatorV5Enhanced.tsx` - Integrated override logic into main calculator
 
 #### **Override Interface**
 ```typescript

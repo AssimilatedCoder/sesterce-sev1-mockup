@@ -5,24 +5,24 @@
 **Purpose**: Backup before implementing Nscale light theme
 
 ## Backup Files:
-- `sesterce-dashboard/src/styles-backup-dark-theme/` - Complete styles directory backup
-- `sesterce-dashboard/src/index-backup-dark-theme.css` - Main CSS backup
+- `nullsector-dashboard/src/styles-backup-dark-theme/` - Complete styles directory backup
+- `nullsector-dashboard/src/index-backup-dark-theme.css` - Main CSS backup
 
 ## Rollback Instructions:
 To restore the dark theme:
 
 ```bash
 # Remove current styles
-rm -rf sesterce-dashboard/src/styles/
+rm -rf nullsector-dashboard/src/styles/
 
 # Restore backup
-cp -r sesterce-dashboard/src/styles-backup-dark-theme/ sesterce-dashboard/src/styles/
+cp -r nullsector-dashboard/src/styles-backup-dark-theme/ nullsector-dashboard/src/styles/
 
 # Restore main CSS
-cp sesterce-dashboard/src/index-backup-dark-theme.css sesterce-dashboard/src/index.css
+cp nullsector-dashboard/src/index-backup-dark-theme.css nullsector-dashboard/src/index.css
 
 # Restart development server
-cd sesterce-dashboard && npm start
+cd nullsector-dashboard && npm start
 ```
 
 ## Original Theme Characteristics:

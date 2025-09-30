@@ -4,7 +4,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "🛑 Stopping Sesterce Calculator..."
+echo "🛑 Stopping NullSector Calculator..."
 
 # Stop API server
 if [ -f "$SCRIPT_DIR/api.pid" ]; then

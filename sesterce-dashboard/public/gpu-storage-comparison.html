@@ -8,25 +8,25 @@
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
         
         :root {
-            --sesterce-green: #00c896;
-            --sesterce-green-dark: #00b185;
-            --sesterce-green-light: #e6f7f3;
-            --sesterce-text-primary: #2c3e50;
-            --sesterce-text-secondary: #6c757d;
-            --sesterce-text-muted: #95a5a6;
-            --sesterce-text-light: #ffffff;
-            --sesterce-bg-primary: #ffffff;
-            --sesterce-bg-secondary: #f8f9fa;
-            --sesterce-bg-gradient: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
-            --sesterce-border-light: #dee2e6;
-            --sesterce-border-medium: #ced4da;
-            --sesterce-border-accent: #00c896;
-            --sesterce-success: #28a745;
-            --sesterce-warning: #ffc107;
-            --sesterce-error: #dc3545;
-            --sesterce-info: #17a2b8;
-            --sesterce-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --sesterce-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --nullsector-green: #00c896;
+            --nullsector-green-dark: #00b185;
+            --nullsector-green-light: #e6f7f3;
+            --nullsector-text-primary: #2c3e50;
+            --nullsector-text-secondary: #6c757d;
+            --nullsector-text-muted: #95a5a6;
+            --nullsector-text-light: #ffffff;
+            --nullsector-bg-primary: #ffffff;
+            --nullsector-bg-secondary: #f8f9fa;
+            --nullsector-bg-gradient: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            --nullsector-border-light: #dee2e6;
+            --nullsector-border-medium: #ced4da;
+            --nullsector-border-accent: #00c896;
+            --nullsector-success: #28a745;
+            --nullsector-warning: #ffc107;
+            --nullsector-error: #dc3545;
+            --nullsector-info: #17a2b8;
+            --nullsector-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --nullsector-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
         
         * {
@@ -36,21 +36,21 @@
         }
         
         body {
-            font-family: var(--sesterce-font-family);
+            font-family: var(--nullsector-font-family);
             font-size: 11pt;
             line-height: 1.6;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
             max-width: 210mm;
             margin: 0 auto;
             padding: 20px;
-            background: var(--sesterce-bg-primary);
+            background: var(--nullsector-bg-primary);
             font-weight: 400;
         }
         
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: var(--sesterce-bg-primary);
+            background: var(--nullsector-bg-primary);
             border-radius: 12px;
             overflow: hidden;
         }
@@ -59,22 +59,22 @@
             text-align: center;
             padding: 30px 0;
             margin-bottom: 30px;
-            border-bottom: 3px solid var(--sesterce-green);
-            background: var(--sesterce-bg-gradient);
-            color: var(--sesterce-text-primary);
+            border-bottom: 3px solid var(--nullsector-green);
+            background: var(--nullsector-bg-gradient);
+            color: var(--nullsector-text-primary);
         }
         
         h1 {
             font-size: 24pt;
             font-weight: 300;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
             letter-spacing: 0.5px;
             margin-bottom: 10px;
         }
         
         .subtitle {
             font-size: 12pt;
-            color: var(--sesterce-text-secondary);
+            color: var(--nullsector-text-secondary);
             font-weight: 400;
             line-height: 1.4;
             margin-bottom: 5px;
@@ -82,7 +82,7 @@
         
         .date {
             font-size: 10pt;
-            color: var(--sesterce-text-muted);
+            color: var(--nullsector-text-muted);
             margin-top: 15px;
         }
         
@@ -99,13 +99,13 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 10pt;
-            background: var(--sesterce-bg-primary);
-            border: 1px solid var(--sesterce-border-light);
+            background: var(--nullsector-bg-primary);
+            border: 1px solid var(--nullsector-border-light);
         }
         
         th {
-            background: var(--sesterce-green);
-            color: var(--sesterce-text-light);
+            background: var(--nullsector-green);
+            color: var(--nullsector-text-light);
             padding: 12px 8px;
             text-align: left;
             font-weight: 500;
@@ -113,50 +113,50 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            border-bottom: 2px solid var(--sesterce-green-dark);
+            border-bottom: 2px solid var(--nullsector-green-dark);
         }
         
         td {
             padding: 8px;
-            border-bottom: 1px solid var(--sesterce-border-light);
+            border-bottom: 1px solid var(--nullsector-border-light);
             font-size: 9pt;
             vertical-align: top;
         }
         
         tr:hover {
-            background: var(--sesterce-green-light);
+            background: var(--nullsector-green-light);
         }
         
         tr:nth-child(even) td {
-            background: var(--sesterce-bg-secondary);
+            background: var(--nullsector-bg-secondary);
         }
         
         tr:hover td {
-            background: var(--sesterce-green-light);
+            background: var(--nullsector-green-light);
         }
         
         .metric-name {
             font-weight: 500;
-            color: var(--sesterce-text-primary);
-            background: var(--sesterce-bg-secondary);
-            border-right: 2px solid var(--sesterce-border-medium);
+            color: var(--nullsector-text-primary);
+            background: var(--nullsector-bg-secondary);
+            border-right: 2px solid var(--nullsector-border-medium);
         }
         
         /* Highlight key cells */
         .best {
             background: #d4f8e8;
             font-weight: 500;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
         }
         
         .good {
-            background: var(--sesterce-green-light);
-            color: var(--sesterce-text-primary);
+            background: var(--nullsector-green-light);
+            color: var(--nullsector-text-primary);
         }
         
         .warning {
             background: #fef5e7;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
         }
         
         .section {
@@ -166,22 +166,22 @@
         h2 {
             font-size: 16pt;
             font-weight: 500;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
             margin: 40px 0 20px 0;
             padding-bottom: 8px;
-            border-bottom: 2px solid var(--sesterce-green);
+            border-bottom: 2px solid var(--nullsector-green);
         }
         
         h3 {
             font-size: 13pt;
             font-weight: 500;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
             margin: 20px 0 15px 0;
         }
         
         .deployment-pattern {
-            background: var(--sesterce-bg-secondary);
-            border-left: 4px solid var(--sesterce-green);
+            background: var(--nullsector-bg-secondary);
+            border-left: 4px solid var(--nullsector-green);
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 4px;
@@ -189,7 +189,7 @@
         
         .deployment-pattern h3 {
             margin-top: 0;
-            color: var(--sesterce-green);
+            color: var(--nullsector-green);
         }
         
         ul {
@@ -202,44 +202,44 @@
         }
         
         .key-insights {
-            background: var(--sesterce-green-light);
-            border: 1px solid var(--sesterce-green);
+            background: var(--nullsector-green-light);
+            border: 1px solid var(--nullsector-green);
             border-radius: 8px;
             padding: 25px;
             margin-bottom: 30px;
         }
         
         .key-insights h3 {
-            color: var(--sesterce-green-dark);
+            color: var(--nullsector-green-dark);
             margin-bottom: 15px;
         }
         
         .conclusions {
-            background: var(--sesterce-bg-secondary);
+            background: var(--nullsector-bg-secondary);
             border-radius: 8px;
             padding: 25px;
             margin-top: 40px;
-            border: 1px solid var(--sesterce-border-light);
+            border: 1px solid var(--nullsector-border-light);
         }
         
         .conclusions h2 {
-            color: var(--sesterce-text-primary);
-            border-bottom: 2px solid var(--sesterce-green);
+            color: var(--nullsector-text-primary);
+            border-bottom: 2px solid var(--nullsector-green);
         }
         
         strong {
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
             font-weight: 500;
         }
         
         .vendor-name {
             font-weight: 500;
-            color: var(--sesterce-green-dark);
+            color: var(--nullsector-green-dark);
         }
         
         p {
             margin-bottom: 12px;
-            color: var(--sesterce-text-primary);
+            color: var(--nullsector-text-primary);
         }
         
         @media (max-width: 768px) {

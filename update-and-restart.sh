@@ -5,7 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "🔄 Updating Sesterce Calculator..."
+echo "🔄 Updating NullSector Calculator..."
 
 # Stop services first
 echo "🛑 Stopping current services..."
@@ -22,7 +22,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Check if there are changes to React source
-if git diff --name-only HEAD~1 HEAD | grep -q "sesterce-dashboard/src\|package.json"; then
+if git diff --name-only HEAD~1 HEAD | grep -q "NullSector-dashboard/src\|package.json"; then
     echo "🔄 React source changes detected, rebuild required"
     FORCE_REBUILD=true
 else

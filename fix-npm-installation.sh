@@ -4,7 +4,7 @@
 # Fixes broken npm installations caused by audit fixes
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/nullsector-dashboard"
 
 echo "🔧 Fixing broken npm installation..."
 

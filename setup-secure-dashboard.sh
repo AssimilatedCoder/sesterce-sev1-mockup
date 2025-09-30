@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Setup script for Sesterce Secure Dashboard with API Backend
+# Setup script for NullSector Secure Dashboard with API Backend
 
-echo "🔒 Setting up Sesterce Secure Dashboard with API Backend..."
+echo "🔒 Setting up NullSector Secure Dashboard with API Backend..."
 
 # Get the current directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
 API_FILE="$SCRIPT_DIR/calculator-api.py"
 
@@ -123,9 +123,9 @@ setup_api_service() {
     
     if [ "$IS_UBUNTU" = true ]; then
         # Create systemd service for API
-        sudo tee /etc/systemd/system/sesterce-calculator-api.service > /dev/null <<EOF
+        sudo tee /etc/systemd/system/NullSector-calculator-api.service > /dev/null <<EOF
 [Unit]
-Description=Sesterce Calculator API
+Description=NullSector Calculator API
 After=network.target
 
 [Service]
@@ -143,7 +143,7 @@ EOF
         
         # Reload systemd and enable service
         sudo systemctl daemon-reload
-        sudo systemctl enable sesterce-calculator-api
+        sudo systemctl enable NullSector-calculator-api
         
         echo "✅ API service configured"
     else
@@ -157,7 +157,7 @@ update_nginx_config() {
     
     # Create updated Nginx config
     cat > "$SCRIPT_DIR/nginx-secure-dashboard.conf" <<EOF
-# Nginx configuration for Sesterce Secure Dashboard with API
+# Nginx configuration for NullSector Secure Dashboard with API
 
 # Rate limiting for API
 limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=10r/m;
@@ -223,8 +223,8 @@ server {
     }
     
     # Logging
-    access_log $NGINX_LOG_DIR/sesterce-secure-access.log;
-    error_log $NGINX_LOG_DIR/sesterce-secure-error.log;
+    access_log $NGINX_LOG_DIR/NullSector-secure-access.log;
+    error_log $NGINX_LOG_DIR/NullSector-secure-error.log;
 }
 EOF
     
@@ -274,7 +274,7 @@ build_react_app() {
     cp -r "$SCRIPT_DIR/superpod_sev1_fake_telemetry" "$BUILD_DIR/" 2>/dev/null || true
     cp "$SCRIPT_DIR/sev1-warroom-dashboard.html" "$BUILD_DIR/" 2>/dev/null || true
     cp "$SCRIPT_DIR/dashboard-data-loader.js" "$BUILD_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/assets/sesterce.jpg" "$REACT_DIR/public/" 2>/dev/null || true
+    cp -r "$SCRIPT_DIR/assets/NullSector.jpg" "$REACT_DIR/public/" 2>/dev/null || true
     
     cd "$SCRIPT_DIR"
     
@@ -306,17 +306,17 @@ main() {
     echo ""
     echo "1. Start the API service:"
     if [ "$IS_UBUNTU" = true ]; then
-        echo "   sudo systemctl start sesterce-calculator-api"
-        echo "   sudo systemctl status sesterce-calculator-api"
+        echo "   sudo systemctl start NullSector-calculator-api"
+        echo "   sudo systemctl status NullSector-calculator-api"
     else
         echo "   source venv/bin/activate"
         echo "   gunicorn -w 4 -b 127.0.0.1:7778 calculator-api:app"
     fi
     echo ""
     echo "2. Configure and start Nginx:"
-    echo "   sudo cp nginx-secure-dashboard.conf $NGINX_SITES_AVAILABLE/sesterce-secure"
+    echo "   sudo cp nginx-secure-dashboard.conf $NGINX_SITES_AVAILABLE/NullSector-secure"
     if [ "$IS_UBUNTU" = true ]; then
-        echo "   sudo ln -sf $NGINX_SITES_AVAILABLE/sesterce-secure $NGINX_SITES_ENABLED/"
+        echo "   sudo ln -sf $NGINX_SITES_AVAILABLE/NullSector-secure $NGINX_SITES_ENABLED/"
     fi
     echo "   sudo nginx -t"
     echo "   sudo systemctl restart nginx"

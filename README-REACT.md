@@ -1,6 +1,6 @@
-# 🚀 Sesterce React Dashboard
+# 🚀 NullSector React Dashboard
 
-A modern, React-based dashboard combining the SEV-1 War Room Grafana mockup with an advanced GPU cost calculator, built with the Sesterce design system.
+A modern, React-based dashboard combining the SEV-1 War Room Grafana mockup with an advanced GPU cost calculator, built with the NullSector design system.
 
 ## ✨ Features
 
@@ -17,11 +17,11 @@ A modern, React-based dashboard combining the SEV-1 War Room Grafana mockup with
 - **Infrastructure scaling**: Power, cooling, networking, storage
 - **Regional cost variations** with electricity rates
 - **CAPEX/OPEX breakdown** with detailed component analysis
-- **Modern Sesterce UI** with Tailwind CSS styling
+- **Modern NullSector UI** with Tailwind CSS styling
 
 ## 🎨 Design System
 
-Built with the **Sesterce Design System** featuring:
+Built with the **NullSector Design System** featuring:
 - **Brand colors**: Professional blue gradient palette
 - **GPU-themed accents**: NVIDIA green, performance orange, purple
 - **Dark mode support** with sophisticated color schemes
@@ -40,12 +40,12 @@ Built with the **Sesterce Design System** featuring:
 1. **Clone and setup:**
    ```bash
    git clone <repository>
-   cd "Grafana Sesterce"
+   cd "Grafana NullSector"
    ```
 
 2. **Install dependencies:**
    ```bash
-   cd sesterce-dashboard
+   cd NullSector-dashboard
    npm install
    ```
 
@@ -78,7 +78,7 @@ Built with the **Sesterce Design System** featuring:
 
 ### Development Mode
 ```bash
-cd sesterce-dashboard
+cd NullSector-dashboard
 npm start                    # Development server on :3000
 npm run build               # Production build
 npm test                    # Run tests
@@ -87,8 +87,8 @@ npm test                    # Run tests
 ## 📁 Project Structure
 
 ```
-Grafana Sesterce/
-├── sesterce-dashboard/                 # React application
+Grafana NullSector/
+├── NullSector-dashboard/                 # React application
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── ui/                    # Base UI components
@@ -110,7 +110,7 @@ Grafana Sesterce/
 │   ├── build/                         # Production build
 │   ├── tailwind.config.js            # Tailwind configuration
 │   └── package.json
-├── nginx-sesterce-dashboard.conf      # nginx configuration
+├── nginx-NullSector-dashboard.conf      # nginx configuration
 ├── setup-react-dashboard.sh          # Automated setup script
 ├── react-dashboard                    # Management script
 └── README-REACT.md                   # This file
@@ -141,7 +141,7 @@ Grafana Sesterce/
 
 ### Local Development
 ```bash
-cd sesterce-dashboard
+cd NullSector-dashboard
 npm start                    # http://localhost:3000
 ```
 
@@ -151,7 +151,7 @@ npm start                    # http://localhost:3000
 ```
 
 ### Custom Port
-Edit `nginx-sesterce-dashboard.conf` and change the `listen` directive:
+Edit `nginx-NullSector-dashboard.conf` and change the `listen` directive:
 ```nginx
 listen 8080;                 # Custom port
 ```
@@ -161,7 +161,7 @@ listen 8080;                 # Custom port
 ### Build Issues
 ```bash
 # Clear cache and rebuild
-cd sesterce-dashboard
+cd NullSector-dashboard
 rm -rf node_modules package-lock.json
 npm install
 npm run build
@@ -193,7 +193,7 @@ sudo lsof -ti:7777 | xargs sudo kill -9
 | Feature | Original HTML | React Dashboard |
 |---------|---------------|-----------------|
 | **UI Framework** | Vanilla HTML/CSS | React + Tailwind CSS |
-| **Design System** | Custom CSS | Sesterce Design System |
+| **Design System** | Custom CSS | NullSector Design System |
 | **Responsiveness** | Basic | Fully responsive |
 | **Component Reuse** | None | Modular components |
 | **State Management** | DOM manipulation | React state |
@@ -212,8 +212,8 @@ sudo lsof -ti:7777 | xargs sudo kill -9
 
 ## 📄 License
 
-This project is part of the Sesterce GPU cloud infrastructure mockup and is intended for demonstration purposes.
+This project is part of the NullSector GPU cloud infrastructure mockup and is intended for demonstration purposes.
 
 ---
 
-**Built with ❤️ using React, Tailwind CSS, and the Sesterce Design System**
+**Built with ❤️ using React, Tailwind CSS, and the NullSector Design System**

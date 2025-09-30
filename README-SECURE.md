@@ -1,8 +1,8 @@
-# Sesterce Secure Dashboard Deployment Guide
+# NullSector Secure Dashboard Deployment Guide
 
 ## Overview
 
-This guide covers the secure deployment of the Sesterce Dashboard with protected business logic using a backend API.
+This guide covers the secure deployment of the NullSector Dashboard with protected business logic using a backend API.
 
 ## Architecture
 
@@ -80,8 +80,8 @@ sudo apt install -y nodejs npm python3 python3-pip nginx git
 
 ```bash
 # Clone repository
-git clone <your-repo-url> sesterce-dashboard
-cd sesterce-dashboard
+git clone <your-repo-url> NullSector-dashboard
+cd NullSector-dashboard
 
 # Run secure setup
 ./setup-secure-dashboard.sh
@@ -90,15 +90,15 @@ cd sesterce-dashboard
 ### Step 3: Configure Services
 
 The setup script automatically creates:
-- SystemD service for API: `/etc/systemd/system/sesterce-calculator-api.service`
-- Nginx configuration: `/etc/nginx/sites-available/sesterce-secure`
+- SystemD service for API: `/etc/systemd/system/NullSector-calculator-api.service`
+- Nginx configuration: `/etc/nginx/sites-available/NullSector-secure`
 
 ### Step 4: Start Services
 
 ```bash
 # Start API service
-sudo systemctl start sesterce-calculator-api
-sudo systemctl enable sesterce-calculator-api
+sudo systemctl start NullSector-calculator-api
+sudo systemctl enable NullSector-calculator-api
 
 # Start Nginx
 sudo systemctl restart nginx
@@ -156,7 +156,7 @@ FLASK_ENV=production
 
 To use the secure calculator:
 
-1. Edit `sesterce-dashboard/src/App.tsx`:
+1. Edit `NullSector-dashboard/src/App.tsx`:
 ```javascript
 // Replace this:
 import { GPUSuperclusterCalculator } from './components/features/GPUSuperclusterCalculator';
@@ -247,14 +247,14 @@ curl http://localhost:7778/api/health
 sudo nginx -t
 
 # Check error logs
-sudo tail -f /var/log/nginx/sesterce-secure-error.log
+sudo tail -f /var/log/nginx/NullSector-secure-error.log
 ```
 
 ### Permission Issues
 ```bash
 # Fix file permissions
-sudo chown -R $USER:$USER /path/to/sesterce-dashboard
-sudo chmod -R 755 /path/to/sesterce-dashboard
+sudo chown -R $USER:$USER /path/to/NullSector-dashboard
+sudo chmod -R 755 /path/to/NullSector-dashboard
 ```
 
 ## Support

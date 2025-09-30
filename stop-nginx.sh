@@ -4,7 +4,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "🛑 Stopping Nginx-based Sesterce Calculator..."
+echo "🛑 Stopping Nginx-based NullSector Calculator..."
 
 # Stop API server
 if [ -f "$SCRIPT_DIR/api.pid" ]; then
@@ -23,6 +23,6 @@ if pgrep nginx > /dev/null; then
 fi
 
 # Remove our site configuration
-sudo rm -f /etc/nginx/sites-enabled/sesterce-dashboard
+sudo rm -f /etc/nginx/sites-enabled/NullSector-dashboard
 
 echo "✅ All services stopped"

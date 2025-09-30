@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Setup script for Sesterce React Dashboard
+# Setup script for NullSector React Dashboard
 
-echo "🚀 Setting up Sesterce React Dashboard..."
+echo "🚀 Setting up NullSector React Dashboard..."
 
 # Get the current directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/sesterce-dashboard"
+REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
 
 # Check if we're on Ubuntu or macOS
@@ -136,7 +136,7 @@ fi
 
 # Update nginx config with correct path
 echo "🔧 Creating nginx configuration..."
-cat > /tmp/nginx-sesterce-dashboard.conf << EOF
+cat > /tmp/nginx-NullSector-dashboard.conf << EOF
 server {
     listen 7777;
     listen [::]:7777;
@@ -191,11 +191,11 @@ EOF
 
 # Install nginx configuration
 echo "📋 Installing nginx configuration..."
-sudo cp /tmp/nginx-sesterce-dashboard.conf "$NGINX_SITES_AVAILABLE/sesterce-dashboard"
+sudo cp /tmp/nginx-NullSector-dashboard.conf "$NGINX_SITES_AVAILABLE/NullSector-dashboard"
 
 # Enable site on Ubuntu-style systems
 if [ "$IS_UBUNTU" = true ]; then
-    sudo ln -sf "$NGINX_SITES_AVAILABLE/sesterce-dashboard" "$NGINX_SITES_ENABLED/"
+    sudo ln -sf "$NGINX_SITES_AVAILABLE/NullSector-dashboard" "$NGINX_SITES_ENABLED/"
     # Remove default site if it exists
     sudo rm -f "$NGINX_SITES_ENABLED/default"
 fi
@@ -251,7 +251,7 @@ if pgrep nginx > /dev/null; then
     fi
     
     echo ""
-    echo "🎉 Sesterce React Dashboard is now running!"
+    echo "🎉 NullSector React Dashboard is now running!"
     echo "🌐 Local access: http://localhost:7777"
     if [ ! -z "$LOCAL_IP" ]; then
         echo "🌐 Network access: http://$LOCAL_IP:7777"
@@ -285,7 +285,7 @@ else
 fi
 
 # Clean up temporary files
-rm -f /tmp/nginx-sesterce-dashboard.conf
+rm -f /tmp/nginx-NullSector-dashboard.conf
 
 echo ""
 echo "✅ Setup complete! The dashboard should now be accessible."

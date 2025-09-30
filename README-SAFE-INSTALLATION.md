@@ -28,13 +28,13 @@ npm install --legacy-peer-deps --no-audit # Fallback for conflicts
 
 ### **Quick Recovery:**
 ```bash
-cd ~/Projects/sesterce-sev1-mockup
+cd ~/Projects/nullsector-sev1-mockup
 ./fix-npm-installation.sh
 ```
 
 ### **Manual Recovery:**
 ```bash
-cd ~/Projects/sesterce-sev1-mockup/sesterce-dashboard
+cd ~/Projects/nullsector-sev1-mockup/nullsector-dashboard
 
 # Clean everything
 rm -rf node_modules/ package-lock.json
@@ -77,7 +77,7 @@ npm run build
 ### **First Time Setup:**
 ```bash
 git clone <repository>
-cd sesterce-sev1-mockup
+cd nullsector-sev1-mockup
 ./deploy-secure.sh  # Uses safe install
 ```
 

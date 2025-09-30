@@ -2,20 +2,20 @@
 
 # Automated port update script for Ubuntu
 
-echo "🔄 Updating Sesterce Dashboard from port 7777 to 3025..."
+echo "🔄 Updating NullSector Dashboard from port 7777 to 3025..."
 echo "=================================================="
 
 # Stop all services
 echo "📋 Stopping services..."
 sudo systemctl stop nginx
-sudo systemctl stop sesterce-calculator-api 2>/dev/null || true
+sudo systemctl stop NullSector-calculator-api 2>/dev/null || true
 sudo pkill -f 'gunicorn.*calculator-api' 2>/dev/null || true
 
 # Update Nginx configuration
 echo "🔧 Updating Nginx configuration..."
-if [ -f "/etc/nginx/sites-available/sesterce-dashboard" ]; then
-    sudo sed -i 's/listen 7777/listen 3025/g' /etc/nginx/sites-available/sesterce-dashboard
-    sudo sed -i 's/listen \[::\]:7777/listen \[::\]:3025/g' /etc/nginx/sites-available/sesterce-dashboard
+if [ -f "/etc/nginx/sites-available/NullSector-dashboard" ]; then
+    sudo sed -i 's/listen 7777/listen 3025/g' /etc/nginx/sites-available/NullSector-dashboard
+    sudo sed -i 's/listen \[::\]:7777/listen \[::\]:3025/g' /etc/nginx/sites-available/NullSector-dashboard
     echo "✅ Nginx configuration updated"
 else
     echo "❌ Nginx configuration not found!"
@@ -47,8 +47,8 @@ fi
 # Start services
 echo "🚀 Starting services..."
 sudo systemctl start nginx
-if [ -f "/etc/systemd/system/sesterce-calculator-api.service" ]; then
-    sudo systemctl start sesterce-calculator-api
+if [ -f "/etc/systemd/system/NullSector-calculator-api.service" ]; then
+    sudo systemctl start NullSector-calculator-api
 fi
 
 # Check status
@@ -58,8 +58,8 @@ echo "=================="
 sudo systemctl status nginx --no-pager | head -10
 echo ""
 
-if [ -f "/etc/systemd/system/sesterce-calculator-api.service" ]; then
-    sudo systemctl status sesterce-calculator-api --no-pager | head -10
+if [ -f "/etc/systemd/system/NullSector-calculator-api.service" ]; then
+    sudo systemctl status NullSector-calculator-api --no-pager | head -10
 fi
 
 # Test the new endpoint
@@ -82,5 +82,5 @@ echo ""
 echo "Access the dashboard at: http://localhost:3025"
 echo ""
 echo "Login credentials:"
-echo "  Username: Youssef  Password: Sesterce2025"
+echo "  Username: Youssef  Password: NullSector2025"
 echo "  Username: admin    Password: Arno7747"

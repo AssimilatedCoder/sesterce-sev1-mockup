@@ -10,20 +10,20 @@ echo ""
 
 # Check if new GPU types are in the code
 echo "🔍 Checking for new GPU types in code..."
-if grep -q "mi355x\|rtx6000-blackwell" sesterce-dashboard/src/components/tabs/CalculatorTabEnhanced.tsx; then
+if grep -q "mi355x\|rtx6000-blackwell" nullsector-dashboard/src/components/tabs/CalculatorTabEnhanced.tsx; then
     echo "✅ New GPU types found in CalculatorTabEnhanced.tsx"
 else
     echo "❌ New GPU types NOT found in CalculatorTabEnhanced.tsx"
 fi
 
-if grep -q "mi355x\|rtx6000-blackwell" sesterce-dashboard/src/data/gpuSpecs.ts; then
+if grep -q "mi355x\|rtx6000-blackwell" nullsector-dashboard/src/data/gpuSpecs.ts; then
     echo "✅ New GPU types found in gpuSpecs.ts"
 else
     echo "❌ New GPU types NOT found in gpuSpecs.ts"
 fi
 
 # Check if optgroups are present
-if grep -q "optgroup.*AMD\|optgroup.*Professional" sesterce-dashboard/src/components/tabs/CalculatorTabEnhanced.tsx; then
+if grep -q "optgroup.*AMD\|optgroup.*Professional" nullsector-dashboard/src/components/tabs/CalculatorTabEnhanced.tsx; then
     echo "✅ Vendor optgroups found in dropdown"
 else
     echo "❌ Vendor optgroups NOT found in dropdown"
@@ -37,9 +37,9 @@ echo "   ./start-nginx.sh"
 echo ""
 
 # Check build directory age
-if [ -d "sesterce-dashboard/build" ]; then
+if [ -d "nullsector-dashboard/build" ]; then
     echo "📦 Build directory last modified:"
-    ls -la sesterce-dashboard/build/static/js/main.*.js | head -1
+    ls -la nullsector-dashboard/build/static/js/main.*.js | head -1
     echo ""
 fi
 

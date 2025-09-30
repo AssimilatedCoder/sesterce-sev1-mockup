@@ -1,4 +1,4 @@
-# Sesterce GPU SuperCluster Calculator
+# NullSector GPU SuperCluster Calculator
 
 A production-grade calculator for designing, costing, and monetizing large-scale GPU clusters (10,000–200,000 GPUs) based on NVIDIA GB200/GB300 NVL72 systems. Features sophisticated networking algorithms, dynamic service tier pricing, and comprehensive TCO analysis.
 
@@ -250,7 +250,7 @@ Bandwidth Calculation:
 
 ### **Development**
 ```bash
-cd sesterce-dashboard && npm start    # Frontend: port 3000
+cd NullSector-dashboard && npm start    # Frontend: port 3000
 python calculator-api.py              # Backend: port 7779
 ```
 
@@ -260,4 +260,4 @@ python calculator-api.py              # Backend: port 7779
 
 ---
 
-**© 2025 Sesterce Engineering. All rights reserved.**
+**© 2025 NullSector Engineering. All rights reserved.**
