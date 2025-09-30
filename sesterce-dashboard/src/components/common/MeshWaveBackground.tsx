@@ -267,7 +267,11 @@ export const MeshWaveBackground: React.FC<MeshWaveBackgroundProps> = ({ variant 
     // Event listeners
     window.addEventListener('resize', handleResize);
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('click', handleClick);
+    if (variant === 'full') {
+      window.addEventListener('click', handleClick);
+    } else {
+      canvas.addEventListener('click', handleClick);
+    }
 
     return () => {
       if (animationRef.current) {
@@ -275,7 +279,11 @@ export const MeshWaveBackground: React.FC<MeshWaveBackgroundProps> = ({ variant 
       }
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('click', handleClick);
+      if (variant === 'full') {
+        window.removeEventListener('click', handleClick);
+      } else {
+        canvas.removeEventListener('click', handleClick);
+      }
     };
   }, [variant]);
 
@@ -292,3 +300,5 @@ export const MeshWaveBackground: React.FC<MeshWaveBackgroundProps> = ({ variant 
     />
   );
 };
+
+export default MeshWaveBackground;
