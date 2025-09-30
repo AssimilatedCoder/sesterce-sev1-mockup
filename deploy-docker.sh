@@ -159,7 +159,8 @@ fi
 
 # Wait for services to be healthy
 print_info "Waiting for services to be ready..."
-sleep 10
+print_info "Note: Health checks have start_period delays (API: 40s, Frontend: 30s, Nginx: 30s)"
+sleep 45  # Wait for maximum start_period (40s) plus buffer
 
 # Check service health
 print_info "Checking service health..."
@@ -200,8 +201,7 @@ fi
 if [[ "$OSTYPE" != "darwin"* ]]; then
     print_info "🔍 Running post-deployment verification..."
 
-    # Wait a bit more for services to fully start
-    sleep 5
+    # Services should already be ready after the main wait period
 
     # Check if port 2053 is now listening
     PORT_CHECK=""

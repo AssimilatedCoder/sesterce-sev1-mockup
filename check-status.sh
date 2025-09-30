@@ -82,29 +82,53 @@ echo ""
 print_info "🏥 Service Health Checks:"
 echo "------------------------"
 
-# Check API health (through nginx proxy)
-if curl -s --max-time 5 http://localhost:2053/api/health >/dev/null 2>&1; then
-    API_STATUS=$(curl -s http://localhost:2053/api/health)
-    print_status "API Health: $API_STATUS"
-else
-    print_error "API Health: UNREACHABLE"
-fi
+# Check API health (through nginx proxy) with retry
+print_info "🔄 Checking API health (may take a moment for services to be ready)..."
+for i in {1..3}; do
+    if curl -s --max-time 10 http://localhost:2053/api/health >/dev/null 2>&1; then
+        API_STATUS=$(curl -s http://localhost:2053/api/health)
+        print_status "API Health: $API_STATUS"
+        break
+    else
+        if [ $i -eq 3 ]; then
+            print_error "API Health: UNREACHABLE"
+        else
+            sleep 2
+        fi
+    fi
+done
 
-# Check Frontend health (through nginx proxy)
-if curl -s --max-time 5 http://localhost:2053/health >/dev/null 2>&1; then
-    FRONTEND_STATUS=$(curl -s http://localhost:2053/health)
-    print_status "Frontend Health: $FRONTEND_STATUS"
-else
-    print_error "Frontend Health: UNREACHABLE"
-fi
+# Check Frontend health (through nginx proxy) with retry
+print_info "🔄 Checking Frontend health..."
+for i in {1..3}; do
+    if curl -s --max-time 10 http://localhost:2053/health >/dev/null 2>&1; then
+        FRONTEND_STATUS=$(curl -s http://localhost:2053/health)
+        print_status "Frontend Health: $FRONTEND_STATUS"
+        break
+    else
+        if [ $i -eq 3 ]; then
+            print_error "Frontend Health: UNREACHABLE"
+        else
+            sleep 2
+        fi
+    fi
+done
 
-# Check Nginx health (port 2053)
-if curl -s --max-time 5 http://localhost:2053/health >/dev/null 2>&1; then
-    NGINX_STATUS=$(curl -s http://localhost:2053/health)
-    print_status "Nginx Health: $NGINX_STATUS"
-else
-    print_error "Nginx Health: UNREACHABLE"
-fi
+# Check Nginx health (port 2053) with retry
+print_info "🔄 Checking Nginx health..."
+for i in {1..3}; do
+    if curl -s --max-time 10 http://localhost:2053/health >/dev/null 2>&1; then
+        NGINX_STATUS=$(curl -s http://localhost:2053/health)
+        print_status "Nginx Health: $NGINX_STATUS"
+        break
+    else
+        if [ $i -eq 3 ]; then
+            print_error "Nginx Health: UNREACHABLE"
+        else
+            sleep 2
+        fi
+    fi
+done
 
 echo ""
 print_info "🌐 Application Access Test:"
