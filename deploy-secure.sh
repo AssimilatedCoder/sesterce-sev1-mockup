@@ -1,35 +1,25 @@
 #!/bin/bash
 
 # Secure Deployment Script for NullSector Calculator
-# This script deploys the secure backend API and updated frontend
+# This script now uses Docker for deployment (recommended)
+# For legacy deployment without Docker, use the individual service scripts
 
 set -e
 
 echo "🔒 Deploying Secure NullSector Calculator..."
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Check if Docker is available - if so, recommend Docker deployment
+if command -v docker &> /dev/null && (command -v docker-compose &> /dev/null || docker --help | grep -q compose); then
+    echo ""
+    echo "🐳 Docker detected! Using Docker-based deployment (recommended)"
+    echo ""
+    ./deploy-docker.sh
+    exit $?
+fi
 
-# Function to print colored output
-print_status() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
-print_error() {
-    echo -e "${RED}❌ $1${NC}"
-}
-
-print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
-}
+echo "⚠️  Docker not detected. Using legacy deployment method."
+echo "   For better deployment, install Docker and use: ./deploy-docker.sh"
+echo ""
 
 # Check if Python is available
 if ! command -v python3 &> /dev/null; then
@@ -80,20 +70,20 @@ cd NullSector-dashboard
 # Install Node dependencies safely
 if [ ! -d "node_modules" ]; then
     print_info "Installing Node.js dependencies (safe mode)..."
-    
+
     # Install without audit fixes to prevent breaking changes
     npm install --no-audit --no-fund
-    
+
     if [ $? -ne 0 ]; then
         print_warning "Standard install failed, trying with legacy peer deps..."
         npm install --legacy-peer-deps --no-audit --no-fund
-        
+
         if [ $? -ne 0 ]; then
             print_error "npm install failed"
             exit 1
         fi
     fi
-    
+
     print_status "Node.js dependencies installed safely"
 fi
 
@@ -116,7 +106,7 @@ print_info "Updating deployment scripts..."
 # Create systemd service for the API (optional)
 if command -v systemctl &> /dev/null; then
     print_info "Creating systemd service for secure API..."
-    
+
     sudo tee /etc/systemd/system/NullSector-api.service > /dev/null << EOF
 [Unit]
 Description=NullSector Calculator Secure API
@@ -162,7 +152,7 @@ fi
 start_api() {
     echo "🚀 Starting secure API server..."
     cd "$SCRIPT_DIR"
-    
+
     if [ -f "$API_PID_FILE" ]; then
         if kill -0 $(cat "$API_PID_FILE") 2>/dev/null; then
             echo "API server already running (PID: $(cat $API_PID_FILE))"
@@ -171,12 +161,12 @@ start_api() {
             rm -f "$API_PID_FILE"
         fi
     fi
-    
+
     # Start API server in background (using virtual environment)
     source "$SCRIPT_DIR/venv/bin/activate" && python calculator-api.py &
     API_PID=$!
     echo $API_PID > "$API_PID_FILE"
-    
+
     # Wait a moment and check if it started successfully
     sleep 2
     if kill -0 $API_PID 2>/dev/null; then
@@ -208,10 +198,10 @@ stop_api() {
 
 start_services() {
     echo "🚀 Starting secure NullSector dashboard services..."
-    
+
     # Start API first
     start_api
-    
+
     # Start Nginx
     if command -v nginx >/dev/null 2>&1; then
         if ! pgrep nginx > /dev/null; then
@@ -225,7 +215,7 @@ start_services() {
         echo "❌ Nginx not found. Please install nginx."
         return 1
     fi
-    
+
     echo ""
     echo "🎉 Secure NullSector Dashboard is now running!"
     echo "🌐 Access: http://localhost:3025"
@@ -234,7 +224,7 @@ start_services() {
     echo ""
     echo "📊 Login with your credentials:"
     echo "   • Youssef / Y0da!777 (Admin Access)"
-    echo "   • Maciej / H0th#88! (Admin Access)" 
+    echo "   • Maciej / H0th#88! (Admin Access)"
     echo "   • admin / Vader@66 (Admin Access)"
     echo ""
     echo "🔐 All passwords are now hashed and secure!"
@@ -242,14 +232,14 @@ start_services() {
 
 stop_services() {
     echo "🛑 Stopping secure dashboard services..."
-    
+
     stop_api
-    
+
     if pgrep nginx > /dev/null; then
         sudo nginx -s quit
         echo "✅ Nginx stopped"
     fi
-    
+
     echo "✅ All services stopped"
 }
 
@@ -278,7 +268,7 @@ case "$1" in
         else
             echo "🔴 API Server: Stopped"
         fi
-        
+
         if pgrep nginx > /dev/null; then
             echo "🟢 Nginx: Running"
         else

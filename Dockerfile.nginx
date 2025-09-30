@@ -1,0 +1,32 @@
+# Nginx reverse proxy on Ubuntu LTS
+FROM ubuntu:22.04
+
+# Avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Nginx
+RUN apt-get update && apt-get install -y \
+    nginx \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy custom nginx configuration
+COPY nginx-production.conf /etc/nginx/sites-available/default
+
+# Add health check endpoint
+RUN echo 'server { listen 80; location /health { return 200 "healthy\n"; access_log off; } }' > /etc/nginx/sites-available/health
+
+# Enable sites
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ \
+    && ln -sf /etc/nginx/sites-available/health /etc/nginx/sites-enabled/ \
+    && rm -f /etc/nginx/sites-enabled/default.bak
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
