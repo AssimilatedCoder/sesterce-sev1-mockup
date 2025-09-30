@@ -4,7 +4,7 @@
 # Uses Nginx for proper web server functionality
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
+REACT_DIR="$SCRIPT_DIR/nullsector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
 
 echo "🚀 Starting NullSector Calculator (Production Mode with Nginx)..."
@@ -31,23 +31,28 @@ if [ "$NEEDS_BUILD" = true ]; then
     cd "$REACT_DIR"
     
     # Install dependencies if needed
-    if [ ! -d "node_modules" ] || [ ! -f "node_modules/.package-lock.json" ]; then
+    if [ ! -d "$REACT_DIR/node_modules" ] || [ ! -f "$REACT_DIR/node_modules/.package-lock.json" ]; then
         echo "📦 Installing Node.js dependencies (safe mode)..."
-        
+        cd "$REACT_DIR"
+
         # Clean install to avoid conflicts
         rm -rf node_modules/ package-lock.json 2>/dev/null || true
-        
+
         # Install without audit fixes to prevent breaking changes
         npm install --no-audit --no-fund
-        
+
         if [ $? -ne 0 ]; then
             echo "❌ npm install failed"
             exit 1
         fi
+
+        cd "$SCRIPT_DIR"
     fi
     
     # Build the app
+    cd "$REACT_DIR"
     GENERATE_SOURCEMAP=false npm run build
+    cd "$SCRIPT_DIR"
     
     if [ $? -eq 0 ]; then
         echo "✅ React build completed"
@@ -108,7 +113,7 @@ if ! command -v nginx >/dev/null 2>&1; then
 fi
 
 # Create dynamic Nginx config with correct paths
-NGINX_CONF="/tmp/NullSector-nginx.conf"
+NGINX_CONF="/tmp/nullsector-nginx.conf"
 cat > "$NGINX_CONF" << EOF
 server {
     listen 3025;
@@ -179,8 +184,8 @@ server {
 EOF
 
 # Copy config and start Nginx (open firewall and ensure correct state)
-sudo cp "$NGINX_CONF" /etc/nginx/sites-available/NullSector-dashboard
-sudo ln -sf /etc/nginx/sites-available/NullSector-dashboard /etc/nginx/sites-enabled/NullSector-dashboard
+sudo cp "$NGINX_CONF" /etc/nginx/sites-available/nullsector-dashboard
+sudo ln -sf /etc/nginx/sites-available/nullsector-dashboard /etc/nginx/sites-enabled/nullsector-dashboard
 
 # Remove default site
 sudo rm -f /etc/nginx/sites-enabled/default
