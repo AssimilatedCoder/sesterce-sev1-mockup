@@ -72,7 +72,7 @@ print_info "🔗 Internal Port Status:"
 echo "-----------------------"
 
 # Check nginx internal port 80
-if docker exec nullsector-nginx netstat -tuln 2>/dev/null | grep -q :80; then
+if docker exec nullsector-nginx ss -tuln 2>/dev/null | grep -q :80; then
     print_status "Nginx internal port 80: LISTENING"
 else
     print_warning "Nginx internal port 80: Not listening"
@@ -82,25 +82,25 @@ echo ""
 print_info "🏥 Service Health Checks:"
 echo "------------------------"
 
-# Check API health
-if curl -s --max-time 5 http://localhost:7779/api/health >/dev/null 2>&1; then
-    API_STATUS=$(curl -s http://localhost:7779/api/health)
+# Check API health (through nginx proxy)
+if curl -s --max-time 5 http://localhost:2053/api/health >/dev/null 2>&1; then
+    API_STATUS=$(curl -s http://localhost:2053/api/health)
     print_status "API Health: $API_STATUS"
 else
     print_error "API Health: UNREACHABLE"
 fi
 
-# Check Frontend health (port 8080)
-if curl -s --max-time 5 http://localhost:8080/health >/dev/null 2>&1; then
-    FRONTEND_STATUS=$(curl -s http://localhost:8080/health)
+# Check Frontend health (through nginx proxy)
+if curl -s --max-time 5 http://localhost:2053/health >/dev/null 2>&1; then
+    FRONTEND_STATUS=$(curl -s http://localhost:2053/health)
     print_status "Frontend Health: $FRONTEND_STATUS"
 else
     print_error "Frontend Health: UNREACHABLE"
 fi
 
-# Check Nginx health (port 80)
-if curl -s --max-time 5 http://localhost:80/health >/dev/null 2>&1; then
-    NGINX_STATUS=$(curl -s http://localhost:80/health)
+# Check Nginx health (port 2053)
+if curl -s --max-time 5 http://localhost:2053/health >/dev/null 2>&1; then
+    NGINX_STATUS=$(curl -s http://localhost:2053/health)
     print_status "Nginx Health: $NGINX_STATUS"
 else
     print_error "Nginx Health: UNREACHABLE"
