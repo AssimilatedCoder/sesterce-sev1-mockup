@@ -1,47 +1,40 @@
-# Multi-stage build for React frontend on Ubuntu LTS
-FROM ubuntu:22.04 as builder
-
-# Avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install Node.js and build dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files first for better caching
-COPY nullsector-dashboard/package*.json ./
-COPY nullsector-dashboard/ ./
-
-# Install dependencies (including dev dependencies for build)
-RUN npm ci --only=production=false
-
-# Build the application
-RUN npm run build
-
-# Production stage with Nginx on Ubuntu
+# React frontend with Nginx on Ubuntu LTS
 FROM ubuntu:22.04
 
 # Avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Nginx
+# Install Node.js and Nginx
 RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    ca-certificates \
     nginx \
     wget \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
+
+# Set working directory for React app
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY nullsector-dashboard/package*.json ./
+
+# Install dependencies (including dev dependencies for build)
+RUN npm ci --only=production=false
+
+# Copy React source code
+COPY nullsector-dashboard/ ./
+
+# Build the application
+RUN npm run build
+
+# Copy built React app to nginx html directory
+RUN cp -r build/* /usr/share/nginx/html/
 
 # Copy custom nginx configuration
 COPY nginx-frontend.conf /etc/nginx/sites-available/default
-
-# Copy built React app to nginx html directory
-COPY --from=builder /app/build /usr/share/nginx/html
 
 # Add health check endpoint
 RUN echo 'server { listen 8080; location /health { return 200 "healthy\n"; access_log off; } }' > /etc/nginx/sites-available/health
