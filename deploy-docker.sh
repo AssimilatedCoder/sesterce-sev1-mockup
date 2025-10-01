@@ -180,7 +180,7 @@ if $COMPOSE_CMD ps | grep -q "Up"; then
     echo ""
     echo "🔑 LOGIN CREDENTIALS:"
     echo "   Username: admin"
-    echo "   Password: nullsector2024!"
+    echo "   Password: Vader@66"
     echo ""
     echo "🛡️  Security Features:"
     echo "   • All services run in isolated containers"
@@ -218,7 +218,7 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
         echo ""
         echo "🔑 LOGIN CREDENTIALS:"
         echo "   Username: admin"
-        echo "   Password: nullsector2024!"
+        echo "   Password: Vader@66"
     else
         print_warning "⚠️  Port 2053: Not accessible"
         print_info "💡 Troubleshooting: Run ./troubleshoot-remote.sh"
