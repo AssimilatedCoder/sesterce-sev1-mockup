@@ -482,6 +482,11 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   // Calculate comprehensive TCO
   const calculate = () => {
+    console.log('🔧 Calculate function called');
+    console.log('📊 Current spec:', spec);
+    console.log('📊 GPU Model:', gpuModel);
+    console.log('📊 Region Data:', regionRates[region]);
+    
     // Log calculation activity
     activityLogger.logCalculation('TCO Calculation', {
       gpuModel,
@@ -492,6 +497,16 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     });
 
     const regionData = regionRates[region];
+    
+    if (!regionData) {
+      console.error('❌ Region data not found for:', region);
+      return;
+    }
+    
+    if (!spec) {
+      console.error('❌ GPU spec not found for:', gpuModel);
+      return;
+    }
     
     // Calculate actual systems needed (can't buy partial systems)
     const safeRackSize = spec?.rackSize || 8;
