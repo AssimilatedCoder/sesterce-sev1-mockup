@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import GPUSuperclusterCalculatorV5Enhanced from './components/GPUSuperclusterCalculatorV5Enhanced';
 import { Login } from './components/Login';
 import './styles/null-sector-theme.css';
+
+// Lazy load the calculator for better performance
+const GPUSuperclusterCalculatorV5Enhanced = React.lazy(() => import('./components/GPUSuperclusterCalculatorV5Enhanced'));
 
 function AppContent() {
 
@@ -17,12 +19,21 @@ function AppContent() {
       <main className="relative z-10">
         {/* Main Content - Only Calculator */}
         <div className="min-h-screen">
-          <Routes>
-            <Route path="/" element={<GPUSuperclusterCalculatorV5Enhanced />} />
-            <Route path="/calculator" element={<GPUSuperclusterCalculatorV5Enhanced />} />
-            <Route path="/pricing" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading NullSector TCO Calculator...</p>
+              </div>
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<GPUSuperclusterCalculatorV5Enhanced />} />
+              <Route path="/calculator" element={<GPUSuperclusterCalculatorV5Enhanced />} />
+              <Route path="/pricing" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </div>
       </main>
     </div>

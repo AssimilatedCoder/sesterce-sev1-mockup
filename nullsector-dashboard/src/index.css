@@ -22,41 +22,6 @@ code {
     monospace;
 }
 
-/* Grafana-specific styles for the embedded dashboard - Light Theme */
-.grafana-dashboard {
-  background: #f9fafb;
-  color: #1f2937;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-}
-
-.grafana-dashboard .panel {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.grafana-dashboard .panel-title {
-  color: #1f2937;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.grafana-dashboard .metric-value {
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.grafana-dashboard .metric-unit {
-  color: #6b7280;
-  font-size: 12px;
-}
-
-/* Chart.js overrides for light theme */
-.chart-container canvas {
-  background: transparent !important;
-}
 
 /* Additional light theme overrides */
 .bg-slate-900 { background-color: #ffffff !important; }
