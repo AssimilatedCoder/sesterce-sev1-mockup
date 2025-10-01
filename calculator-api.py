@@ -23,27 +23,47 @@ CORS(app, origins=['http://localhost:3000', 'http://localhost:3025', 'https://yo
 API_SECRET = os.environ.get('CALCULATOR_API_SECRET', 'change-this-secret-key-in-production')
 JWT_SECRET = os.environ.get('JWT_SECRET', 'jwt-secret-key-change-in-production')
 
-# Secure user database (hashed passwords)
+# Secure user database (hashed passwords with expiry dates)
 USERS = {
     'David': {
         'password_hash': hashlib.sha256('Sk7walk3r!'.encode()).hexdigest(),
-        'role': 'admin'
+        'role': 'admin',
+        'created_at': '2024-01-01T00:00:00Z',
+        'expires_at': None,  # Admin users don't expire
+        'last_login': None,
+        'is_active': True
     },
     'Thomas': {
         'password_hash': hashlib.sha256('Th0mas@99'.encode()).hexdigest(),
-        'role': 'admin'
+        'role': 'admin',
+        'created_at': '2024-01-01T00:00:00Z',
+        'expires_at': None,  # Admin users don't expire
+        'last_login': None,
+        'is_active': True
     },
     'Kiko': {
         'password_hash': hashlib.sha256('K1ko#2025'.encode()).hexdigest(),
-        'role': 'admin'
+        'role': 'admin',
+        'created_at': '2024-01-01T00:00:00Z',
+        'expires_at': None,  # Admin users don't expire
+        'last_login': None,
+        'is_active': True
     },
     'Maciej': {
         'password_hash': hashlib.sha256('Mac1ej*77'.encode()).hexdigest(),
-        'role': 'admin'
+        'role': 'admin',
+        'created_at': '2024-01-01T00:00:00Z',
+        'expires_at': None,  # Admin users don't expire
+        'last_login': None,
+        'is_active': True
     },
     'admin': {
         'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
-        'role': 'admin'
+        'role': 'admin',
+        'created_at': '2024-01-01T00:00:00Z',
+        'expires_at': None,  # Super admin never expires
+        'last_login': None,
+        'is_active': True
     }
 }
 
@@ -205,9 +225,25 @@ def login():
         time.sleep(1)  # Prevent timing attacks
         return jsonify({'error': 'Invalid credentials'}), 401
     
+    user = USERS[username]
+    
+    # Check if user is active
+    if not user.get('is_active', True):
+        log_login_attempt(client_ip, username, False, user_agent)
+        time.sleep(1)
+        return jsonify({'error': 'Account is disabled'}), 401
+    
+    # Check if user account has expired
+    if user.get('expires_at'):
+        expires_at = datetime.fromisoformat(user['expires_at'].replace('Z', '+00:00'))
+        if datetime.now(timezone.utc) > expires_at:
+            log_login_attempt(client_ip, username, False, user_agent)
+            time.sleep(1)
+            return jsonify({'error': 'Account has expired'}), 401
+    
     # Verify password
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    if password_hash != USERS[username]['password_hash']:
+    if password_hash != user['password_hash']:
         log_login_attempt(client_ip, username, False, user_agent)
         time.sleep(1)  # Prevent timing attacks
         return jsonify({'error': 'Invalid credentials'}), 401
@@ -215,13 +251,16 @@ def login():
     # Log successful login
     log_login_attempt(client_ip, username, True, user_agent)
     
+    # Update last login time
+    USERS[username]['last_login'] = datetime.now(timezone.utc).isoformat()
+    
     # Generate JWT token
-    token = generate_token(username, USERS[username]['role'])
+    token = generate_token(username, user['role'])
     
     return jsonify({
         'token': token,
         'username': username,
-        'role': USERS[username]['role'],
+        'role': user['role'],
         'expires_in': 86400  # 24 hours
     })
 
@@ -578,6 +617,230 @@ def calculate_network_costs(num_gpus, fabric_type, oversubscription):
 def health():
     return jsonify({'status': 'healthy'})
 
+# User Management API Endpoints (Admin only)
+
+@app.route('/api/users', methods=['GET'])
+@require_auth
+def get_users():
+    """Get all users - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    # Return user list without password hashes
+    users_list = []
+    for username, user_data in USERS.items():
+        users_list.append({
+            'username': username,
+            'role': user_data['role'],
+            'created_at': user_data.get('created_at'),
+            'expires_at': user_data.get('expires_at'),
+            'last_login': user_data.get('last_login'),
+            'is_active': user_data.get('is_active', True)
+        })
+    
+    return jsonify({'users': users_list})
+
+@app.route('/api/users', methods=['POST'])
+@require_auth
+def create_user():
+    """Create a new user - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Request data required'}), 400
+    
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    role = data.get('role', 'user').strip()
+    expires_days = data.get('expires_days', 14)  # Default 2 weeks
+    
+    # Validation
+    if not username:
+        return jsonify({'error': 'Username is required'}), 400
+    
+    if username in USERS:
+        return jsonify({'error': 'Username already exists'}), 400
+    
+    if not password:
+        return jsonify({'error': 'Password is required'}), 400
+    
+    if len(password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+    
+    if role not in ['admin', 'user']:
+        return jsonify({'error': 'Role must be admin or user'}), 400
+    
+    # Calculate expiry date (admin users don't expire)
+    expires_at = None
+    if role != 'admin' and expires_days > 0:
+        expires_at = (datetime.now(timezone.utc) + timedelta(days=expires_days)).isoformat()
+    
+    # Create user
+    USERS[username] = {
+        'password_hash': hashlib.sha256(password.encode()).hexdigest(),
+        'role': role,
+        'created_at': datetime.now(timezone.utc).isoformat(),
+        'expires_at': expires_at,
+        'last_login': None,
+        'is_active': True
+    }
+    
+    # Log the action
+    client_ip = get_client_ip()
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    log_user_activity(client_ip, request.user['username'], 'user_management', 
+                     f'Created user: {username} (role: {role})', user_agent)
+    
+    return jsonify({
+        'message': 'User created successfully',
+        'username': username,
+        'role': role,
+        'expires_at': expires_at
+    })
+
+@app.route('/api/users/<username>', methods=['PUT'])
+@require_auth
+def update_user(username):
+    """Update user - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    if username not in USERS:
+        return jsonify({'error': 'User not found'}), 404
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Request data required'}), 400
+    
+    user = USERS[username]
+    updated_fields = []
+    
+    # Update role
+    if 'role' in data:
+        new_role = data['role'].strip()
+        if new_role in ['admin', 'user']:
+            user['role'] = new_role
+            updated_fields.append(f'role: {new_role}')
+            
+            # If changing to admin, remove expiry
+            if new_role == 'admin':
+                user['expires_at'] = None
+                updated_fields.append('removed expiry (admin user)')
+    
+    # Update active status
+    if 'is_active' in data:
+        user['is_active'] = bool(data['is_active'])
+        updated_fields.append(f'active: {user["is_active"]}')
+    
+    # Update expiry date
+    if 'expires_days' in data and user['role'] != 'admin':
+        expires_days = int(data['expires_days'])
+        if expires_days > 0:
+            user['expires_at'] = (datetime.now(timezone.utc) + timedelta(days=expires_days)).isoformat()
+            updated_fields.append(f'expires in {expires_days} days')
+        else:
+            user['expires_at'] = None
+            updated_fields.append('removed expiry')
+    
+    # Log the action
+    client_ip = get_client_ip()
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    log_user_activity(client_ip, request.user['username'], 'user_management', 
+                     f'Updated user {username}: {", ".join(updated_fields)}', user_agent)
+    
+    return jsonify({
+        'message': 'User updated successfully',
+        'updated_fields': updated_fields
+    })
+
+@app.route('/api/users/<username>/password', methods=['PUT'])
+@require_auth
+def reset_user_password(username):
+    """Reset user password - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    if username not in USERS:
+        return jsonify({'error': 'User not found'}), 404
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Request data required'}), 400
+    
+    new_password = data.get('password', '').strip()
+    
+    if not new_password:
+        return jsonify({'error': 'New password is required'}), 400
+    
+    if len(new_password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+    
+    # Update password
+    USERS[username]['password_hash'] = hashlib.sha256(new_password.encode()).hexdigest()
+    
+    # Log the action
+    client_ip = get_client_ip()
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    log_user_activity(client_ip, request.user['username'], 'user_management', 
+                     f'Reset password for user: {username}', user_agent)
+    
+    return jsonify({'message': 'Password reset successfully'})
+
+@app.route('/api/users/<username>', methods=['DELETE'])
+@require_auth
+def delete_user(username):
+    """Delete user - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    if username not in USERS:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Prevent deleting the super admin
+    if username == 'admin':
+        return jsonify({'error': 'Cannot delete super admin account'}), 403
+    
+    # Delete user
+    del USERS[username]
+    
+    # Log the action
+    client_ip = get_client_ip()
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    log_user_activity(client_ip, request.user['username'], 'user_management', 
+                     f'Deleted user: {username}', user_agent)
+    
+    return jsonify({'message': 'User deleted successfully'})
+
+@app.route('/api/generate-password', methods=['POST'])
+@require_auth
+def generate_password():
+    """Generate a Star Wars inspired password - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    # Simple Star Wars password generator (server-side version)
+    import random
+    
+    characters = ['Luke', 'Leia', 'Han', 'Yoda', 'Obi', 'Rey', 'Finn', 'Poe', 'Vader', 'Kylo']
+    numbers = random.randint(10, 99)
+    special_chars = ['!', '@', '#', '$', '%', '&', '*']
+    
+    password = f"{random.choice(characters)}{numbers}{random.choice(special_chars)}"
+    
+    return jsonify({'password': password})
+
 if __name__ == '__main__':
+    print("🚀 Starting GPU SuperCluster Calculator API...")
+    print("🔒 Security features enabled:")
+    print("   • JWT Authentication")
+    print("   • Rate limiting (10 req/min)")
+    print("   • Secure password hashing")
+    print("   • Request validation")
+    print("   • CORS protection")
+    print("   • User management (admin only)")
+    print("🌐 Server starting on http://0.0.0.0:7779")
+    
     # For production, use gunicorn or similar
     app.run(host='0.0.0.0', port=7779, debug=False)

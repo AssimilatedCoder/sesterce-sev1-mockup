@@ -7,6 +7,7 @@ import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
 import { calculateStorageWithSelectedTiers } from '../utils/storageCalculationsWithTiers';
 import { calculateStackCost } from '../data/softwareStacks';
+import { calculateEnterpriseInfrastructureCosts } from '../data/enterpriseInfrastructure';
 import { CalculatorTabRedesigned } from './tabs/CalculatorTabRedesigned';
 import { NetworkingTabEnhanced } from './tabs/NetworkingTabEnhanced';
 import { StorageTabProductionEnhanced } from './tabs/StorageTabProductionEnhanced';
@@ -22,6 +23,7 @@ import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
 import { AccessLogsTab } from './tabs/AccessLogsTab';
+import { UserManagementTab } from './tabs/UserManagementTab';
 import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
@@ -103,7 +105,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise' || activeTab === 'documentation')) {
       setActiveTab('calculator');
     }
-    if (!isSuperAdmin && activeTab === 'logs') {
+    if (!isSuperAdmin && (activeTab === 'logs' || activeTab === 'users')) {
       setActiveTab('calculator');
     }
   }, [activeTab, isAdmin, isSuperAdmin]);
@@ -482,11 +484,6 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
 
   // Calculate comprehensive TCO
   const calculate = () => {
-    console.log('🔧 Calculate function called');
-    console.log('📊 Current spec:', spec);
-    console.log('📊 GPU Model:', gpuModel);
-    console.log('📊 Region Data:', regionRates[region]);
-    
     // Log calculation activity
     activityLogger.logCalculation('TCO Calculation', {
       gpuModel,
@@ -550,6 +547,15 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       ? gpuPowerMW * 1000 * (tcoOverrides.coolingCostPerKW || 400)  // $400/kW for liquid
       : gpuPowerMW * 1000 * (tcoOverrides.coolingCostPerKW || 300); // $300/kW for air
     
+    // Calculate enterprise infrastructure (including detailed staff costs)
+    const enterpriseInfra = calculateEnterpriseInfrastructureCosts(
+      actualGPUs, 
+      numRacks, 
+      fabricType, 
+      true, // includeOptional
+      gpuModel
+    );
+    
     // Data center infrastructure
     const datacenterCapex = totalPowerMW * (tcoOverrides.datacenterCostPerMW || 10000000); // $10M/MW
     
@@ -566,7 +572,8 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     
     // Annual OPEX calculations
     const annualCoolingOpex = annualPowerCost * (tcoOverrides.coolingOpexMultiplier || (coolingType === 'liquid' ? 0.15 : 0.45));
-    const annualStaff = (Math.ceil(gpuPowerMW / 2) * 166000 + Math.ceil(actualGPUs / 5000) * 200000) * (tcoOverrides.staffMultiplier || staffMultiplier);
+    // Use detailed enterprise infrastructure staff costs instead of simple calculation
+    const annualStaff = enterpriseInfra.totalAnnualOpex * (tcoOverrides.staffMultiplier || staffMultiplier);
     const annualMaintenance = (gpuCapex + network.total + storage.total) * ((tcoOverrides.maintenancePercent || maintenancePercent) / 100);
     const annualBandwidth = actualGPUs * (tcoOverrides.bandwidthCostPerGPU || 600); // $600/GPU/year (for actual GPUs)
     
@@ -628,7 +635,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     const opexBreakdown = [
       { name: 'Power Consumption', amount: annualPowerCost, pct: (annualPowerCost/annualOpex*100).toFixed(1), notes: `${totalPowerMW.toFixed(1)} MW @ ${formatNumber(regionData.rate)}/kWh` },
       { name: 'Cooling Operations', amount: annualCoolingOpex, pct: (annualCoolingOpex/annualOpex*100).toFixed(1), notes: `${coolingType.charAt(0).toUpperCase() + coolingType.slice(1)} cooling` },
-      { name: 'Staff & Personnel', amount: annualStaff, pct: (annualStaff/annualOpex*100).toFixed(1), notes: `${Math.ceil(gpuPowerMW / 2)} DC + ${Math.ceil(actualGPUs / 5000)} GPU engineers` },
+      { name: 'Staff & Personnel', amount: annualStaff, pct: (annualStaff/annualOpex*100).toFixed(1), notes: `${enterpriseInfra.breakdown.length} FTE roles (detailed breakdown available)` },
       { name: 'Hardware Maintenance', amount: annualMaintenance, pct: (annualMaintenance/annualOpex*100).toFixed(1), notes: `${maintenancePercent}% of hardware CAPEX` },
       { name: 'Storage Operations', amount: storageOpex, pct: (storageOpex/annualOpex*100).toFixed(1), notes: `$0.015/GB/month` },
       { name: 'Network Bandwidth', amount: annualBandwidth, pct: (annualBandwidth/annualOpex*100).toFixed(1), notes: '$600/GPU/year' },
@@ -648,6 +655,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       opexBreakdown,
       storage,
       network,
+      enterpriseInfra,
       // Individual CAPEX components for breakdown display
       gpuCapex,
       networkCapex: network.total,
@@ -718,7 +726,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     ...(isAdmin ? [{
       title: 'Admin',
       tabs: [
-        ...(isSuperAdmin ? [{ id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> }] : []),
+        ...(isSuperAdmin ? [
+          { id: 'users', label: 'User Management', icon: <Settings className="w-4 h-4" /> },
+          { id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> }
+        ] : []),
         { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
         { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
       ]
@@ -1040,6 +1051,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             
             {activeTab === 'references' && (
               <ReferencesTab />
+            )}
+            
+            {activeTab === 'users' && isSuperAdmin && (
+              <UserManagementTab currentUser={currentUser || ''} />
             )}
             
             {activeTab === 'logs' && isSuperAdmin && (
