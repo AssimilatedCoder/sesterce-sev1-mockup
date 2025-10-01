@@ -6,7 +6,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REACT_DIR="$SCRIPT_DIR/NullSector-dashboard"
 BUILD_DIR="$REACT_DIR/build"
-NGINX_CONF="$SCRIPT_DIR/nginx-NullSector-dashboard.conf"
+NGINX_CONF="$SCRIPT_DIR/nginx-nullsector-dashboard-ssl.conf"
 API_PID_FILE="$SCRIPT_DIR/api.pid"
 
 # Load environment variables (skip comments and empty lines)
@@ -154,16 +154,17 @@ start_services() {
     
     echo ""
     echo "🎉 Secure NullSector Dashboard is now running!"
-    echo "🌐 Access: http://localhost:3025"
+    echo "🔒 HTTPS Access: https://your-domain.com:3025"
     echo "🔒 API: http://localhost:7779"
-    echo "🛡️  Security: JWT Authentication + Server-side calculations"
+    echo "🛡️  Security: JWT Authentication + Server-side calculations + HTTPS"
     echo ""
     echo "📊 Login with your credentials:"
     echo "   • Youssef / Y0da!777 (Admin Access)"
-    echo "   • Maciej / H0th#88! (Admin Access)" 
+    echo "   • Maciej / H0th#88! (Admin Access)"
     echo "   • admin / Vader@66 (Admin Access)"
     echo ""
     echo "🔐 All passwords are now hashed and secure!"
+    echo "🌐 HTTPS encryption provided by Cloudflare"
 }
 
 stop_services() {
