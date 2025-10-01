@@ -23,46 +23,67 @@ CORS(app, origins=['http://localhost:3000', 'http://localhost:3025', 'https://yo
 API_SECRET = os.environ.get('CALCULATOR_API_SECRET', 'change-this-secret-key-in-production')
 JWT_SECRET = os.environ.get('JWT_SECRET', 'jwt-secret-key-change-in-production')
 
+# User roles and permissions
+USER_ROLES = {
+    'admin': {
+        'description': 'Full system access including user management',
+        'permissions': ['calculate', 'view_logs', 'manage_users', 'system_admin']
+    },
+    'analyst': {
+        'description': 'Advanced calculator access with detailed analysis',
+        'permissions': ['calculate', 'advanced_features', 'export_data']
+    },
+    'user': {
+        'description': 'Basic calculator access',
+        'permissions': ['calculate', 'basic_features']
+    },
+    'viewer': {
+        'description': 'Read-only access to calculations',
+        'permissions': ['view_only']
+    }
+}
+
 # Secure user database (hashed passwords with expiry dates)
+# App created 4 weeks ago (early September 2025)
 USERS = {
     'David': {
         'password_hash': hashlib.sha256('Sk7walk3r!'.encode()).hexdigest(),
         'role': 'admin',
-        'created_at': '2024-01-01T00:00:00Z',
+        'created_at': '2025-09-03T10:30:00Z',  # App creator - 4 weeks ago
         'expires_at': None,  # Admin users don't expire
-        'last_login': None,
+        'last_login': '2025-09-30T14:22:00Z',
         'is_active': True
     },
     'Thomas': {
         'password_hash': hashlib.sha256('Th0mas@99'.encode()).hexdigest(),
-        'role': 'admin',
-        'created_at': '2024-01-01T00:00:00Z',
-        'expires_at': None,  # Admin users don't expire
-        'last_login': None,
+        'role': 'analyst',
+        'created_at': '2025-09-05T09:15:00Z',  # Early team member
+        'expires_at': '2025-11-05T09:15:00Z',  # 2 months from creation
+        'last_login': '2025-09-28T11:45:00Z',
         'is_active': True
     },
     'Kiko': {
         'password_hash': hashlib.sha256('K1ko#2025'.encode()).hexdigest(),
-        'role': 'admin',
-        'created_at': '2024-01-01T00:00:00Z',
-        'expires_at': None,  # Admin users don't expire
-        'last_login': None,
+        'role': 'user',
+        'created_at': '2025-09-10T16:20:00Z',  # Regular user
+        'expires_at': '2025-10-24T16:20:00Z',  # 2 weeks from today
+        'last_login': '2025-09-29T08:30:00Z',
         'is_active': True
     },
     'Maciej': {
         'password_hash': hashlib.sha256('Mac1ej*77'.encode()).hexdigest(),
-        'role': 'admin',
-        'created_at': '2024-01-01T00:00:00Z',
-        'expires_at': None,  # Admin users don't expire
-        'last_login': None,
+        'role': 'analyst',
+        'created_at': '2025-09-12T13:45:00Z',  # Analyst role
+        'expires_at': '2025-11-12T13:45:00Z',  # 2 months from creation
+        'last_login': '2025-09-27T16:10:00Z',
         'is_active': True
     },
     'admin': {
         'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
         'role': 'admin',
-        'created_at': '2024-01-01T00:00:00Z',
+        'created_at': '2025-09-03T10:00:00Z',  # Super admin created with app
         'expires_at': None,  # Super admin never expires
-        'last_login': None,
+        'last_login': '2025-10-01T09:00:00Z',  # Today
         'is_active': True
     }
 }
@@ -640,6 +661,15 @@ def get_users():
     
     return jsonify({'users': users_list})
 
+@app.route('/api/roles', methods=['GET'])
+@require_auth
+def get_roles():
+    """Get available user roles - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    return jsonify({'roles': USER_ROLES}), 200
+
 @app.route('/api/users', methods=['POST'])
 @require_auth
 def create_user():
@@ -669,8 +699,9 @@ def create_user():
     if len(password) < 8:
         return jsonify({'error': 'Password must be at least 8 characters'}), 400
     
-    if role not in ['admin', 'user']:
-        return jsonify({'error': 'Role must be admin or user'}), 400
+    if role not in USER_ROLES:
+        valid_roles = ', '.join(USER_ROLES.keys())
+        return jsonify({'error': f'Invalid role. Must be one of: {valid_roles}'}), 400
     
     # Calculate expiry date (admin users don't expire)
     expires_at = None

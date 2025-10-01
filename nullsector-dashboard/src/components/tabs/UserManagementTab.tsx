@@ -15,12 +15,18 @@ interface User {
   is_active: boolean;
 }
 
+interface Role {
+  description: string;
+  permissions: string[];
+}
+
 interface UserManagementTabProps {
   currentUser: string;
 }
 
 export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUser }) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Record<string, Role>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -50,8 +56,12 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
 
   // Load users on component mount
   useEffect(() => {
-    loadUsers();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    await Promise.all([loadUsers(), loadRoles()]);
+  };
 
   const loadUsers = async () => {
     try {
@@ -75,6 +85,41 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
       setError('Network error loading users');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRoles = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/roles', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data.roles);
+      } else {
+        console.warn('Failed to load roles, using defaults');
+        // Fallback to default roles if API fails
+        setRoles({
+          admin: { description: 'Full system access', permissions: ['all'] },
+          analyst: { description: 'Advanced calculator access', permissions: ['calculate', 'advanced'] },
+          user: { description: 'Basic calculator access', permissions: ['calculate'] },
+          viewer: { description: 'Read-only access', permissions: ['view'] }
+        });
+      }
+    } catch (err) {
+      console.warn('Network error loading roles, using defaults');
+      // Fallback to default roles
+      setRoles({
+        admin: { description: 'Full system access', permissions: ['all'] },
+        analyst: { description: 'Advanced calculator access', permissions: ['calculate', 'advanced'] },
+        user: { description: 'Basic calculator access', permissions: ['calculate'] },
+        viewer: { description: 'Read-only access', permissions: ['view'] }
+      });
     }
   };
 
@@ -363,14 +408,25 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.role === 'admin' 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {user.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
-                          {user.role}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            user.role === 'admin' 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : user.role === 'analyst'
+                              ? 'bg-blue-100 text-blue-800'
+                              : user.role === 'viewer'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {user.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          </span>
+                          {roles[user.role] && (
+                            <span className="text-xs text-gray-500 mt-1">
+                              {roles[user.role].description}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -518,8 +574,11 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  {Object.entries(roles).map(([roleKey, roleData]) => (
+                    <option key={roleKey} value={roleKey}>
+                      {roleKey.charAt(0).toUpperCase() + roleKey.slice(1)} - {roleData.description}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -580,8 +639,11 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
                   onChange={(e) => setEditUser({ ...editUser, role: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  {Object.entries(roles).map(([roleKey, roleData]) => (
+                    <option key={roleKey} value={roleKey}>
+                      {roleKey.charAt(0).toUpperCase() + roleKey.slice(1)} - {roleData.description}
+                    </option>
+                  ))}
                 </select>
               </div>
 
