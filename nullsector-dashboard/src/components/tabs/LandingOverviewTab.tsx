@@ -6,6 +6,7 @@ import {
   Server, Database, Gauge, Target,
   BookOpen, Layers, ArrowRight, AlertTriangle
 } from 'lucide-react';
+import { getCurrentVersion } from '../../config/version';
 
 interface LandingOverviewTabProps {
   currentUser: string;
@@ -773,7 +774,7 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
               For custom configurations or deployment assistance, consult with infrastructure specialists.
             </p>
             <div className="flex items-center gap-4 text-xs text-gray-500">
-              <span>Calculator Version: v1.9.4</span>
+              <span>Calculator Version: v{getCurrentVersion()}</span>
               <span>•</span>
               <span>Last Updated: October 2025</span>
               <span>•</span>

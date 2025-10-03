@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Calculator, Cpu, HardDrive, Network, Thermometer, Zap, AlertTriangle,
-  FileText, BookOpen, DollarSign, TrendingUp, Package, Settings, Shield
+  FileText, BookOpen, DollarSign, TrendingUp, Package, Settings, Shield, GitBranch
 } from 'lucide-react';
 import { gpuSpecs } from '../data/gpuSpecs';
 import { storageVendors } from '../data/storageVendors';
@@ -18,12 +18,14 @@ import { ServicePricingTab } from './tabs/ServicePricingTab';
 import { FinancialAnalyticsTab } from './tabs/FinancialAnalyticsTab';
 import { CapexBreakdownTab } from './tabs/CapexBreakdownTab';
 import { DocumentationTab } from './tabs/DocumentationTab';
+import { getCurrentVersion } from '../config/version';
 import { ReferencesTab } from './tabs/ReferencesTab';
 import { DesignTab } from './tabs/DesignTab';
 import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
 import { AccessLogsTab } from './tabs/AccessLogsTab';
 import { UserManagementTab } from './tabs/UserManagementTab';
+import { VersionManagementTab } from './tabs/VersionManagementTab';
 import { LandingOverviewTab } from './tabs/LandingOverviewTab';
 import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { formatNumber } from '../utils/formatters';
@@ -762,6 +764,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
       tabs: [
         ...(isSuperAdmin ? [
           { id: 'users', label: 'User Management', icon: <Settings className="w-4 h-4" /> },
+          { id: 'versions', label: 'Version Management', icon: <GitBranch className="w-4 h-4" /> },
           { id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> }
         ] : []),
         { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
@@ -860,7 +863,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-medium">
-                v1.9.4
+                v{getCurrentVersion()}
               </span>
               <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
                 Enterprise
@@ -1096,6 +1099,10 @@ const GPUSuperclusterCalculator: React.FC = () => {
             
             {activeTab === 'users' && isSuperAdmin && (
               <UserManagementTab currentUser={currentUser || ''} />
+            )}
+            
+            {activeTab === 'versions' && isSuperAdmin && (
+              <VersionManagementTab isAdmin={isSuperAdmin} />
             )}
             
             {activeTab === 'logs' && isSuperAdmin && (

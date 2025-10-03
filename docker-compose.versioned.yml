@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: nullsector/dashboard:${VERSION:-latest}
+    container_name: nullsector-frontend
+    restart: unless-stopped
+    networks:
+      - nullsector-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "nullsector.service=frontend"
+      - "nullsector.version=${VERSION:-latest}"
+
+  api:
+    image: nullsector/api:${VERSION:-latest}
+    container_name: nullsector-api
+    restart: unless-stopped
+    ports:
+      - "7779:7779"
+    networks:
+      - nullsector-network
+    environment:
+      - FLASK_ENV=production
+      - VERSION=${VERSION:-latest}
+      - BUILD_DATE=${BUILD_DATE:-unknown}
+      - GIT_COMMIT=${GIT_COMMIT:-unknown}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7779/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "nullsector.service=api"
+      - "nullsector.version=${VERSION:-latest}"
+
+  nginx:
+    image: nullsector/nginx:${VERSION:-latest}
+    container_name: nullsector-nginx
+    restart: unless-stopped
+    ports:
+      - "2053:2053"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - nullsector-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2053/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "nullsector.service=nginx"
+      - "nullsector.version=${VERSION:-latest}"
+
+networks:
+  nullsector-network:
+    driver: bridge
+    labels:
+      - "nullsector.network=main"
+
+volumes:
+  nullsector-data:
+    driver: local
+    labels:
+      - "nullsector.volume=data"

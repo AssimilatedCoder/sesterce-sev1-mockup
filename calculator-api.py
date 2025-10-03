@@ -937,6 +937,75 @@ def generate_password():
     
     return jsonify({'password': password})
 
+# Version Management Endpoints
+@app.route('/api/version/current', methods=['GET'])
+def get_current_version():
+    """Get current application version information"""
+    return jsonify({
+        'version': os.environ.get('VERSION', '1.9.5'),
+        'buildDate': os.environ.get('BUILD_DATE', datetime.now(timezone.utc).isoformat()),
+        'buildNumber': 195,
+        'gitCommit': os.environ.get('GIT_COMMIT', 'unknown'),
+        'environment': os.environ.get('ENVIRONMENT', 'production'),
+        'architecture': 'Service-Tier-Driven'
+    })
+
+@app.route('/api/version/history', methods=['GET'])
+@admin_required
+def get_version_history():
+    """Get version history (admin only)"""
+    version_history = [
+        {
+            'version': '1.9.5',
+            'buildDate': '2025-10-03T12:00:00Z',
+            'buildNumber': 195,
+            'releaseNotes': '4-Tier MLOps Platform Implementation + Dynamic Calculations',
+            'breaking': False,
+            'features': [
+                'Added Tier 3: Managed MLOps Platform (PaaS)',
+                'Dynamic TCO calculation without manual button',
+                'Real-time input validation with yellow warnings',
+                'Enhanced mid-market business strategy documentation',
+                'Removed redundant Advanced Options section'
+            ],
+            'bugfixes': [
+                'Fixed validation function parameter passing',
+                'Resolved TypeScript compilation errors',
+                'Cleaned up unused imports and variables'
+            ],
+            'architecture': 'Service-Tier-Driven'
+        }
+    ]
+    return jsonify(version_history)
+
+@app.route('/api/deploy/rollback', methods=['POST'])
+@admin_required
+def rollback_version():
+    """Trigger version rollback (admin only)"""
+    data = request.get_json()
+    target_version = data.get('version')
+    
+    if not target_version:
+        return jsonify({'error': 'Version required'}), 400
+    
+    try:
+        log_activity(
+            request.headers.get('X-User', 'system'),
+            'version_rollback',
+            f'Initiated rollback to version {target_version}',
+            request.remote_addr
+        )
+        
+        # Simulate rollback for now
+        return jsonify({
+            'status': 'simulated',
+            'message': f'Rollback to version {target_version} simulated',
+            'note': 'Production deployment would execute rollback script'
+        })
+            
+    except Exception as e:
+        return jsonify({'error': f'Rollback failed: {str(e)}'}), 500
+
 if __name__ == '__main__':
     print("🚀 Starting GPU SuperCluster Calculator API...")
     print("🔒 Security features enabled:")
