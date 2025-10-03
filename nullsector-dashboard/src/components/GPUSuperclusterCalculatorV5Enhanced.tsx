@@ -116,7 +116,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const [gpuModel, setGpuModel] = useState('gb200');
   const [numGPUs, setNumGPUs] = useState(10000);
   const [coolingType, setCoolingType] = useState('liquid');
-  const [region, setRegion] = useState('us-texas');
+  const [region, setRegion] = useState('');
   const [utilization, setUtilization] = useState(90);
   const [depreciation, setDepreciation] = useState(4);
   

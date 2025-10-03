@@ -105,20 +105,18 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
         console.warn('Failed to load roles, using defaults');
         // Fallback to default roles if API fails
         setRoles({
-          admin: { description: 'Full system access', permissions: ['all'] },
-          analyst: { description: 'Advanced calculator access', permissions: ['calculate', 'advanced'] },
-          user: { description: 'Basic calculator access', permissions: ['calculate'] },
-          viewer: { description: 'Read-only access', permissions: ['view'] }
+          admin: { description: 'All tabs, all functions, including user management and logs', permissions: ['calculate', 'view_logs', 'manage_users', 'system_admin', 'financial_data', 'all_tabs'] },
+          power_user: { description: 'Everything except user management and logs access', permissions: ['calculate', 'advanced_features', 'financial_data', 'all_tabs_except_admin'] },
+          user: { description: 'Basic calculator use, no financial data', permissions: ['calculate', 'basic_features'] }
         });
       }
     } catch (err) {
       console.warn('Network error loading roles, using defaults');
       // Fallback to default roles
       setRoles({
-        admin: { description: 'Full system access', permissions: ['all'] },
-        analyst: { description: 'Advanced calculator access', permissions: ['calculate', 'advanced'] },
-        user: { description: 'Basic calculator access', permissions: ['calculate'] },
-        viewer: { description: 'Read-only access', permissions: ['view'] }
+        admin: { description: 'All tabs, all functions, including user management and logs', permissions: ['calculate', 'view_logs', 'manage_users', 'system_admin', 'financial_data', 'all_tabs'] },
+        power_user: { description: 'Everything except user management and logs access', permissions: ['calculate', 'advanced_features', 'financial_data', 'all_tabs_except_admin'] },
+        user: { description: 'Basic calculator use, no financial data', permissions: ['calculate', 'basic_features'] }
       });
     }
   };
@@ -140,13 +138,18 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
         setSuccess(`User ${newUser.username} created successfully`);
         setShowAddUser(false);
         setNewUser({ username: '', password: '', role: 'user', expires_days: 14 });
-        loadUsers();
+        // Clear any previous errors
+        setError('');
+        // Reload users to refresh the list
+        await loadUsers();
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to create user');
+        setSuccess('');
       }
     } catch (err) {
       setError('Network error creating user');
+      setSuccess('');
     }
   };
 
@@ -168,13 +171,18 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
         setSuccess(`User ${selectedUser.username} updated successfully`);
         setShowEditUser(false);
         setSelectedUser(null);
-        loadUsers();
+        // Clear any previous errors
+        setError('');
+        // Reload users to refresh the list
+        await loadUsers();
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to update user');
+        setSuccess('');
       }
     } catch (err) {
       setError('Network error updating user');
+      setSuccess('');
     }
   };
 

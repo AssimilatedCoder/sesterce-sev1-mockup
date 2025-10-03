@@ -26,20 +26,16 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'jwt-secret-key-change-in-production')
 # User roles and permissions
 USER_ROLES = {
     'admin': {
-        'description': 'Full system access including user management',
-        'permissions': ['calculate', 'view_logs', 'manage_users', 'system_admin']
+        'description': 'All tabs, all functions, including user management and logs',
+        'permissions': ['calculate', 'view_logs', 'manage_users', 'system_admin', 'financial_data', 'all_tabs']
     },
-    'analyst': {
-        'description': 'Advanced calculator access with detailed analysis',
-        'permissions': ['calculate', 'advanced_features', 'export_data']
+    'power_user': {
+        'description': 'Everything except user management and logs access',
+        'permissions': ['calculate', 'advanced_features', 'financial_data', 'all_tabs_except_admin']
     },
     'user': {
-        'description': 'Basic calculator access',
+        'description': 'Basic calculator use, no financial data',
         'permissions': ['calculate', 'basic_features']
-    },
-    'viewer': {
-        'description': 'Read-only access to calculations',
-        'permissions': ['view_only']
     }
 }
 
