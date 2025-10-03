@@ -951,9 +951,11 @@ def get_current_version():
     })
 
 @app.route('/api/version/history', methods=['GET'])
-@admin_required
+@require_auth
 def get_version_history():
     """Get version history (admin only)"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
     version_history = [
         {
             'version': '1.9.5',
@@ -979,9 +981,12 @@ def get_version_history():
     return jsonify(version_history)
 
 @app.route('/api/deploy/rollback', methods=['POST'])
-@admin_required
+@require_auth
 def rollback_version():
     """Trigger version rollback (admin only)"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+        
     data = request.get_json()
     target_version = data.get('version')
     
