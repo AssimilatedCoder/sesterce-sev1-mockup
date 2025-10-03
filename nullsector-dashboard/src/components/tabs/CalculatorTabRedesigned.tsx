@@ -10,6 +10,25 @@ import { useCurrency } from '../../hooks/useCurrency';
 import WarningBanner from '../common/WarningBanner';
 import { LocationSelector } from '../common/LocationSelector';
 import { getRecommendedRate, convertElectricityRate } from '../../data/electricityPrices';
+import { ServiceTierConfiguration } from '../common/ServiceTierConfiguration';
+import { CalculatedStorageArchitecture } from '../common/CalculatedStorageArchitecture';
+import { InfrastructureRequirements } from '../common/InfrastructureRequirements';
+import { 
+  ServiceTierConfig, 
+  StorageRequirements, 
+  InfrastructureRequirements as InfraReqs 
+} from '../../utils/workloadPerformanceCalculations';
+import { 
+  calculateEnhancedTCO, 
+  EnhancedTCOResults 
+} from '../../utils/enhancedTCOCalculations';
+import { EnhancedTCOResultsComponent } from '../common/EnhancedTCOResults';
+import { 
+  validateConfiguration, 
+  ValidationSummary as ValidationSummaryType 
+} from '../../utils/validationRules';
+import { ValidationSummary } from '../common/ValidationSummary';
+import { ArchitectureFlowDiagram } from '../common/ArchitectureFlowDiagram';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -133,6 +152,55 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   const [touchedStorageTiers, setTouchedStorageTiers] = useState<string[]>([]);
   const [touchedWorkloadTypes, setTouchedWorkloadTypes] = useState<string[]>([]);
   const [touchedTenantTypes, setTouchedTenantTypes] = useState<string[]>([]);
+  
+  // New service-tier-driven architecture state
+  const [serviceTiers, setServiceTiers] = useState<ServiceTierConfig[]>([]);
+  const [storageRequirements, setStorageRequirements] = useState<StorageRequirements | null>(null);
+  const [infrastructureRequirements, setInfrastructureRequirements] = useState<InfraReqs | null>(null);
+  const [enhancedTCOResults, setEnhancedTCOResults] = useState<EnhancedTCOResults | null>(null);
+  const [validationSummary, setValidationSummary] = useState<ValidationSummaryType | null>(null);
+
+  // Calculate enhanced TCO when service tiers or infrastructure requirements change
+  useEffect(() => {
+    if (serviceTiers.length > 0 && storageRequirements && infrastructureRequirements) {
+      try {
+        // Get electricity rate
+        const locationRate = getRecommendedRate(config.region);
+        const electricityRate = locationRate ? convertElectricityRate(locationRate, 'USD') : 0.10; // Default to $0.10/kWh
+
+        const enhancedConfig = {
+          gpuModel: config.gpuModel,
+          numGPUs: config.numGPUs,
+          coolingType: config.coolingType,
+          electricityRate,
+          currency: 'USD' as const,
+          utilization: config.utilization || 90,
+          depreciation: config.depreciation || 4,
+          serviceTiers,
+          storageRequirements,
+          infrastructureRequirements,
+          tcoOverrides: {}
+        };
+
+        const tcoResults = calculateEnhancedTCO(enhancedConfig);
+        setEnhancedTCOResults(tcoResults);
+
+        // Run comprehensive validation
+        const validation = validateConfiguration(
+          serviceTiers,
+          storageRequirements,
+          infrastructureRequirements,
+          tcoResults,
+          config.numGPUs
+        );
+        setValidationSummary(validation);
+      } catch (error) {
+        console.error('Error calculating enhanced TCO:', error);
+        setEnhancedTCOResults(null);
+        setValidationSummary(null);
+      }
+    }
+  }, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation]);
 
   // Initialize storage configuration
   useEffect(() => {
@@ -448,6 +516,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
   return (
     <div className="space-y-4">
+      {/* Architecture Flow Overview */}
+      <ArchitectureFlowDiagram isConfigured={serviceTiers.length > 0 && enhancedTCOResults !== null} />
+
       {/* Software Licensing Warning Banner */}
       <WarningBanner
         title="Software Stack Pricing"
@@ -457,7 +528,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
       
 
-      {/* GPU Configuration + Service Tier Distribution */}
+      {/* GPU Configuration */}
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <Zap className="w-3 h-3 text-gray-500" />
@@ -582,7 +653,49 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           </div>
         </div>
 
-        {/* Service Tier Distribution (moved here) */}
+      </div>
+
+      {/* New Service Tier Configuration */}
+      <ServiceTierConfiguration
+        totalGPUs={config.numGPUs}
+        onServiceTiersChange={setServiceTiers}
+        onStorageRequirementsChange={setStorageRequirements}
+        onInfrastructureRequirementsChange={setInfrastructureRequirements}
+      />
+
+      {/* Validation Summary */}
+      {validationSummary && (
+        <ValidationSummary validationSummary={validationSummary} />
+      )}
+
+      {/* Calculated Storage Architecture */}
+      {storageRequirements && (
+        <CalculatedStorageArchitecture
+          storageRequirements={storageRequirements}
+          totalGPUs={config.numGPUs}
+          formatCurrency={formatCurrency}
+        />
+      )}
+
+      {/* Infrastructure Requirements */}
+      {infrastructureRequirements && (
+        <InfrastructureRequirements
+          infrastructureRequirements={infrastructureRequirements}
+          totalGPUs={config.numGPUs}
+          formatCurrency={formatCurrency}
+        />
+      )}
+
+      {/* Enhanced TCO Results */}
+      {enhancedTCOResults && (
+        <EnhancedTCOResultsComponent
+          tcoResults={enhancedTCOResults}
+          formatCurrency={formatCurrency}
+        />
+      )}
+
+      {/* Legacy Storage Configuration - Hidden in new architecture */}
+      <div className="hidden bg-gray-50 p-4 rounded-lg border border-gray-200">
         <div className="service-tier-distribution mt-4 p-3 bg-gray-100 rounded border border-gray-200">
           <div className="flex items-center justify-between mb-1">
             <h4 className="text-xs font-semibold text-gray-800">Service Tier Distribution</h4>
