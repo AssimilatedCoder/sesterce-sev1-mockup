@@ -674,6 +674,288 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
             </div>
           </div>
 
+          {/* Infrastructure-First Design Flow */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-gray-600" />
+              Infrastructure-First Design Flow
+            </h3>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+              <h4 className="font-medium text-blue-800 mb-2">When to Use Infrastructure-First Approach</h4>
+              <p className="text-sm text-blue-700 mb-3">
+                Choose Infrastructure-First when you have existing hardware constraints, specific vendor requirements, 
+                or need to design services around available infrastructure capacity.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-blue-700">
+                <div>
+                  <strong>Ideal Scenarios:</strong>
+                  <ul className="mt-1 space-y-1">
+                    <li>• Existing datacenter with power/cooling constraints</li>
+                    <li>• Vendor lock-in or preferred hardware partnerships</li>
+                    <li>• Brownfield deployments with legacy infrastructure</li>
+                    <li>• Budget-driven hardware procurement decisions</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>Key Benefits:</strong>
+                  <ul className="mt-1 space-y-1">
+                    <li>• Maximizes utilization of existing investments</li>
+                    <li>• Ensures infrastructure compatibility</li>
+                    <li>• Reduces procurement complexity</li>
+                    <li>• Optimizes for specific hardware capabilities</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Step 1 */}
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h4 className="font-medium text-gray-800 mb-2">Step 1: Infrastructure Configuration</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Define your hardware foundation first. This includes compute, storage, network, and power infrastructure specifications.
+                </p>
+                <div className="bg-gray-50 p-3 rounded text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <strong>Compute Infrastructure:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>GPU Model:</strong> H100 SXM, H200, A100, L40S selection</li>
+                        <li>• <strong>Total GPU Count:</strong> 100-200,000 GPUs supported</li>
+                        <li>• <strong>Node Configuration:</strong> GPUs per node, memory per GPU</li>
+                        <li>• <strong>Form Factor:</strong> DGX systems, custom servers, cloud instances</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Storage Architecture:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Performance Tiers:</strong> Extreme, High, Balanced, Cost-optimized</li>
+                        <li>• <strong>Vendor Selection:</strong> VAST, WEKA, Pure, Ceph, NetApp</li>
+                        <li>• <strong>Capacity Planning:</strong> Raw vs usable, replication overhead</li>
+                        <li>• <strong>Network Fabric:</strong> InfiniBand, Ethernet, storage protocols</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <strong>Network Infrastructure:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Interconnect:</strong> NVLink, InfiniBand NDR/XDR, Ethernet</li>
+                        <li>• <strong>Topology:</strong> Fat-tree, Dragonfly+, BCube architectures</li>
+                        <li>• <strong>Oversubscription:</strong> 1:1 to 4:1 ratios</li>
+                        <li>• <strong>Rails per GPU:</strong> 8-16 network connections</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Power & Cooling:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Total Power Capacity:</strong> MW available for compute</li>
+                        <li>• <strong>Cooling Type:</strong> Air, liquid, immersion cooling</li>
+                        <li>• <strong>PUE (Power Usage Effectiveness):</strong> 1.1-2.0 efficiency</li>
+                        <li>• <strong>Redundancy:</strong> N+1, N+2 power backup systems</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="border-l-4 border-purple-500 pl-4">
+                <h4 className="font-medium text-gray-800 mb-2">Step 2: Infrastructure Analysis & Capability Assessment</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  The system analyzes your infrastructure configuration to determine optimal service capabilities and constraints.
+                </p>
+                <div className="bg-gray-50 p-3 rounded text-xs">
+                  <div className="space-y-3">
+                    <div>
+                      <strong>Performance Analysis:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Compute Capacity:</strong> Total FLOPS, memory bandwidth, GPU-hours available</li>
+                        <li>• <strong>Storage Performance:</strong> Aggregate bandwidth, IOPS, latency characteristics</li>
+                        <li>• <strong>Network Throughput:</strong> Bisection bandwidth, all-to-all communication capacity</li>
+                        <li>• <strong>Power Efficiency:</strong> Performance per watt, cooling requirements</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Workload Suitability Assessment:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Training Workloads:</strong> Large model support, multi-node scaling capability</li>
+                        <li>• <strong>Inference Workloads:</strong> Low latency, high throughput, batch processing</li>
+                        <li>• <strong>Mixed Workloads:</strong> Resource sharing, scheduling flexibility</li>
+                        <li>• <strong>Specialized Tasks:</strong> Fine-tuning, research, development environments</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Constraint Identification:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Bottlenecks:</strong> Storage bandwidth, network fabric, power limits</li>
+                        <li>• <strong>Scaling Limits:</strong> Maximum cluster size, expansion capabilities</li>
+                        <li>• <strong>Performance Trade-offs:</strong> Cost vs performance optimization points</li>
+                        <li>• <strong>Operational Constraints:</strong> Maintenance windows, upgrade paths</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="border-l-4 border-green-500 pl-4">
+                <h4 className="font-medium text-gray-800 mb-2">Step 3: Optimal Service Mix Derivation</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Based on infrastructure capabilities, the system recommends the optimal service tier mix and pricing strategy.
+                </p>
+                <div className="bg-gray-50 p-3 rounded text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <strong>Service Tier Optimization:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Bare Metal Allocation:</strong> High-performance GPUs for whale customers</li>
+                        <li>• <strong>Kubernetes Capacity:</strong> Shared resources with guaranteed QoS</li>
+                        <li>• <strong>MLOps Platform:</strong> Managed services with metadata overhead</li>
+                        <li>• <strong>Inference Services:</strong> High-density, low-latency deployments</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Workload Distribution:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Training %:</strong> Based on storage bandwidth availability</li>
+                        <li>• <strong>Inference %:</strong> Optimized for IOPS and network capacity</li>
+                        <li>• <strong>Mixed Workloads:</strong> Balanced allocation for flexibility</li>
+                        <li>• <strong>Burst Capacity:</strong> Reserved resources for peak demands</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <strong>Revenue Optimization:</strong>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                      <ul className="space-y-1 text-gray-600">
+                        <li>• <strong>Premium Tiers:</strong> Maximize high-margin bare metal services</li>
+                        <li>• <strong>Volume Tiers:</strong> Fill capacity with managed services</li>
+                        <li>• <strong>Efficiency Tiers:</strong> Cost-optimized inference for scale</li>
+                      </ul>
+                      <ul className="space-y-1 text-gray-600">
+                        <li>• <strong>Pricing Strategy:</strong> Infrastructure-justified pricing models</li>
+                        <li>• <strong>Utilization Targets:</strong> 85-95% for optimal ROI</li>
+                        <li>• <strong>Growth Planning:</strong> Expansion roadmap alignment</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="border-l-4 border-orange-500 pl-4">
+                <h4 className="font-medium text-gray-800 mb-2">Step 4: Service Constraints & Validation</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Identify infrastructure-imposed constraints and validate service delivery capabilities.
+                </p>
+                <div className="bg-gray-50 p-3 rounded text-xs">
+                  <div className="space-y-3">
+                    <div>
+                      <strong>Performance Constraints:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Storage Bandwidth:</strong> Training workload limits based on I/O capacity</li>
+                        <li>• <strong>Network Fabric:</strong> Multi-node training scale limitations</li>
+                        <li>• <strong>Memory Capacity:</strong> Large model support boundaries</li>
+                        <li>• <strong>Power Density:</strong> Cooling and electrical distribution limits</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Service Level Validation:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>SLA Compliance:</strong> Infrastructure can meet performance guarantees</li>
+                        <li>• <strong>Availability Targets:</strong> Redundancy supports uptime requirements</li>
+                        <li>• <strong>Scalability Limits:</strong> Maximum customer density per service tier</li>
+                        <li>• <strong>Quality of Service:</strong> Resource isolation and performance consistency</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Operational Considerations:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Maintenance Impact:</strong> Service disruption during hardware updates</li>
+                        <li>• <strong>Monitoring Requirements:</strong> Infrastructure health and performance tracking</li>
+                        <li>• <strong>Disaster Recovery:</strong> Backup and failover capabilities</li>
+                        <li>• <strong>Compliance:</strong> Security and regulatory requirements</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 5 */}
+              <div className="border-l-4 border-red-500 pl-4">
+                <h4 className="font-medium text-gray-800 mb-2">Step 5: TCO Calculation & Business Case</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Generate comprehensive TCO analysis based on infrastructure specifications and derived service mix.
+                </p>
+                <div className="bg-gray-50 p-3 rounded text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <strong>Infrastructure Costs:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Hardware CAPEX:</strong> GPUs, storage, network, servers</li>
+                        <li>• <strong>Facility Costs:</strong> Power, cooling, space, connectivity</li>
+                        <li>• <strong>Software Licensing:</strong> Orchestration, monitoring, management</li>
+                        <li>• <strong>Deployment Costs:</strong> Installation, configuration, testing</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Operational Expenses:</strong>
+                      <ul className="mt-1 space-y-1 text-gray-600">
+                        <li>• <strong>Power & Cooling:</strong> Electricity, HVAC, PUE impact</li>
+                        <li>• <strong>Staffing:</strong> Operations, support, maintenance teams</li>
+                        <li>• <strong>Maintenance:</strong> Hardware support, software updates</li>
+                        <li>• <strong>Connectivity:</strong> Network bandwidth, peering costs</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <strong>Revenue Projections:</strong>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                      <ul className="space-y-1 text-gray-600">
+                        <li>• <strong>Service Revenue:</strong> Tier-based pricing × allocation %</li>
+                        <li>• <strong>Utilization Impact:</strong> Revenue scaling with capacity usage</li>
+                        <li>• <strong>Growth Trajectory:</strong> Customer acquisition and expansion</li>
+                      </ul>
+                      <ul className="space-y-1 text-gray-600">
+                        <li>• <strong>Gross Margin:</strong> Revenue - direct infrastructure costs</li>
+                        <li>• <strong>Payback Period:</strong> Time to recover initial investment</li>
+                        <li>• <strong>ROI Analysis:</strong> 5-year return on infrastructure investment</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <h4 className="font-medium text-yellow-800 mb-2">Infrastructure-First vs Service-First Comparison</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-yellow-700">
+                <div>
+                  <strong>Infrastructure-First Advantages:</strong>
+                  <ul className="mt-1 space-y-1">
+                    <li>• Maximizes existing hardware investments</li>
+                    <li>• Ensures infrastructure compatibility and constraints</li>
+                    <li>• Simplifies procurement and vendor management</li>
+                    <li>• Optimizes for specific hardware capabilities</li>
+                    <li>• Reduces technical risk in deployment</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>Service-First Advantages:</strong>
+                  <ul className="mt-1 space-y-1">
+                    <li>• Optimizes for customer needs and market demand</li>
+                    <li>• Maximizes revenue potential and margins</li>
+                    <li>• Provides flexibility in infrastructure choices</li>
+                    <li>• Enables best-in-class technology selection</li>
+                    <li>• Supports rapid market adaptation</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Best Practices */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
