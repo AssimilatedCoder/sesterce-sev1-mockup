@@ -293,10 +293,10 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
     const days = getDaysUntilExpiry(expiresAt);
     if (days === null) return { status: 'never', color: 'text-gray-500', icon: null };
     
-    if (days < 0) return { status: 'expired', color: 'text-red-600', icon: <XCircle className="w-4 h-4" /> };
-    if (days <= 3) return { status: 'expiring', color: 'text-orange-600', icon: <AlertTriangle className="w-4 h-4" /> };
-    if (days <= 7) return { status: 'warning', color: 'text-yellow-600', icon: <AlertTriangle className="w-4 h-4" /> };
-    return { status: 'active', color: 'text-green-600', icon: <CheckCircle className="w-4 h-4" /> };
+    if (days < 0) return { status: 'expired', color: 'text-gray-600', icon: <XCircle className="w-3 h-3 text-gray-500" /> };
+    if (days <= 3) return { status: 'expiring', color: 'text-gray-600', icon: <AlertTriangle className="w-3 h-3 text-gray-500" /> };
+    if (days <= 7) return { status: 'warning', color: 'text-gray-600', icon: <AlertTriangle className="w-3 h-3 text-gray-500" /> };
+    return { status: 'active', color: 'text-gray-600', icon: <CheckCircle className="w-3 h-3 text-gray-500" /> };
   };
 
   // Clear messages after 5 seconds

@@ -48,7 +48,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Germany',
     country: 'Germany',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.251,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.251, 'EUR'),
@@ -58,7 +58,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'France',
     country: 'France',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.153,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.153, 'EUR'),
@@ -68,7 +68,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Italy',
     country: 'Italy',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.340,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.340, 'EUR'),
@@ -78,7 +78,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Spain',
     country: 'Spain',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.137,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.137, 'EUR'),
@@ -88,7 +88,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Belgium',
     country: 'Belgium',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.241,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.241, 'EUR'),
@@ -98,7 +98,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Netherlands',
     country: 'Netherlands',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.208,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.208, 'EUR'),
@@ -108,7 +108,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Finland',
     country: 'Finland',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.097,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.097, 'EUR'),
@@ -118,7 +118,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Denmark',
     country: 'Denmark',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 1.951,
     originalCurrency: 'DKK',
     priceUSD: 0.307, // Pre-calculated in source
@@ -128,7 +128,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Sweden',
     country: 'Sweden',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.179, // Using USD value from source
     originalCurrency: 'USD',
     priceUSD: 0.179,
@@ -138,7 +138,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Austria',
     country: 'Austria',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.269,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.269, 'EUR'),
@@ -148,7 +148,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Portugal',
     country: 'Portugal',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.149,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.149, 'EUR'),
@@ -158,7 +158,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Greece',
     country: 'Greece',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.253,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.253, 'EUR'),
@@ -173,7 +173,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Bulgaria',
     country: 'Bulgaria',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.125,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.125, 'EUR'),
@@ -184,7 +184,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Croatia',
     country: 'Croatia',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.145,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.145, 'EUR'),
@@ -195,7 +195,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Czech Republic',
     country: 'Czech Republic',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.165,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.165, 'EUR'),
@@ -206,7 +206,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Estonia',
     country: 'Estonia',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.138,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.138, 'EUR'),
@@ -217,7 +217,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Hungary',
     country: 'Hungary',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.115,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.115, 'EUR'),
@@ -228,7 +228,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Latvia',
     country: 'Latvia',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.152,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.152, 'EUR'),
@@ -239,7 +239,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Lithuania',
     country: 'Lithuania',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.148,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.148, 'EUR'),
@@ -250,7 +250,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Poland',
     country: 'Poland',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.158,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.158, 'EUR'),
@@ -261,7 +261,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Romania',
     country: 'Romania',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.142,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.142, 'EUR'),
@@ -272,7 +272,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Slovakia',
     country: 'Slovakia',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.175,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.175, 'EUR'),
@@ -283,7 +283,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Slovenia',
     country: 'Slovenia',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.162,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.162, 'EUR'),
@@ -296,7 +296,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Ireland',
     country: 'Ireland',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.285,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.285, 'EUR'),
@@ -307,7 +307,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Luxembourg',
     country: 'Luxembourg',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.195,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.195, 'EUR'),
@@ -320,7 +320,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Cyprus',
     country: 'Cyprus',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.276,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.276, 'EUR'),
@@ -331,7 +331,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Malta',
     country: 'Malta',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.135,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.135, 'EUR'),
@@ -344,7 +344,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Iceland',
     country: 'Iceland',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.089,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.089, 'EUR'),
@@ -355,7 +355,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Norway',
     country: 'Norway',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.095,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.095, 'EUR'),
@@ -366,7 +366,7 @@ const europeRates: ElectricityRate[] = [
   {
     location: 'Liechtenstein',
     country: 'Liechtenstein',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.185,
     originalCurrency: 'EUR',
     priceUSD: convertToUSD(0.185, 'EUR'),
@@ -447,7 +447,7 @@ const otherRates: ElectricityRate[] = [
   {
     location: 'United Kingdom',
     country: 'United Kingdom',
-    region: 'Europe',
+    region: 'Europe and UK',
     originalPrice: 0.243,
     originalCurrency: 'GBP',
     priceUSD: convertToUSD(0.243, 'GBP'),

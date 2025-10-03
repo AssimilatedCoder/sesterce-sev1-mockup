@@ -53,9 +53,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   const getCustomerTypeColor = (type: string) => {
     switch (type) {
-      case 'industrial': return 'text-blue-600 bg-blue-50';
-      case 'commercial': return 'text-green-600 bg-green-50';
-      case 'business': return 'text-purple-600 bg-purple-50';
+      case 'industrial': return 'text-gray-600 bg-gray-50';
+      case 'commercial': return 'text-gray-600 bg-gray-50';
+      case 'business': return 'text-gray-600 bg-gray-50';
       default: return 'text-gray-600 bg-gray-50';
     }
   };
@@ -137,7 +137,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                           setIsOpen(false);
                         }}
                         className={`w-full px-5 py-2 text-left hover:bg-gray-50 flex items-center justify-between ${
-                          selectedLocation === rate.location ? 'bg-green-50 text-green-700' : ''
+                          selectedLocation === rate.location ? 'bg-gray-100 text-gray-800' : ''
                         }`}
                       >
                         <div className="flex-1">
@@ -151,7 +151,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
                           <span className={`px-2 py-1 text-xs rounded-full ${getCustomerTypeColor(rate.customerType)}`}>
                             {rate.customerType}
                           </span>
-                          <span className="text-sm font-semibold text-green-600">
+                          <span className="text-sm font-semibold text-gray-600">
                             {formatRate(rate)}
                           </span>
                         </div>
@@ -184,7 +184,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         <div className="mt-1 text-xs text-gray-500">
           <div className="flex items-center justify-between">
             <span>Original: {selectedRate.originalPrice} {selectedRate.originalCurrency}/kWh</span>
-            <span className="text-green-600 font-medium">
+            <span className="text-gray-600 font-medium">
               Converted: {formatRate(selectedRate)}
             </span>
           </div>

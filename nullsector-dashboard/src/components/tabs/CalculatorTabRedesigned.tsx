@@ -273,20 +273,20 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               return (
                 <div className="mt-2 space-y-1">
                   {spec.warnings && spec.warnings.map((warning, index) => (
-                    <div key={index} className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" />
+                    <div key={index} className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3 text-gray-500" />
                       {warning}
                     </div>
                   ))}
                   {spec.vendor === 'amd' && (
-                    <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" />
+                    <div className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3 text-gray-500" />
                       AMD ROCm software stack required
                     </div>
                   )}
                   {spec.interconnect !== 'nvlink' && config.numGPUs > 10000 && (
-                    <div className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-medium flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" />
+                    <div className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3 text-gray-500" />
                       Non-NVLink architecture - consider networking implications for large scale
                     </div>
                   )}
@@ -319,7 +319,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               <option value="liquid">Liquid Cooling</option>
             </select>
             {coolingRequired && (
-              <span className="text-xs text-orange-600 mt-1 block">Liquid cooling required</span>
+              <span className="text-xs text-gray-600 mt-1 block">Liquid cooling required</span>
             )}
           </div>
           
@@ -484,7 +484,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         onChange={(e) => handleChange(t.id, Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)))}
                         className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
                       />
-                      <span className="text-sm font-semibold text-blue-600">%</span>
+                      <span className="text-sm font-semibold text-gray-600">%</span>
                     </div>
                     <div className="text-[11px] text-gray-500 mt-1">{t.desc}</div>
                   </div>
@@ -502,7 +502,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {(() => {
               const td2 = config.tierDistribution || { tier1: 30, tier2: 35, tier3: 25, tier4: 10 };
               const total = td2.tier1 + td2.tier2 + td2.tier3 + td2.tier4;
-              return Math.abs(total - 100) > 0.1 ? <span className="text-red-600 ml-1">(Total must equal 100%)</span> : null;
+              return Math.abs(total - 100) > 0.1 ? <span className="text-gray-600 ml-1">(Total must equal 100%)</span> : null;
             })()}
           </div>
         </div>
@@ -512,7 +512,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       {/* Comprehensive Storage Configuration */}
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
         <h3 
-          className="text-sm font-semibold text-blue-800 mb-4 flex items-center gap-2 cursor-pointer"
+          className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
           onClick={() => toggleSection('storage')}
         >
           <HardDrive className="w-3 h-3 text-gray-500" />
@@ -561,18 +561,18 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
             {/* Storage Tier Selection */}
             <div className="mb-6">
-              <h4 className="text-sm font-medium text-blue-800 mb-3">Select Storage Tiers & Distribution</h4>
+              <h4 className="text-sm font-medium text-gray-800 mb-3">Select Storage Tiers & Distribution</h4>
               <div className="space-y-3">
                 {/* Extreme Performance Tiers */}
                 <div className="bg-red-50 p-3 rounded-lg border border-red-200">
-                  <h5 className="text-xs font-semibold text-red-800 mb-2">🚀 Extreme Performance (All-NVMe, &lt;100μs latency)</h5>
+                  <h5 className="text-xs font-semibold text-gray-800 mb-2">🚀 Extreme Performance (All-NVMe, &lt;100μs latency)</h5>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input 
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('vast-universal') || false}
                         onChange={(e) => toggleStorageTier('vast-universal', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">VAST Universal</div>
@@ -586,7 +586,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('weka-parallel') || false}
                         onChange={(e) => toggleStorageTier('weka-parallel', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">WEKA Parallel</div>
@@ -600,7 +600,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('ddn-exascaler') || false}
                         onChange={(e) => toggleStorageTier('ddn-exascaler', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">DDN EXAScaler</div>
@@ -613,14 +613,14 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
                 {/* High Performance Tiers */}
                 <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                  <h5 className="text-xs font-semibold text-orange-800 mb-2">⚡ High Performance (All-Flash, &lt;1ms latency)</h5>
+                  <h5 className="text-xs font-semibold text-gray-800 mb-2">⚡ High Performance (All-Flash, &lt;1ms latency)</h5>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input 
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('pure-flashblade') || false}
                         onChange={(e) => toggleStorageTier('pure-flashblade', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">Pure FlashBlade//E</div>
@@ -634,7 +634,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('netapp-aff') || false}
                         onChange={(e) => toggleStorageTier('netapp-aff', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">NetApp AFF</div>
@@ -647,14 +647,14 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
                 {/* Balanced/Ceph Tiers */}
                 <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                  <h5 className="text-xs font-semibold text-green-800 mb-2">⚖️ Balanced Performance/Cost (Ceph-based, &lt;5ms latency)</h5>
+                  <h5 className="text-xs font-semibold text-gray-800 mb-2">⚖️ Balanced Performance/Cost (Ceph-based, &lt;5ms latency)</h5>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input 
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('ceph-nvme') || false}
                         onChange={(e) => toggleStorageTier('ceph-nvme', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">Ceph All-NVMe</div>
@@ -668,7 +668,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('ceph-hybrid') || false}
                         onChange={(e) => toggleStorageTier('ceph-hybrid', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">Ceph Hybrid</div>
@@ -682,7 +682,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('dell-powerscale') || false}
                         onChange={(e) => toggleStorageTier('dell-powerscale', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">Dell PowerScale</div>
@@ -695,14 +695,14 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
                 {/* Cost-Optimized Tiers */}
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <h5 className="text-xs font-semibold text-blue-800 mb-2">💰 Cost-Optimized (HDD/Object, &lt;100ms latency)</h5>
+                  <h5 className="text-xs font-semibold text-gray-800 mb-2">💰 Cost-Optimized (HDD/Object, &lt;100ms latency)</h5>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input 
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('ceph-hdd') || false}
                         onChange={(e) => toggleStorageTier('ceph-hdd', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">Ceph HDD</div>
@@ -716,7 +716,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                         type="checkbox"
                         checked={config.selectedStorageTiers?.includes('s3-compatible') || false}
                         onChange={(e) => toggleStorageTier('s3-compatible', e.target.checked)}
-                        className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
                       <div className="text-xs">
                         <div className="font-medium">S3 Object (MinIO/Wasabi)</div>
@@ -732,7 +732,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {/* Distribution Configuration */}
             {config.selectedStorageTiers?.length > 0 && (
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-blue-800 mb-3">Configure Tier Distribution (Must total 100%)</h4>
+                <h4 className="text-sm font-medium text-gray-800 mb-3">Configure Tier Distribution (Must total 100%)</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {config.selectedStorageTiers.map((tierId: string) => {
                     const tier = storageArchitectures[tierId];
@@ -759,7 +759,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 <div className="mt-2 text-xs text-gray-600">
                   Total: {Object.values(config.storageTierDistribution || {}).reduce((sum: number, val: any) => sum + (val || 0), 0)}%
                   {Object.values(config.storageTierDistribution || {}).reduce((sum: number, val: any) => sum + (val || 0), 0) !== 100 && 
-                    <span className="text-red-600 ml-1">(Must equal 100%)</span>
+                    <span className="text-gray-600 ml-1">(Must equal 100%)</span>
                   }
                 </div>
               </div>
@@ -767,7 +767,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
             {/* Workload Mix */}
             <div className="mb-6">
-              <h4 className="text-sm font-medium text-blue-800 mb-3">Workload Distribution (%) - Affects Bandwidth Requirements</h4>
+              <h4 className="text-sm font-medium text-gray-800 mb-3">Workload Distribution (%) - Affects Bandwidth Requirements</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">Training Workloads</label>
@@ -816,7 +816,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
             {/* Tenant Mix */}
             <div>
-              <h4 className="text-sm font-medium text-blue-800 mb-3">Multi-Tenant Distribution (%) - Affects Capacity Requirements</h4>
+              <h4 className="text-sm font-medium text-gray-800 mb-3">Multi-Tenant Distribution (%) - Affects Capacity Requirements</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">Whale Tenants (&gt;1000 GPUs)</label>
@@ -866,11 +866,11 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {/* Validation Warnings */}
             {config.storageWarnings?.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
-                <h4 className="text-xs font-semibold text-yellow-800 mb-2">⚠️ Configuration Warnings</h4>
+                <h4 className="text-xs font-semibold text-gray-800 mb-2">⚠️ Configuration Warnings</h4>
                 <ul className="space-y-1">
                   {config.storageWarnings.map((warning: string, index: number) => (
-                    <li key={index} className="text-xs text-yellow-700 flex items-start gap-2">
-                      <span className="text-yellow-600 mt-0.5">•</span>
+                    <li key={index} className="text-xs text-gray-700 flex items-start gap-2">
+                      <span className="text-gray-600 mt-0.5">•</span>
                       <span>{warning}</span>
                     </li>
                   ))}
@@ -984,7 +984,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                           setComplianceRequirements(current.filter((c: string) => c !== compliance));
                         }
                       }}
-                      className="rounded border-gray-300 text-green-600 focus:ring-green-500 mr-2"
+                      className="rounded border-gray-300 text-gray-600 focus:ring-gray-500 mr-2"
                     />
                     {compliance}
                   </label>
@@ -995,7 +995,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {/* Stack Cost Breakdown */}
             {config.softwareStack && config.numGPUs > 0 && (
               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
                   <DollarSign className="w-3 h-3 text-gray-500" />
                   Software Stack Cost Analysis
                 </h4>
@@ -1034,7 +1034,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {/* Recommended Stack Based on Requirements */}
             {config.numGPUs > 0 && (
               <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="text-xs font-semibold text-green-800 mb-1 flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-gray-800 mb-1 flex items-center gap-2">
                   <Zap className="w-3 h-3 text-gray-500" />
                   AI-Recommended Stack
                 </h4>
@@ -1050,12 +1050,12 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   });
                   const recommendedStack = softwareStacks[recommended];
                   return (
-                    <p className="text-xs text-green-700">
+                    <p className="text-xs text-gray-700">
                       Based on your requirements, we recommend: <strong>{recommendedStack.name}</strong>
                       {config.softwareStack !== recommended && (
                         <button
                           onClick={() => setSoftwareStack(recommended)}
-                          className="ml-2 text-green-600 underline hover:text-green-800"
+                          className="ml-2 text-gray-600 underline hover:text-gray-800"
                         >
                           Apply Recommendation
                         </button>
@@ -1146,7 +1146,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   type="checkbox"
                   checked={config.enableBluefield}
                   onChange={(e) => setEnableBluefield(e.target.checked)}
-                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                 />
                 Enable BlueField-3 DPUs
               </label>
