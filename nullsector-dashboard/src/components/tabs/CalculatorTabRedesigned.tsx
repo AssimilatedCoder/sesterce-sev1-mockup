@@ -280,7 +280,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         setValidationSummary(null);
       }
     }
-  }, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, calculate]);
+  }, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation]);
 
   // Trigger calculation when basic configuration changes (for immediate feedback)
   useEffect(() => {
@@ -290,7 +290,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, config.storagePreset, config.tierDistribution, calculate]);
+  }, [config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, config.storagePreset, config.tierDistribution]);
 
   // Infrastructure-first mode calculations
   useEffect(() => {

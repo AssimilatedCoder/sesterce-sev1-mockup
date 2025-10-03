@@ -1,0 +1,45 @@
+# Fix for Potential Infinite Loop in CalculatorTabRedesigned.tsx
+
+## Issue
+The `calculate` function is included in useEffect dependency arrays, but it's passed as a prop from parent component.
+If the parent component recreates this function on every render, it will cause infinite re-renders and potential memory leaks.
+
+## Lines to Fix
+
+### Line 283 (useEffect for enhanced TCO calculation)
+```typescript
+// BEFORE (problematic)
+}, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, calculate]);
+
+// AFTER (fixed)
+}, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation]);
+```
+
+### Line 293 (useEffect for immediate feedback)
+```typescript
+// BEFORE (problematic)
+}, [config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, config.storagePreset, config.tierDistribution, calculate]);
+
+// AFTER (fixed)
+}, [config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, config.storagePreset, config.tierDistribution]);
+```
+
+## Alternative Solution
+If the calculate function needs to be called, wrap it in useCallback in the parent component:
+
+```typescript
+const calculate = useCallback(() => {
+  // calculation logic
+}, [/* stable dependencies only */]);
+```
+
+## Why This Causes Black Screen
+1. Parent component renders
+2. Creates new `calculate` function
+3. Passes it to CalculatorTabRedesigned
+4. useEffect detects `calculate` changed
+5. Calls calculate() after 300ms timeout
+6. This triggers parent re-render
+7. Loop continues infinitely
+8. Eventually causes memory exhaustion
+9. Browser/React crashes → black screen
