@@ -490,7 +490,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         {/* Always Visible: Total Capacity and Quick Presets */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Total Storage Capacity</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Total use-able Storage Capacity</label>
             <div className="flex items-center gap-2">
               <input 
                 type="number"
@@ -706,6 +706,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                           className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
                         />
                         <span className="text-sm font-semibold text-gray-600">%</span>
+                      </div>
+                      <div className="text-xs text-blue-600 font-medium mt-1">
+                        {((config.storageTierDistribution?.[tierId] || 0) * config.totalStorage / 100).toFixed(1)} PB
                       </div>
                       <div className="text-xs text-gray-500 mt-1">{tier?.description || 'Storage tier'}</div>
                     </div>
