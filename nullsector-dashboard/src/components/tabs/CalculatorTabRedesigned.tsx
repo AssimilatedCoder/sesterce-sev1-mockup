@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Zap, AlertTriangle, Network, HardDrive, Settings,
+  Zap, AlertTriangle, Network, HardDrive,
   ChevronDown, ChevronUp, Package, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
@@ -159,6 +159,31 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   const [infrastructureRequirements, setInfrastructureRequirements] = useState<InfraReqs | null>(null);
   const [enhancedTCOResults, setEnhancedTCOResults] = useState<EnhancedTCOResults | null>(null);
   const [validationSummary, setValidationSummary] = useState<ValidationSummaryType | null>(null);
+  const [missingInputs, setMissingInputs] = useState<string[]>([]);
+
+  // Check for missing required inputs
+  const checkMissingInputs = useCallback(() => {
+    const missing: string[] = [];
+
+    if (!config.gpuModel) missing.push('GPU Model');
+    if (!config.numGPUs || config.numGPUs === 0) missing.push('Number of GPUs');
+    if (!config.region) missing.push('Cluster Location');
+    if (!config.utilization || config.utilization === 0) missing.push('Utilization Rate');
+    if (!config.depreciation || config.depreciation === 0) missing.push('Depreciation Period');
+
+    // Check if service tiers are configured
+    if (serviceTiers.length === 0) {
+      missing.push('Service Tier Configuration');
+    } else {
+      const totalPercent = serviceTiers.reduce((sum, tier) => sum + tier.clusterPercent, 0);
+      if (Math.abs(totalPercent - 100) > 0.1) {
+        missing.push('Service Tier Allocation (must sum to 100%)');
+      }
+    }
+
+    setMissingInputs(missing);
+    return missing;
+  }, [config, serviceTiers]);
 
   // Calculate enhanced TCO when service tiers or infrastructure requirements change
   useEffect(() => {
@@ -194,13 +219,31 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           config.numGPUs
         );
         setValidationSummary(validation);
+
+        // Also trigger legacy calculation for backward compatibility
+        calculate();
       } catch (error) {
         console.error('Error calculating enhanced TCO:', error);
         setEnhancedTCOResults(null);
         setValidationSummary(null);
       }
     }
-  }, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation]);
+  }, [serviceTiers, storageRequirements, infrastructureRequirements, config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, calculate]);
+
+  // Trigger calculation when basic configuration changes (for immediate feedback)
+  useEffect(() => {
+    // Add a small delay to avoid excessive calculations during rapid input changes
+    const timeoutId = setTimeout(() => {
+      calculate();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, config.storagePreset, config.tierDistribution, calculate]);
+
+  // Check for missing inputs when configuration changes
+  useEffect(() => {
+    checkMissingInputs();
+  }, [checkMissingInputs]);
 
   // Initialize storage configuration
   useEffect(() => {
@@ -518,6 +561,34 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
     <div className="space-y-4">
       {/* Architecture Flow Overview */}
       <ArchitectureFlowDiagram isConfigured={serviceTiers.length > 0 && enhancedTCOResults !== null} />
+
+      {/* Missing Inputs Warning */}
+      {missingInputs.length > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-yellow-800 mb-2">
+                Configuration Required
+              </h3>
+              <p className="text-sm text-yellow-700 mb-3">
+                Complete the following inputs to enable full TCO calculations:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {missingInputs.map((input, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm text-yellow-700">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full flex-shrink-0"></div>
+                    <span>{input}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-yellow-600 mt-3">
+                💡 Calculations update automatically as you provide inputs. No manual calculation required.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Software Licensing Warning Banner */}
       <WarningBanner
@@ -1506,108 +1577,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         )}
       </div>
 
-      {/* Advanced Options */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 
-          className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
-          onClick={() => toggleSection('advanced')}
-        >
-          <Settings className="w-3 h-3 text-gray-500" />
-          Advanced Options
-          {expandedSections.advanced ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
-        </h3>
-        
-        {expandedSections.advanced && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">PUE Override</label>
-              <input 
-                type="text"
-                value={config.pueOverride}
-                onChange={(e) => setPueOverride(e.target.value)}
-                placeholder="Auto"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                Leave blank for auto
-              </span>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">GPU Unit Price Override</label>
-              <input 
-                type="text"
-                value={config.gpuPriceOverride}
-                onChange={(e) => setGpuPriceOverride(e.target.value)}
-                placeholder={formatCurrency(spec?.unitPrice || 0)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                Override GPU price
-              </span>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Maintenance %/year</label>
-              <input 
-                type="number"
-                value={config.maintenancePercent}
-                onChange={(e) => setMaintenancePercent(parseInt(e.target.value) || 3)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                min="0"
-                max="10"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                Of hardware CAPEX
-              </span>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Staff Multiplier</label>
-              <input 
-                type="number"
-                value={config.staffMultiplier}
-                onChange={(e) => setStaffMultiplier(parseFloat(e.target.value) || 1)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                min="0.5"
-                max="2"
-                step="0.1"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                Adjust staff costs
-              </span>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Custom Energy Rate ({formatCurrency(1)}/kWh)</label>
-              <input 
-                type="text"
-                value={config.customEnergyRate}
-                onChange={(e) => setCustomEnergyRate(e.target.value)}
-                placeholder={(() => {
-                  const locationRate = getRecommendedRate(config.region);
-                  const rate = locationRate ? convertElectricityRate(locationRate, 'USD') : (regionRates[config.region]?.rate || 0.05);
-                  return formatCurrency(rate);
-                })()}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                Override regional rate
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* Calculate Button */}
-      <div className="flex justify-center">
-        <button
-          onClick={calculate}
-          className="px-8 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
-        >
-          Calculate TCO
-        </button>
-      </div>
 
       {/* Results Section */}
       {results && (

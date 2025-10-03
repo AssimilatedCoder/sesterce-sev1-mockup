@@ -5,11 +5,13 @@ export interface ServiceTierConfig {
   id: string;
   name: string;
   description: string;
+  type: 'bareMetalWhale' | 'orchestratedK8s' | 'managedMLOps' | 'inferenceService';
   clusterPercent: number;
   trainingPercent: number;
   inferencePercent: number; // Auto-calculated as 100 - trainingPercent
   typicalCustomers: string;
   slaRequirement: string;
+  serviceCategory: 'IaaS' | 'PaaS' | 'SaaS';
 }
 
 export interface WorkloadPerformanceFactors {
@@ -58,19 +60,63 @@ export interface InfrastructureRequirements {
   };
 }
 
-// Performance factors based on real-world GPU cluster deployments
-export const PERFORMANCE_FACTORS: WorkloadPerformanceFactors = {
-  training: {
-    bandwidth: 250,  // GB/s per 100 GPUs (checkpoint writes, dataset streaming)
-    iops: 50000,     // IOPS per 100 GPUs (metadata operations)
-    capacity: 500,   // TB per 100 GPUs (datasets, checkpoints, logs)
-    latency: 1       // <1ms for training efficiency
+// Performance factors based on real-world GPU cluster deployments and service tier types
+export const PERFORMANCE_FACTORS: Record<string, WorkloadPerformanceFactors> = {
+  bareMetalWhale: {
+    training: {
+      bandwidth: 300,  // GB/s per 100 GPUs - massive model checkpoints
+      iops: 50000,     // IOPS per 100 GPUs
+      capacity: 600,   // TB per 100 GPUs
+      latency: 5       // <5ms for optimal training
+    },
+    inference: {
+      bandwidth: 60,   // GB/s per 100 GPUs
+      iops: 150000,    // IOPS per 100 GPUs
+      capacity: 120,   // TB per 100 GPUs
+      latency: 10      // <10ms for real-time inference
+    }
   },
-  inference: {
-    bandwidth: 50,   // GB/s per 100 GPUs (model serving, batch processing)
-    iops: 200000,    // IOPS per 100 GPUs (frequent model weight access)
-    capacity: 100,   // TB per 100 GPUs (models, cache, results)
-    latency: 5       // <5ms acceptable for most inference
+  orchestratedK8s: {
+    training: {
+      bandwidth: 220,  // GB/s per 100 GPUs - standard training workloads
+      iops: 75000,     // IOPS per 100 GPUs
+      capacity: 450,   // TB per 100 GPUs
+      latency: 10      // <10ms acceptable
+    },
+    inference: {
+      bandwidth: 50,   // GB/s per 100 GPUs
+      iops: 200000,    // IOPS per 100 GPUs
+      capacity: 100,   // TB per 100 GPUs
+      latency: 15      // <15ms acceptable
+    }
+  },
+  managedMLOps: {
+    training: {
+      bandwidth: 180,  // GB/s per 100 GPUs - managed, optimized I/O
+      iops: 100000,    // Higher IOPS for experiment tracking
+      capacity: 400,   // TB per 100 GPUs - includes versioning overhead
+      latency: 15      // <15ms acceptable with platform overhead
+    },
+    inference: {
+      bandwidth: 70,   // Higher than basic due to A/B testing
+      iops: 250000,    // High IOPS for model registry access
+      capacity: 150,   // More models cached for experimentation
+      latency: 12      // <12ms for managed serving
+    }
+  },
+  inferenceService: {
+    training: {
+      bandwidth: 40,   // GB/s per 100 GPUs - minimal training, mostly fine-tuning
+      iops: 30000,     // IOPS per 100 GPUs
+      capacity: 50,    // TB per 100 GPUs
+      latency: 20      // <20ms acceptable for batch training
+    },
+    inference: {
+      bandwidth: 80,   // GB/s per 100 GPUs - optimized for serving
+      iops: 300000,    // IOPS per 100 GPUs - very high for API serving
+      capacity: 200,   // TB per 100 GPUs - large model cache
+      latency: 5       // <5ms for API response times
+    }
   }
 };
 
@@ -80,33 +126,77 @@ export const DEFAULT_SERVICE_TIERS: ServiceTierConfig[] = [
     id: 'tier1_whale',
     name: 'Tier 1: Bare Metal GPU Access',
     description: 'Direct hardware access for whale customers',
-    clusterPercent: 25,
+    type: 'bareMetalWhale',
+    clusterPercent: 20,
     trainingPercent: 80,
     inferencePercent: 20,
-    typicalCustomers: 'OpenAI, Anthropic, Cohere',
-    slaRequirement: '99.9% uptime, dedicated partitions'
+    typicalCustomers: 'OpenAI, Anthropic, Cohere, Meta AI',
+    slaRequirement: '99.9% uptime, dedicated partitions',
+    serviceCategory: 'IaaS'
   },
   {
     id: 'tier2_orchestrated',
     name: 'Tier 2: Orchestrated Kubernetes',
     description: 'Managed Kubernetes with GPU scheduling',
-    clusterPercent: 50,
-    trainingPercent: 60,
-    inferencePercent: 40,
-    typicalCustomers: 'Enterprise AI teams, Research labs',
-    slaRequirement: '99.5% uptime, shared with QoS'
+    type: 'orchestratedK8s',
+    clusterPercent: 30,
+    trainingPercent: 65,
+    inferencePercent: 35,
+    typicalCustomers: 'Fortune 500 ML teams, Fintech companies',
+    slaRequirement: '99.5% uptime, shared with QoS',
+    serviceCategory: 'PaaS'
   },
   {
-    id: 'tier3_inference',
-    name: 'Tier 3: Inference-as-a-Service',
-    description: 'API-based inference services',
-    clusterPercent: 25,
+    id: 'tier3_mlops',
+    name: 'Tier 3: Managed MLOps Platform',
+    description: 'Full MLOps stack with experiment tracking, model registry, and pipeline orchestration',
+    type: 'managedMLOps',
+    clusterPercent: 35,
+    trainingPercent: 55,
+    inferencePercent: 45,
+    typicalCustomers: 'Mid-market enterprises, Healthcare AI, Retail analytics teams',
+    slaRequirement: '99.0% uptime, managed platform SLA',
+    serviceCategory: 'PaaS'
+  },
+  {
+    id: 'tier4_inference',
+    name: 'Tier 4: Inference-as-a-Service',
+    description: 'API-based inference services with serverless scaling',
+    type: 'inferenceService',
+    clusterPercent: 15,
     trainingPercent: 10,
     inferencePercent: 90,
-    typicalCustomers: 'SaaS providers, API services',
-    slaRequirement: '99.0% uptime, best effort'
+    typicalCustomers: 'SaaS providers, API services, Chatbot companies',
+    slaRequirement: '99.0% uptime, best effort',
+    serviceCategory: 'SaaS'
   }
 ];
+
+/**
+ * Calculate MLOps-specific storage overhead
+ */
+function calculateMLOpsOverhead(gpusInTier: number, trainingPercent: number) {
+  const experiments = gpusInTier * 2; // Assume 2 experiments per GPU per month
+  const trainingRatio = trainingPercent / 100;
+  
+  return {
+    // Artifact storage (model checkpoints, experiment tracking)
+    artifactStorage: experiments * 0.5 * trainingRatio, // TB
+    
+    // Dataset versioning storage
+    datasetStorage: gpusInTier * 2 * trainingRatio, // TB per GPU
+    
+    // Metadata and metrics storage
+    metadataStorage: experiments * 0.01, // TB (small but critical)
+    metadataIOPS: experiments * 100, // High IOPS for queries
+    
+    // Feature store requirements
+    featureStore: gpusInTier * 0.5, // TB
+    
+    // Artifact bandwidth for uploads
+    artifactBandwidth: Math.min(50, gpusInTier * 0.5) // GB/s, capped at 50
+  };
+}
 
 /**
  * Calculate storage requirements based on service tier configuration
@@ -133,34 +223,80 @@ export function calculateStorageRequirements(
     const trainingGPUs = gpusInTier * (tier.trainingPercent / 100);
     const inferenceGPUs = gpusInTier * (tier.inferencePercent / 100);
 
-    // Calculate bandwidth requirements
+    // Get tier-specific performance factors
+    const tierFactors = PERFORMANCE_FACTORS[tier.type] || PERFORMANCE_FACTORS.orchestratedK8s;
+
+    // Calculate bandwidth requirements using tier-specific factors
     requirements.totalBandwidth += 
-      (trainingGPUs / 100) * PERFORMANCE_FACTORS.training.bandwidth +
-      (inferenceGPUs / 100) * PERFORMANCE_FACTORS.inference.bandwidth;
+      (trainingGPUs / 100) * tierFactors.training.bandwidth +
+      (inferenceGPUs / 100) * tierFactors.inference.bandwidth;
 
-    // Calculate IOPS requirements
+    // Calculate IOPS requirements using tier-specific factors
     requirements.totalIOPS += 
-      (trainingGPUs / 100) * PERFORMANCE_FACTORS.training.iops +
-      (inferenceGPUs / 100) * PERFORMANCE_FACTORS.inference.iops;
+      (trainingGPUs / 100) * tierFactors.training.iops +
+      (inferenceGPUs / 100) * tierFactors.inference.iops;
 
-    // Calculate capacity requirements
+    // Calculate capacity requirements using tier-specific factors
     requirements.totalCapacity += 
-      (trainingGPUs / 100) * PERFORMANCE_FACTORS.training.capacity +
-      (inferenceGPUs / 100) * PERFORMANCE_FACTORS.inference.capacity;
+      (trainingGPUs / 100) * tierFactors.training.capacity +
+      (inferenceGPUs / 100) * tierFactors.inference.capacity;
 
-    // Determine performance tier distribution based on workload mix
-    if (tier.trainingPercent > 70) {
-      // Training-heavy workloads need extreme performance
-      requirements.performanceTierDistribution.extreme += tier.clusterPercent;
-    } else if (tier.trainingPercent > 40) {
-      // Mixed workloads need high performance
-      requirements.performanceTierDistribution.high += tier.clusterPercent;
-    } else if (tier.trainingPercent > 15) {
-      // Inference-heavy but some training needs balanced
-      requirements.performanceTierDistribution.balanced += tier.clusterPercent;
-    } else {
-      // Pure inference can use cost-optimized
-      requirements.performanceTierDistribution.cost += tier.clusterPercent;
+    // Add MLOps-specific overhead for managed MLOps tier
+    if (tier.type === 'managedMLOps') {
+      const mlopsOverhead = calculateMLOpsOverhead(gpusInTier, tier.trainingPercent);
+      requirements.totalCapacity += mlopsOverhead.artifactStorage + mlopsOverhead.datasetStorage + mlopsOverhead.metadataStorage;
+      requirements.totalIOPS += mlopsOverhead.metadataIOPS;
+      requirements.totalBandwidth += mlopsOverhead.artifactBandwidth;
+    }
+
+    // Determine performance tier distribution based on service tier type and workload mix
+    switch (tier.type) {
+      case 'bareMetalWhale':
+        // Whales get dedicated ultra-high performance
+        requirements.performanceTierDistribution.extreme += tier.clusterPercent * 0.6;
+        requirements.performanceTierDistribution.high += tier.clusterPercent * 0.4;
+        break;
+        
+      case 'orchestratedK8s':
+        // Standard k8s gets high-perf mix based on training ratio
+        if (tier.trainingPercent > 70) {
+          requirements.performanceTierDistribution.extreme += tier.clusterPercent * 0.4;
+          requirements.performanceTierDistribution.high += tier.clusterPercent * 0.6;
+        } else {
+          requirements.performanceTierDistribution.high += tier.clusterPercent * 0.7;
+          requirements.performanceTierDistribution.balanced += tier.clusterPercent * 0.3;
+        }
+        break;
+        
+      case 'managedMLOps':
+        // MLOps needs balanced with object storage considerations
+        requirements.performanceTierDistribution.high += tier.clusterPercent * 0.3;
+        requirements.performanceTierDistribution.balanced += tier.clusterPercent * 0.5;
+        requirements.performanceTierDistribution.cost += tier.clusterPercent * 0.2; // Object storage
+        break;
+        
+      case 'inferenceService':
+        // Inference mostly needs fast cache and capacity
+        if (tier.trainingPercent > 20) {
+          requirements.performanceTierDistribution.balanced += tier.clusterPercent * 0.6;
+          requirements.performanceTierDistribution.cost += tier.clusterPercent * 0.4;
+        } else {
+          requirements.performanceTierDistribution.balanced += tier.clusterPercent * 0.3;
+          requirements.performanceTierDistribution.cost += tier.clusterPercent * 0.7;
+        }
+        break;
+        
+      default:
+        // Fallback to original logic
+        if (tier.trainingPercent > 70) {
+          requirements.performanceTierDistribution.extreme += tier.clusterPercent;
+        } else if (tier.trainingPercent > 40) {
+          requirements.performanceTierDistribution.high += tier.clusterPercent;
+        } else if (tier.trainingPercent > 15) {
+          requirements.performanceTierDistribution.balanced += tier.clusterPercent;
+        } else {
+          requirements.performanceTierDistribution.cost += tier.clusterPercent;
+        }
     }
   });
 

@@ -29,7 +29,7 @@ export interface ValidationSummary {
 /**
  * Validate service tier configuration
  */
-export function validateServiceTiers(serviceTiers: ServiceTierConfig[]): ValidationResult[] {
+export function validateServiceTiers(serviceTiers: ServiceTierConfig[], totalGPUs: number): ValidationResult[] {
   const results: ValidationResult[] = [];
 
   // Check if service tier percentages sum to 100%
@@ -94,6 +94,80 @@ export function validateServiceTiers(serviceTiers: ServiceTierConfig[]): Validat
       message: `${extremeTier.name} has >90% training workload and >50% cluster allocation - this is very expensive`,
       severity: 'medium',
       recommendation: 'Consider balancing workload types or reducing cluster allocation for cost optimization',
+      affectedComponent: 'ServiceTierConfiguration'
+    });
+  }
+
+  // MLOps-specific validations
+  const mlOpsTier = serviceTiers.find(t => t.type === 'managedMLOps');
+  if (mlOpsTier) {
+    const mlOpsGPUs = (mlOpsTier.clusterPercent / 100) * totalGPUs;
+    
+    // Check if MLOps tier has sufficient scale
+    if (mlOpsGPUs < 100 && mlOpsGPUs > 0) {
+      results.push({
+        type: 'warning',
+        category: 'service_tiers',
+        message: 'MLOps platform has overhead; consider minimum 100 GPUs for efficiency',
+        severity: 'medium',
+        recommendation: 'MLOps platforms have significant software and operational overhead that becomes cost-effective at larger scales',
+        affectedComponent: 'ServiceTierConfiguration'
+      });
+    }
+    
+    // Check storage ratio for MLOps
+    if (mlOpsTier.trainingPercent < 30) {
+      results.push({
+        type: 'info',
+        category: 'service_tiers',
+        message: 'Low training % for MLOps tier; consider Tier 4 (Inference) instead',
+        severity: 'low',
+        recommendation: 'MLOps platforms are optimized for training workflows with experiment tracking and model versioning',
+        affectedComponent: 'ServiceTierConfiguration'
+      });
+    }
+    
+    if (mlOpsTier.trainingPercent > 75) {
+      results.push({
+        type: 'info',
+        category: 'service_tiers',
+        message: 'High training % for MLOps; customers might prefer Tier 2 (K8s) for more control',
+        severity: 'low',
+        recommendation: 'Very training-heavy workloads may benefit from direct Kubernetes access for custom optimization',
+        affectedComponent: 'ServiceTierConfiguration'
+      });
+    }
+
+    // Check for MLOps vs K8s tier balance
+    const k8sTier = serviceTiers.find(t => t.type === 'orchestratedK8s');
+    if (k8sTier && mlOpsTier.clusterPercent > k8sTier.clusterPercent * 2) {
+      results.push({
+        type: 'warning',
+        category: 'service_tiers',
+        message: 'MLOps tier significantly larger than K8s tier - verify target market alignment',
+        severity: 'medium',
+        recommendation: 'Ensure your customer base has sufficient demand for managed MLOps vs self-managed Kubernetes',
+        affectedComponent: 'ServiceTierConfiguration'
+      });
+    }
+  }
+
+  // Check for balanced service category distribution
+  const iaasTiers = serviceTiers.filter(t => t.serviceCategory === 'IaaS');
+  const paasTiers = serviceTiers.filter(t => t.serviceCategory === 'PaaS');
+  const saasTiers = serviceTiers.filter(t => t.serviceCategory === 'SaaS');
+  
+  const iaasPercent = iaasTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+  const paasPercent = paasTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+  const saasPercent = saasTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+
+  if (paasPercent > 70) {
+    results.push({
+      type: 'info',
+      category: 'service_tiers',
+      message: `High PaaS allocation (${paasPercent.toFixed(1)}%) indicates platform-heavy business model`,
+      severity: 'low',
+      recommendation: 'Ensure sufficient operational expertise for managing multiple platform services',
       affectedComponent: 'ServiceTierConfiguration'
     });
   }
@@ -296,7 +370,7 @@ export function validateConfiguration(
   totalGPUs: number
 ): ValidationSummary {
   const allResults: ValidationResult[] = [
-    ...validateServiceTiers(serviceTiers),
+    ...validateServiceTiers(serviceTiers, totalGPUs),
     ...validateStorageRequirements(storageRequirements, totalGPUs),
     ...validateInfrastructureRequirements(infrastructureRequirements, totalGPUs),
     ...validateFinancialMetrics(tcoResults, totalGPUs)

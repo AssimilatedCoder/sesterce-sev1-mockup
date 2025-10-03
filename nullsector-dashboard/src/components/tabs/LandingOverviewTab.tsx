@@ -413,21 +413,26 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
                 <div className="bg-gray-50 p-3 rounded text-xs">
                   <div className="space-y-3">
                     <div>
-                      <strong>Service Tier Types:</strong>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                      <strong>Service Tier Types (4-Tier Structure):</strong>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                         <div>
-                          <div className="font-medium text-blue-700">Tier 1: Whale Customers</div>
-                          <div className="text-gray-600">Bare metal access, highest priority</div>
+                          <div className="font-medium text-gray-800">Tier 1: Bare Metal (IaaS)</div>
+                          <div className="text-gray-600">Direct hardware access for whale customers</div>
                           <div className="text-gray-500">Revenue: $50K/GPU/year</div>
                         </div>
                         <div>
-                          <div className="font-medium text-purple-700">Tier 2: Orchestrated</div>
-                          <div className="text-gray-600">Managed Kubernetes, shared resources</div>
+                          <div className="font-medium text-gray-800">Tier 2: Kubernetes (PaaS)</div>
+                          <div className="text-gray-600">Managed K8s with GPU scheduling</div>
                           <div className="text-gray-500">Revenue: $35K/GPU/year</div>
                         </div>
                         <div>
-                          <div className="font-medium text-green-700">Tier 3: Inference</div>
-                          <div className="text-gray-600">API-based inference services</div>
+                          <div className="font-medium text-gray-800">Tier 3: MLOps Platform (PaaS)</div>
+                          <div className="text-gray-600">Full MLOps stack with experiment tracking</div>
+                          <div className="text-gray-500">Revenue: $45K/GPU/year</div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-800">Tier 4: Inference API (SaaS)</div>
+                          <div className="text-gray-600">Serverless inference services</div>
                           <div className="text-gray-500">Revenue: $25K/GPU/year</div>
                         </div>
                       </div>
@@ -437,7 +442,20 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
                       <ul className="space-y-1 text-gray-600">
                         <li>• <strong>Training workloads:</strong> High bandwidth (3-5 GB/s/GPU), sequential I/O, extreme performance storage</li>
                         <li>• <strong>Inference workloads:</strong> High IOPS (5-10K/GPU), random I/O, balanced performance storage</li>
+                        <li>• <strong>MLOps workloads:</strong> Metadata overhead, experiment tracking, model versioning, artifact storage</li>
                         <li>• <strong>Mixed workloads:</strong> Balanced requirements, cost-optimized tiers for non-critical data</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>New MLOps Platform Tier - The Mid-Market Sweet Spot:</strong>
+                      <ul className="space-y-1 text-gray-600">
+                        <li>• <strong>Full MLOps Stack:</strong> Kubeflow, MLflow, Weights &amp; Biases, feature stores</li>
+                        <li>• <strong>Experiment Tracking:</strong> Automatic versioning, metadata management, artifact storage</li>
+                        <li>• <strong>Model Registry:</strong> Centralized model management with A/B testing capabilities</li>
+                        <li>• <strong>Data Versioning:</strong> Dataset lineage and reproducible experiments</li>
+                        <li>• <strong>Target Market:</strong> Mid-market enterprises, healthcare AI, retail analytics teams</li>
+                        <li>• <strong>Value Proposition:</strong> Data science teams get enterprise ML capabilities without infrastructure complexity</li>
+                        <li>• <strong>Market Gap:</strong> Bridges the gap between basic K8s and expensive bare metal for ML-focused organizations</li>
                       </ul>
                     </div>
                   </div>
@@ -536,6 +554,70 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
                       </ul>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mid-Market MLOps Strategy */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <Target className="w-4 h-4 text-gray-600" />
+              Mid-Market MLOps Strategy &amp; Business Logic
+            </h3>
+
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+              <h4 className="font-medium text-gray-800 mb-3">Why Tier 3 (MLOps Platform) is the Growth Engine</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <h5 className="font-medium mb-2">Market Opportunity</h5>
+                  <ul className="space-y-1 text-xs">
+                    <li>• <strong>Largest addressable market:</strong> Mid-market enterprises (1K-10K employees)</li>
+                    <li>• <strong>High growth segment:</strong> Companies adopting AI but lacking ML infrastructure expertise</li>
+                    <li>• <strong>Premium pricing justified:</strong> $45K/GPU vs $35K for basic K8s due to managed services</li>
+                    <li>• <strong>Sticky customers:</strong> MLOps platforms create vendor lock-in through data and workflows</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="font-medium mb-2">Competitive Advantage</h5>
+                  <ul className="space-y-1 text-xs">
+                    <li>• <strong>Differentiation:</strong> Full-stack ML platform vs commodity compute</li>
+                    <li>• <strong>Higher margins:</strong> Software and services command premium over hardware</li>
+                    <li>• <strong>Operational efficiency:</strong> Standardized MLOps reduces support costs</li>
+                    <li>• <strong>Expansion revenue:</strong> Additional services (AutoML, monitoring) drive growth</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-800 mb-2">Customer Journey</h4>
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div><strong>Stage 1:</strong> Proof of concept on Inference API (Tier 4)</div>
+                  <div><strong>Stage 2:</strong> Scale with MLOps Platform (Tier 3)</div>
+                  <div><strong>Stage 3:</strong> Custom optimization with K8s (Tier 2)</div>
+                  <div><strong>Stage 4:</strong> Enterprise scale with Bare Metal (Tier 1)</div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-800 mb-2">Revenue Optimization</h4>
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div><strong>Land:</strong> Start with inference API for quick wins</div>
+                  <div><strong>Expand:</strong> Migrate to MLOps platform for training</div>
+                  <div><strong>Grow:</strong> Add experiment tracking, model monitoring</div>
+                  <div><strong>Scale:</strong> Enterprise features and dedicated resources</div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-800 mb-2">Cost Structure</h4>
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div><strong>Software:</strong> $205K per 100 GPUs (MLflow, W&B, etc.)</div>
+                  <div><strong>Operations:</strong> 6.5 FTE per 1000 GPUs</div>
+                  <div><strong>Infrastructure:</strong> 10% overhead for platform services</div>
+                  <div><strong>Margin:</strong> 55% gross margin vs 35% for bare metal</div>
                 </div>
               </div>
             </div>

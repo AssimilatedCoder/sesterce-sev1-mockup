@@ -3,10 +3,10 @@ import { Users, AlertTriangle, Info } from 'lucide-react';
 import { 
   ServiceTierConfig, 
   DEFAULT_SERVICE_TIERS, 
-  validateServiceTiers,
   calculateStorageRequirements,
   calculateInfrastructureRequirements
 } from '../../utils/workloadPerformanceCalculations';
+import { validateServiceTiers } from '../../utils/validationRules';
 
 interface ServiceTierConfigurationProps {
   totalGPUs: number;
@@ -22,14 +22,14 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
   onInfrastructureRequirementsChange
 }) => {
   const [serviceTiers, setServiceTiers] = useState<ServiceTierConfig[]>(DEFAULT_SERVICE_TIERS);
-  const [warnings, setWarnings] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<any[]>([]);
   const [touchedTiers, setTouchedTiers] = useState<string[]>([]);
 
   // Recalculate requirements whenever service tiers change
   useEffect(() => {
     const storageReqs = calculateStorageRequirements(serviceTiers, totalGPUs);
     const infraReqs = calculateInfrastructureRequirements(storageReqs, totalGPUs);
-    const validationWarnings = validateServiceTiers(serviceTiers);
+    const validationWarnings = validateServiceTiers(serviceTiers, totalGPUs);
 
     setWarnings(validationWarnings);
     onServiceTiersChange(serviceTiers);
@@ -126,7 +126,16 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
           <div key={tier.id} className="bg-white rounded-lg p-4 border border-gray-200">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <h4 className="text-sm font-medium text-gray-900">{tier.name}</h4>
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="text-sm font-medium text-gray-900">{tier.name}</h4>
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                    tier.serviceCategory === 'IaaS' ? 'bg-gray-200 text-gray-800' :
+                    tier.serviceCategory === 'PaaS' ? 'bg-gray-300 text-gray-800' :
+                    'bg-gray-400 text-gray-800'
+                  }`}>
+                    {tier.serviceCategory}
+                  </span>
+                </div>
                 <p className="text-xs text-gray-600">{tier.description}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   <span className="font-medium">Typical customers:</span> {tier.typicalCustomers}
@@ -250,7 +259,7 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
               <ul className="space-y-1">
                 {warnings.map((warning, index) => (
                   <li key={index} className="text-xs text-yellow-700">
-                    • {warning}
+                    • {typeof warning === 'string' ? warning : warning.message}
                   </li>
                 ))}
               </ul>

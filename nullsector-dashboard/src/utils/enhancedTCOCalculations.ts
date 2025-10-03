@@ -103,11 +103,35 @@ const STORAGE_TIER_COSTS = {
   'Dell PowerScale': { capex: 400000, opex: 80000, total5Year: 800000 }
 };
 
-// Service tier revenue models (annual revenue per GPU)
+// Service tier revenue models (annual revenue per GPU) - Updated for 4-tier structure
 const SERVICE_TIER_REVENUE = {
-  'tier1_whale': 50000,      // $50K per GPU for bare metal access
-  'tier2_orchestrated': 35000, // $35K per GPU for managed K8s
-  'tier3_inference': 25000   // $25K per GPU for inference services
+  'tier1_whale': 50000,        // $50K per GPU for bare metal access (IaaS)
+  'tier2_orchestrated': 35000, // $35K per GPU for managed K8s (PaaS)
+  'tier3_mlops': 45000,        // $45K per GPU for managed MLOps platform (PaaS Premium)
+  'tier4_inference': 25000     // $25K per GPU for inference services (SaaS)
+};
+
+// MLOps platform cost components (annual costs per 100 GPUs)
+const MLOPS_PLATFORM_COSTS = {
+  software: {
+    kubeflow: 50000,        // Managed Kubeflow
+    mlflow: 30000,          // MLflow Enterprise
+    wandb: 45000,           // Weights & Biases
+    dataVersioning: 25000,  // DVC/Pachyderm
+    featureStore: 35000,    // Feast/Tecton
+    monitoring: 20000       // Prometheus/Grafana stack
+  },
+  operations: {
+    platformEngineers: 2,   // FTEs per 1000 GPUs
+    dataEngineers: 1.5,     // FTEs per 1000 GPUs  
+    mlEngineers: 1,         // FTEs per 1000 GPUs
+    supportStaff: 2         // FTEs per 1000 GPUs
+  },
+  infrastructure: {
+    controlPlane: 0.05,     // 5% GPU overhead for platform services
+    monitoring: 0.03,       // 3% overhead for observability
+    cicd: 0.02              // 2% overhead for CI/CD pipelines
+  }
 };
 
 /**
@@ -159,18 +183,50 @@ export function calculateEnhancedTCO(config: EnhancedTCOConfig): EnhancedTCOResu
   const annualPowerCost = totalPowerKW * 8760 * (tcoOverrides.powerPriceOverride || electricityRate);
   const annualCoolingCost = annualPowerCost * 0.15; // 15% of power cost
   
-  // Staff costs based on cluster complexity
+  // Calculate MLOps tier allocation for cost calculations
+  const mlopsGPUs = serviceTiers.find(t => t.id === 'tier3_mlops')?.clusterPercent || 0;
+  
+  // Staff costs based on cluster complexity and MLOps overhead
   const complexityFactor = serviceTiers.length + (storageRequirements.performanceTierDistribution.extreme > 0 ? 2 : 0);
-  const annualStaffCost = (tcoOverrides.staffCostOverride || 150000) * Math.ceil(numGPUs / 5000) * complexityFactor;
+  let annualStaffCost = (tcoOverrides.staffCostOverride || 150000) * Math.ceil(numGPUs / 5000) * complexityFactor;
+  
+  // Add MLOps operational staff costs
+  if (mlopsGPUs > 0) {
+    const mlopsGPUCount = (mlopsGPUs / 100) * numGPUs;
+    const mlopsStaffUnits = mlopsGPUCount / 1000; // Per 1000 GPUs
+    
+    annualStaffCost += mlopsStaffUnits * 150000 * (
+      MLOPS_PLATFORM_COSTS.operations.platformEngineers +
+      MLOPS_PLATFORM_COSTS.operations.dataEngineers +
+      MLOPS_PLATFORM_COSTS.operations.mlEngineers +
+      MLOPS_PLATFORM_COSTS.operations.supportStaff
+    );
+  }
   
   // Maintenance costs
   const maintenancePercent = tcoOverrides.maintenancePercentOverride || 0.08;
   const annualMaintenanceCost = (gpuSystemsCapex + storageCapex) * maintenancePercent;
   
-  // Software licensing (from infrastructure requirements)
-  const annualSoftwareCost = infrastructureRequirements.software.kubernetesLicense +
-                            infrastructureRequirements.software.monitoringStack +
-                            (infrastructureRequirements.software.vastLicense / 5); // Amortize VAST over 5 years
+  // Software licensing (from infrastructure requirements + MLOps platform costs)
+  let annualSoftwareCost = infrastructureRequirements.software.kubernetesLicense +
+                          infrastructureRequirements.software.monitoringStack +
+                          (infrastructureRequirements.software.vastLicense / 5); // Amortize VAST over 5 years
+  
+  // Add MLOps platform costs for tier 3
+  if (mlopsGPUs > 0) {
+    const mlopsGPUCount = (mlopsGPUs / 100) * numGPUs;
+    const mlopsUnits = mlopsGPUCount / 100; // Per 100 GPUs
+    
+    // MLOps software stack costs
+    annualSoftwareCost += mlopsUnits * (
+      MLOPS_PLATFORM_COSTS.software.kubeflow +
+      MLOPS_PLATFORM_COSTS.software.mlflow +
+      MLOPS_PLATFORM_COSTS.software.wandb +
+      MLOPS_PLATFORM_COSTS.software.dataVersioning +
+      MLOPS_PLATFORM_COSTS.software.featureStore +
+      MLOPS_PLATFORM_COSTS.software.monitoring
+    );
+  }
   
   // Storage operations
   const storageOpex = recommendedStorage.reduce((sum, arch) => {
