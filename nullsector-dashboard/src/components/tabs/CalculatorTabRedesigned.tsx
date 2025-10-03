@@ -29,6 +29,19 @@ import {
 } from '../../utils/validationRules';
 import { ValidationSummary } from '../common/ValidationSummary';
 import { ArchitectureFlowDiagram } from '../common/ArchitectureFlowDiagram';
+import { DesignModeSelector, DesignMode } from '../common/DesignModeSelector';
+import { InfrastructureConfiguration, InfrastructureConfig } from '../common/InfrastructureConfiguration';
+import { InfrastructurePresetSelector } from '../common/InfrastructurePresetSelector';
+import { DerivedServiceMix } from '../common/DerivedServiceMix';
+import { 
+  analyzeInfrastructureCapabilities, 
+  deriveOptimalServiceMix, 
+  identifyServiceConstraints,
+  inferWorkloadDistribution,
+  ServiceMixRecommendation,
+  ServiceConstraint,
+  WorkloadDistribution
+} from '../../utils/serviceMixDerivation';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -161,6 +174,41 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   const [validationSummary, setValidationSummary] = useState<ValidationSummaryType | null>(null);
   const [missingInputs, setMissingInputs] = useState<string[]>([]);
 
+  // State for dual-mode design
+  const [designMode, setDesignMode] = useState<DesignMode>('service');
+  const [infrastructureConfig, setInfrastructureConfig] = useState<InfrastructureConfig>({
+    compute: {
+      gpuModel: 'H100 SXM',
+      totalGPUs: 1000,
+      nodeConfiguration: 'DGX H100 (8x H100 SXM)',
+      cpuToGpuRatio: '1:2 (Balanced)'
+    },
+    networking: {
+      fabricType: 'InfiniBand NDR 400Gb (Training optimized)',
+      topologyType: 'Fat Tree (Non-blocking)',
+      railConfiguration: 'Dual Rail (Redundant)',
+      storageNetworkSeparation: true
+    },
+    storage: {
+      ultraHighPerf: { capacity: 0, unit: 'TB' },
+      highPerf: { capacity: 2, unit: 'PB' },
+      mediumPerf: { capacity: 500, unit: 'TB' },
+      capacityTier: { capacity: 20, unit: 'PB' },
+      objectStore: { capacity: 5, unit: 'PB' }
+    },
+    power: {
+      totalPowerCapacity: 15,
+      coolingType: 'Liquid Cooled (Direct chip)',
+      powerRedundancy: 'N+2',
+      pue: 1.2
+    }
+  });
+  
+  // State for infrastructure-first derived results
+  const [derivedServiceMix, setDerivedServiceMix] = useState<ServiceMixRecommendation | null>(null);
+  const [derivedWorkloadDist, setDerivedWorkloadDist] = useState<WorkloadDistribution | null>(null);
+  const [infrastructureConstraints, setInfrastructureConstraints] = useState<ServiceConstraint[]>([]);
+
   // Check for missing required inputs
   const checkMissingInputs = useCallback(() => {
     const missing: string[] = [];
@@ -239,6 +287,24 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
     return () => clearTimeout(timeoutId);
   }, [config.gpuModel, config.numGPUs, config.coolingType, config.region, config.utilization, config.depreciation, config.storagePreset, config.tierDistribution, calculate]);
+
+  // Infrastructure-first mode calculations
+  useEffect(() => {
+    if (designMode === 'infrastructure') {
+      const capabilities = analyzeInfrastructureCapabilities(infrastructureConfig);
+      const serviceMix = deriveOptimalServiceMix(capabilities);
+      const workloadDist = inferWorkloadDistribution(infrastructureConfig, serviceMix);
+      const constraints = identifyServiceConstraints(capabilities);
+      
+      setDerivedServiceMix(serviceMix);
+      setDerivedWorkloadDist(workloadDist);
+      setInfrastructureConstraints(constraints);
+      
+      // Update config to match infrastructure
+      setNumGPUs(infrastructureConfig.compute.totalGPUs);
+      setGpuModel(infrastructureConfig.compute.gpuModel);
+    }
+  }, [designMode, infrastructureConfig, setNumGPUs, setGpuModel]);
 
   // Check for missing inputs when configuration changes
   useEffect(() => {
@@ -559,6 +625,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
   return (
     <div className="space-y-4">
+      {/* Design Mode Selector */}
+      <DesignModeSelector mode={designMode} onModeChange={setDesignMode} />
+
       {/* Architecture Flow Overview */}
       <ArchitectureFlowDiagram isConfigured={serviceTiers.length > 0 && enhancedTCOResults !== null} />
 
@@ -726,13 +795,36 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
       </div>
 
-      {/* New Service Tier Configuration */}
-      <ServiceTierConfiguration
-        totalGPUs={config.numGPUs}
-        onServiceTiersChange={setServiceTiers}
-        onStorageRequirementsChange={setStorageRequirements}
-        onInfrastructureRequirementsChange={setInfrastructureRequirements}
-      />
+      {/* Conditional Configuration Based on Design Mode */}
+      {designMode === 'service' ? (
+        <ServiceTierConfiguration
+          totalGPUs={config.numGPUs}
+          onServiceTiersChange={setServiceTiers}
+          onStorageRequirementsChange={setStorageRequirements}
+          onInfrastructureRequirementsChange={setInfrastructureRequirements}
+        />
+      ) : (
+        <>
+          {/* Infrastructure Preset Selector */}
+          <InfrastructurePresetSelector onPresetSelect={setInfrastructureConfig} />
+          
+          {/* Infrastructure Configuration */}
+          <InfrastructureConfiguration
+            config={infrastructureConfig}
+            onChange={setInfrastructureConfig}
+          />
+          
+          {/* Derived Service Mix Display */}
+          {derivedServiceMix && derivedWorkloadDist && (
+            <DerivedServiceMix
+              serviceMix={derivedServiceMix}
+              workloadDistribution={derivedWorkloadDist}
+              constraints={infrastructureConstraints}
+              totalGPUs={infrastructureConfig.compute.totalGPUs}
+            />
+          )}
+        </>
+      )}
 
       {/* Validation Summary */}
       {validationSummary && (
