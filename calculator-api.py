@@ -415,12 +415,57 @@ GPU_SPECS = {
 }
 
 # Region rates (hidden from client)
+# Legacy region rates - kept for backward compatibility
 REGION_RATES = {
     'us-east': {'name': 'US East', 'rate': 0.10},
     'us-west': {'name': 'US West', 'rate': 0.12},
     'eu-west': {'name': 'Europe West', 'rate': 0.15},
     'apac': {'name': 'Asia Pacific', 'rate': 0.18}
 }
+
+# Location-based electricity rates (Q3 2025 data)
+# This is a subset of the most commonly used locations for data centers
+ELECTRICITY_RATES = {
+    # US States (Industrial rates preferred for data centers)
+    'Texas (Industrial)': 0.0660,
+    'Virginia': 0.1047,
+    'California (Industrial)': 0.2531,
+    'Washington (Industrial)': 0.0699,
+    'Oregon': 0.1129,
+    'North Carolina': 0.0971,
+    'Georgia': 0.1270,
+    'Ohio': 0.1153,
+    'Illinois': 0.1366,
+    'Arizona (Industrial)': 0.0944,
+    
+    # International
+    'Germany': 0.273,  # 0.251 EUR converted to USD
+    'France': 0.166,   # 0.153 EUR converted to USD
+    'Netherlands': 0.226, # 0.208 EUR converted to USD
+    'Finland': 0.105,  # 0.097 EUR converted to USD
+    'United Kingdom': 0.308, # 0.243 GBP converted to USD
+    'Canada': 0.135,   # 0.182 CAD converted to USD
+    'Sweden': 0.179,   # Already in USD
+    
+    # Legacy region mappings for backward compatibility
+    'us-texas': 0.0660,
+    'us-virginia': 0.1047,
+    'us-california': 0.2531,
+    'europe': 0.166,  # France rate as European average
+    'asia': 0.179,    # Sweden rate as placeholder
+}
+
+def get_electricity_rate(location):
+    """Get electricity rate for a location, with fallback to legacy regions"""
+    if location in ELECTRICITY_RATES:
+        return ELECTRICITY_RATES[location]
+    
+    # Try legacy region rates
+    if location in REGION_RATES:
+        return REGION_RATES[location]['rate']
+    
+    # Default fallback (US Virginia commercial rate)
+    return 0.1047
 
 # Storage vendors (hidden from client)
 STORAGE_VENDORS = {
@@ -487,12 +532,9 @@ def calculate():
             return jsonify({'error': 'Invalid GPU model'}), 400
         if num_gpus < 1000 or num_gpus > 200000:
             return jsonify({'error': 'GPU count must be between 1000 and 200000'}), 400
-        if region not in REGION_RATES:
-            return jsonify({'error': 'Invalid region'}), 400
-        
         # Get specifications
         spec = GPU_SPECS[gpu_model]
-        region_rate = REGION_RATES[region]['rate']
+        region_rate = get_electricity_rate(region)
         
         # Core calculations
         gpu_capex = spec['price'] * num_gpus

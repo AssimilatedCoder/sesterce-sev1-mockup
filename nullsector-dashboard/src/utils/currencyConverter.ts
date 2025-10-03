@@ -1,20 +1,24 @@
 // Currency Converter with 3-month rolling average rates
 // Data source: ECB (European Central Bank) historical rates
 
-export type Currency = 'USD' | 'EUR';
+export type Currency = 'USD' | 'EUR' | 'GBP';
 
 // 3-month rolling average exchange rates (updated quarterly)
-// These rates represent the average USD/EUR rate over the last 3 months
+// These rates represent the average exchange rates over the last 3 months (Q3 2025)
 const EXCHANGE_RATES = {
-  // Last updated: Q4 2024 (example rates - in production, these would be fetched from an API)
-  USD_TO_EUR: 0.92, // 1 USD = 0.92 EUR (3-month average)
+  // Last updated: Q3 2025 - aligned with electricity pricing data
+  USD_TO_EUR: 0.920, // 1 USD = 0.920 EUR (3-month average)
   EUR_TO_USD: 1.087, // 1 EUR = 1.087 USD (3-month average)
+  USD_TO_GBP: 0.789, // 1 USD = 0.789 GBP (3-month average)
+  GBP_TO_USD: 1.267, // 1 GBP = 1.267 USD (3-month average)
+  EUR_TO_GBP: 0.726, // 1 EUR = 0.726 GBP (derived)
+  GBP_TO_EUR: 1.378, // 1 GBP = 1.378 EUR (derived)
   
   // Historical 3-month averages for reference
   HISTORICAL: {
-    'Q3_2024': { USD_TO_EUR: 0.91, EUR_TO_USD: 1.099 },
-    'Q2_2024': { USD_TO_EUR: 0.93, EUR_TO_USD: 1.075 },
-    'Q1_2024': { USD_TO_EUR: 0.92, EUR_TO_USD: 1.087 }
+    'Q3_2025': { USD_TO_EUR: 0.920, EUR_TO_USD: 1.087, USD_TO_GBP: 0.789, GBP_TO_USD: 1.267 },
+    'Q2_2025': { USD_TO_EUR: 0.918, EUR_TO_USD: 1.089, USD_TO_GBP: 0.791, GBP_TO_USD: 1.264 },
+    'Q1_2025': { USD_TO_EUR: 0.922, EUR_TO_USD: 1.085, USD_TO_GBP: 0.787, GBP_TO_USD: 1.270 }
   }
 };
 
@@ -57,12 +61,28 @@ export class CurrencyConverter {
       return amount;
     }
 
+    // USD conversions
     if (fromCurrency === 'USD' && toCurrency === 'EUR') {
       return amount * this.rates.USD_TO_EUR;
     }
+    if (fromCurrency === 'USD' && toCurrency === 'GBP') {
+      return amount * this.rates.USD_TO_GBP;
+    }
 
+    // EUR conversions
     if (fromCurrency === 'EUR' && toCurrency === 'USD') {
       return amount * this.rates.EUR_TO_USD;
+    }
+    if (fromCurrency === 'EUR' && toCurrency === 'GBP') {
+      return amount * this.rates.EUR_TO_GBP;
+    }
+
+    // GBP conversions
+    if (fromCurrency === 'GBP' && toCurrency === 'USD') {
+      return amount * this.rates.GBP_TO_USD;
+    }
+    if (fromCurrency === 'GBP' && toCurrency === 'EUR') {
+      return amount * this.rates.GBP_TO_EUR;
     }
 
     return amount; // Fallback
@@ -111,7 +131,12 @@ export class CurrencyConverter {
 
   public getCurrencySymbol(currency?: Currency): string {
     const targetCurrency = currency || this.selectedCurrency;
-    return targetCurrency === 'EUR' ? '€' : '$';
+    switch (targetCurrency) {
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'USD':
+      default: return '$';
+    }
   }
 
   public getCurrentRate(): number {

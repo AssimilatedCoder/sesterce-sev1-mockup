@@ -8,6 +8,8 @@ import { storageArchitectures, recommendedCombinations, tierCombinationRules } f
 import { softwareStacks, recommendStack, calculateStackCost } from '../../data/softwareStacks';
 import { useCurrency } from '../../hooks/useCurrency';
 import WarningBanner from '../common/WarningBanner';
+import { LocationSelector } from '../common/LocationSelector';
+import { getRecommendedRate, convertElectricityRate } from '../../data/electricityPrices';
 
 interface CalculatorTabRedesignedProps {
   config: any;
@@ -60,6 +62,8 @@ interface CalculatorTabRedesignedProps {
   formatNumber: (num: number) => string;
 }
 
+// Legacy region rates - now replaced by LocationSelector
+// Kept for backward compatibility during transition
 const regionRates: Record<string, { rate: number; name: string }> = {
   'us-texas': { rate: 0.047, name: 'US Texas' },
   'us-virginia': { rate: 0.085, name: 'US Virginia' },
@@ -320,16 +324,12 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           </div>
           
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Region</label>
-            <select 
-              value={config.region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-            >
-              {Object.entries(regionRates).map(([key, data]) => (
-                <option key={key} value={key}>{data.name}</option>
-              ))}
-            </select>
+            <LocationSelector
+              selectedLocation={config.region}
+              onLocationChange={setRegion}
+              showRateInfo={true}
+              compact={false}
+            />
           </div>
         </div>
         
@@ -1240,7 +1240,11 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 type="text"
                 value={config.customEnergyRate}
                 onChange={(e) => setCustomEnergyRate(e.target.value)}
-                placeholder={formatCurrency(regionRates[config.region]?.rate || 0.05)}
+                placeholder={(() => {
+                  const locationRate = getRecommendedRate(config.region);
+                  const rate = locationRate ? convertElectricityRate(locationRate, 'USD') : (regionRates[config.region]?.rate || 0.05);
+                  return formatCurrency(rate);
+                })()}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
               />
               <span className="text-xs text-gray-500 mt-1 block">

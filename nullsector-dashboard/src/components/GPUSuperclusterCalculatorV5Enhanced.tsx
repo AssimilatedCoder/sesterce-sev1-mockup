@@ -29,8 +29,10 @@ import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
 import { activityLogger } from '../utils/activityLogger';
+import { getRecommendedRate, convertElectricityRate } from '../data/electricityPrices';
 
-// Region rates with more comprehensive data
+// Legacy region rates - kept for backward compatibility
+// New location-based pricing system provides more accurate rates
 const regionRates: Record<string, { rate: number; name: string; pue: number }> = {
   'us-texas': { rate: 0.047, name: 'US Texas', pue: 1.15 },
   'us-virginia': { rate: 0.085, name: 'US Virginia', pue: 1.2 },
@@ -493,7 +495,25 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
       utilization
     });
 
-    const regionData = regionRates[region];
+    // Get electricity rate using new location-based pricing system
+    const getElectricityRate = (location: string) => {
+      // First try to get rate from new location-based system
+      const locationRate = getRecommendedRate(location);
+      if (locationRate) {
+        // Convert to USD for calculations (base currency)
+        return convertElectricityRate(locationRate, 'USD');
+      }
+      
+      // Fall back to legacy region rates for backward compatibility
+      const regionData = regionRates[location];
+      return regionData ? regionData.rate : 0.085; // Default to US Virginia rate
+    };
+
+    const regionData = regionRates[region] || { 
+      rate: getElectricityRate(region), 
+      name: region, 
+      pue: 1.2 
+    };
     
     if (!regionData) {
       console.error('❌ Region data not found for:', region);
@@ -633,7 +653,7 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
     }
     
     const opexBreakdown = [
-      { name: 'Power Consumption', amount: annualPowerCost, pct: (annualPowerCost/annualOpex*100).toFixed(1), notes: `${totalPowerMW.toFixed(1)} MW @ ${formatNumber(regionData.rate)}/kWh` },
+      { name: 'Power Consumption', amount: annualPowerCost, pct: (annualPowerCost/annualOpex*100).toFixed(1), notes: `${totalPowerMW.toFixed(1)} MW @ $${regionData.rate.toFixed(4)}/kWh (${region})` },
       { name: 'Cooling Operations', amount: annualCoolingOpex, pct: (annualCoolingOpex/annualOpex*100).toFixed(1), notes: `${coolingType.charAt(0).toUpperCase() + coolingType.slice(1)} cooling` },
       { name: 'Staff & Personnel', amount: annualStaff, pct: (annualStaff/annualOpex*100).toFixed(1), notes: `${enterpriseInfra.breakdown.length} FTE roles (detailed breakdown available)` },
       { name: 'Hardware Maintenance', amount: annualMaintenance, pct: (annualMaintenance/annualOpex*100).toFixed(1), notes: `${maintenancePercent}% of hardware CAPEX` },

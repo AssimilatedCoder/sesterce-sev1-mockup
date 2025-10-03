@@ -50,6 +50,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
         >
           <option value="USD">USD ($)</option>
           <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
         </select>
       </div>
     );
@@ -80,7 +81,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         <button
           onClick={() => handleCurrencyChange('USD')}
           className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
@@ -103,6 +104,18 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
         >
           <Euro className="w-4 h-4" />
           <span className="font-medium">EUR</span>
+        </button>
+
+        <button
+          onClick={() => handleCurrencyChange('GBP')}
+          className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+            selectedCurrency === 'GBP'
+              ? 'border-green-500 bg-green-50 text-green-700'
+              : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+          }`}
+        >
+          <span className="text-lg font-semibold">£</span>
+          <span className="font-medium">GBP</span>
         </button>
       </div>
 
