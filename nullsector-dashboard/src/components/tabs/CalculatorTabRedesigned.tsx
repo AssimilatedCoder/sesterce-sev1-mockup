@@ -4,7 +4,7 @@ import {
   ChevronDown, ChevronUp, Package, DollarSign
 } from 'lucide-react';
 import { gpuSpecs } from '../../data/gpuSpecs';
-import { storageArchitectures, recommendedCombinations, tierCombinationRules } from '../../data/storageArchitectures';
+import { storageArchitectures, recommendedCombinations } from '../../data/storageArchitectures';
 import { softwareStacks, recommendStack, calculateStackCost } from '../../data/softwareStacks';
 import { useCurrency } from '../../hooks/useCurrency';
 import WarningBanner from '../common/WarningBanner';
@@ -538,35 +538,41 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           {expandedSections.storageTiers && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Extreme Performance */}
-              <div className="space-y-3">
-                <h5 className="text-xs font-semibold text-gray-800">Extreme Performance</h5>
-                <p className="text-xs text-gray-600">All-NVMe, &lt;100μs latency</p>
-                <div className="space-y-2">
+              <div>
+                <h5 className="text-xs font-semibold text-gray-800 mb-1">Extreme Performance</h5>
+                <p className="text-xs text-gray-600 mb-3">All-NVMe, &lt;100μs latency</p>
+                <div className="relative">
                   <select 
                     value={config.selectedStorageTiers?.find((t: string) => ['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) || ''}
                     onChange={(e) => {
-                      // Remove any existing extreme tier and add new one if selected
                       const newTiers = config.selectedStorageTiers?.filter((t: string) => !['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) || [];
                       if (e.target.value) {
                         newTiers.push(e.target.value);
                       }
                       setSelectedStorageTiers(newTiers);
                     }}
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:border-gray-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   >
                     <option value="">Select Option</option>
-                    <option value="vast-universal">VAST Universal - 1+ TB/s/PB, {formatCurrency(650000)}/PB</option>
-                    <option value="weka-parallel">WEKA Parallel - 720 GB/s/PB, {formatCurrency(475000)}/PB</option>
-                    <option value="ddn-exascaler">DDN EXAScaler - 1.1+ TB/s/PB, {formatCurrency(1000000)}/PB</option>
+                    <option value="vast-universal">VAST Universal - 1+ TB/GPU, €598K/PB</option>
+                    <option value="weka-parallel">WEKA Parallel - 720 GB/GPU, €437K/PB</option>
+                    <option value="ddn-exascaler">DDN EXAScaler - 1+ TB/GPU, €920K/PB</option>
                   </select>
+                  {config.selectedStorageTiers?.find((t: string) => ['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      {config.selectedStorageTiers.includes('vast-universal') && "QLC economics, 100k+ GPU scale"}
+                      {config.selectedStorageTiers.includes('weka-parallel') && "GPUDirect, software-defined"}
+                      {config.selectedStorageTiers.includes('ddn-exascaler') && "HW accelerated, 100k+ GPUs"}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* High Performance */}
-              <div className="space-y-3">
-                <h5 className="text-xs font-semibold text-gray-800">High Performance</h5>
-                <p className="text-xs text-gray-600">All-Flash, &lt;1ms latency</p>
-                <div className="space-y-2">
+              <div>
+                <h5 className="text-xs font-semibold text-gray-800 mb-1">High Performance</h5>
+                <p className="text-xs text-gray-600 mb-3">All-Flash, &lt;1ms latency</p>
+                <div className="relative">
                   <select 
                     value={config.selectedStorageTiers?.find((t: string) => ['pure-flashblade', 'netapp-aff'].includes(t)) || ''}
                     onChange={(e) => {
@@ -576,20 +582,26 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       }
                       setSelectedStorageTiers(newTiers);
                     }}
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:border-gray-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   >
                     <option value="">Select Option</option>
-                    <option value="pure-flashblade">Pure FlashBlade//E - 3.4 TB/s/PB, {formatCurrency(800000)}/PB</option>
-                    <option value="netapp-aff">NetApp AFF - 350 GB/s/PB, {formatCurrency(700000)}/PB</option>
+                    <option value="pure-flashblade">Pure FlashBlade/E - 3.4 TB/GPU, €736K/PB</option>
+                    <option value="netapp-aff">NetApp AFF - 350 GB/GPU, €644K/PB</option>
                   </select>
+                  {config.selectedStorageTiers?.find((t: string) => ['pure-flashblade', 'netapp-aff'].includes(t)) && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      {config.selectedStorageTiers.includes('pure-flashblade') && "Enterprise, Evergreen sub"}
+                      {config.selectedStorageTiers.includes('netapp-aff') && "Enterprise NAS/SAN"}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Balanced Performance */}
-              <div className="space-y-3">
-                <h5 className="text-xs font-semibold text-gray-800">Balanced Performance</h5>
-                <p className="text-xs text-gray-600">Ceph-based, &lt;5ms latency</p>
-                <div className="space-y-2">
+              <div>
+                <h5 className="text-xs font-semibold text-gray-800 mb-1">Balanced Performance</h5>
+                <p className="text-xs text-gray-600 mb-3">Ceph-based, &lt;5ms latency</p>
+                <div className="relative">
                   <select 
                     value={config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || ''}
                     onChange={(e) => {
@@ -599,21 +611,28 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       }
                       setSelectedStorageTiers(newTiers);
                     }}
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:border-gray-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   >
                     <option value="">Select Option</option>
-                    <option value="ceph-nvme">Ceph All-NVMe - 100 GB/s/PB, {formatCurrency(350000)}/PB</option>
-                    <option value="ceph-hybrid">Ceph Hybrid - 50 GB/s/PB, {formatCurrency(200000)}/PB</option>
-                    <option value="dell-powerscale">Dell PowerScale - 100 GB/s/PB, {formatCurrency(600000)}/PB</option>
+                    <option value="ceph-nvme">Ceph All-NVMe - 100 GB/GPU, €312K/PB</option>
+                    <option value="ceph-hybrid">Ceph Hybrid - 50 GB/GPU, €184K/PB</option>
+                    <option value="dell-powerscale">Dell PowerScale - 100 GB/GPU, €352K/PB</option>
                   </select>
+                  {config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-hybrid', 'dell-powerscale'].includes(t)) && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      {config.selectedStorageTiers.includes('ceph-nvme') && "Open-source, all-flash"}
+                      {config.selectedStorageTiers.includes('ceph-hybrid') && "NVMe cache + SSD capacity"}
+                      {config.selectedStorageTiers.includes('dell-powerscale') && "Enterprise scale-out"}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Cost-Optimized */}
-              <div className="space-y-3">
-                <h5 className="text-xs font-semibold text-gray-800">Cost-Optimized</h5>
-                <p className="text-xs text-gray-600">HDD/Object, &lt;100ms latency</p>
-                <div className="space-y-2">
+              <div>
+                <h5 className="text-xs font-semibold text-gray-800 mb-1">Cost-Optimized</h5>
+                <p className="text-xs text-gray-600 mb-3">HDD/Object, &lt;100ms latency</p>
+                <div className="relative">
                   <select 
                     value={config.selectedStorageTiers?.find((t: string) => ['ceph-hdd', 's3-compatible'].includes(t)) || ''}
                     onChange={(e) => {
@@ -623,12 +642,18 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       }
                       setSelectedStorageTiers(newTiers);
                     }}
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:border-gray-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   >
                     <option value="">Select Option</option>
-                    <option value="ceph-hdd">Ceph HDD - 10 GB/s/PB, {formatCurrency(100000)}/PB</option>
-                    <option value="s3-compatible">S3 Object - 5 GB/s/PB, {formatCurrency(50000)}/PB</option>
+                    <option value="ceph-hdd">Ceph HDD - 10 GB/GPU, €92K/PB</option>
+                    <option value="s3-compatible">S3 Object - 5 GB/GPU, €49K/PB CAPEX</option>
                   </select>
+                  {config.selectedStorageTiers?.find((t: string) => ['ceph-hdd', 's3-compatible'].includes(t)) && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      {config.selectedStorageTiers.includes('ceph-hdd') && "SSD cache + HDD capacity"}
+                      {config.selectedStorageTiers.includes('s3-compatible') && "Archive, 11 9s durability"}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -639,34 +664,55 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         <div className="space-y-6">
           {/* Tier Distribution Sliders */}
           {config.selectedStorageTiers?.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-800 mb-3">Tier Distribution (%)</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-3 bg-gray-100 rounded border border-gray-200">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-xs font-semibold text-gray-800">Tier Distribution (%)</h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const equalShare = Math.floor(100 / config.selectedStorageTiers.length);
+                    const newDist: any = {};
+                    config.selectedStorageTiers.forEach((tierId: string, index: number) => {
+                      newDist[tierId] = index === 0 ? 100 - (equalShare * (config.selectedStorageTiers.length - 1)) : equalShare;
+                    });
+                    setStorageTierDistribution(newDist);
+                  }}
+                  className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+                >Reset</button>
+              </div>
+              <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of storage tiers. Total must equal 100%.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {config.selectedStorageTiers.map((tierId: string) => {
                   const tier = storageArchitectures[tierId];
                   return (
-                    <div key={tierId} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium text-gray-700">{tier?.name || tierId}</label>
-                        <div className="flex items-center gap-1">
-                          <input 
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="1"
-                            value={config.storageTierDistribution?.[tierId] || 0}
-                            onChange={(e) => updateTierDistribution(tierId, parseInt(e.target.value) || 0)}
-                            className="w-12 px-1 py-0.5 text-xs border border-gray-300 rounded"
-                          />
-                          <span className="text-xs text-gray-600">%</span>
-                        </div>
+                    <div key={tierId} className="p-3 bg-white rounded border border-gray-200">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{tier?.name || tierId}</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={config.storageTierDistribution?.[tierId] || 0}
+                          onChange={(e) => updateTierDistribution(tierId, parseInt(e.target.value))}
+                          className="flex-1"
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={1}
+                          value={config.storageTierDistribution?.[tierId] || 0}
+                          onChange={(e) => updateTierDistribution(tierId, parseInt(e.target.value) || 0)}
+                          className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
+                        />
+                        <span className="text-sm font-semibold text-gray-600">%</span>
                       </div>
-                      <div className="text-xs text-gray-500">{tier?.description || 'Storage tier'}</div>
+                      <div className="text-xs text-gray-500 mt-1">{tier?.description || 'Storage tier'}</div>
                     </div>
                   );
                 })}
               </div>
-              <div className="mt-2 text-xs text-gray-500">
+              <div className="mt-2 text-xs text-gray-600">
                 Total: {Object.values(config.storageTierDistribution || {}).reduce((sum: number, val: any) => sum + (val || 0), 0)}%
                 {Object.values(config.storageTierDistribution || {}).reduce((sum: number, val: any) => sum + (val || 0), 0) !== 100 && 
                   <span className="text-gray-600 ml-1">(Must equal 100%)</span>
@@ -676,35 +722,53 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           )}
 
           {/* Workload Distribution Sliders */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-800 mb-3">Workload Distribution (%)</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-3 bg-gray-100 rounded border border-gray-200">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="text-xs font-semibold text-gray-800">Workload Distribution (%)</h4>
+              <button
+                type="button"
+                onClick={() => { 
+                  setWorkloadTraining(70); 
+                  setWorkloadInference(20); 
+                  setWorkloadFinetuning(10); 
+                }}
+                className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+              >Reset</button>
+            </div>
+            <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of workload types. Total must equal 100%.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {[
-                { id: 'training', name: 'Training', desc: 'High bandwidth, 2.7 GiB/s per GPU', value: config.workloadTraining, setter: setWorkloadTraining },
-                { id: 'inference', name: 'Inference', desc: 'Lower bandwidth, 100-500 MB/s per GPU', value: config.workloadInference, setter: setWorkloadInference },
-                { id: 'finetuning', name: 'Fine-tuning', desc: 'Medium bandwidth, 2.0 GiB/s per GPU', value: config.workloadFinetuning, setter: setWorkloadFinetuning }
+                { id: 'training', name: 'Training Workloads', desc: 'High bandwidth, 2.7 GiB/s per GPU', value: config.workloadTraining, setter: setWorkloadTraining },
+                { id: 'inference', name: 'Inference Workloads', desc: 'Lower bandwidth, 100-500 MB/s per GPU', value: config.workloadInference, setter: setWorkloadInference },
+                { id: 'finetuning', name: 'Fine-tuning Workloads', desc: 'Medium bandwidth, 2.0 GiB/s per GPU', value: config.workloadFinetuning, setter: setWorkloadFinetuning }
               ].map((workload) => (
-                <div key={workload.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-gray-700">{workload.name}</label>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="5"
-                        value={workload.value}
-                        onChange={(e) => workload.setter(parseInt(e.target.value) || 0)}
-                        className="w-12 px-1 py-0.5 text-xs border border-gray-300 rounded"
-                      />
-                      <span className="text-xs text-gray-600">%</span>
-                    </div>
+                <div key={workload.id} className="p-3 bg-white rounded border border-gray-200">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{workload.name}</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={workload.value}
+                      onChange={(e) => workload.setter(parseInt(e.target.value))}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={workload.value}
+                      onChange={(e) => workload.setter(parseInt(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
+                    />
+                    <span className="text-sm font-semibold text-gray-600">%</span>
                   </div>
-                  <div className="text-xs text-gray-500">{workload.desc}</div>
+                  <div className="text-xs text-gray-500 mt-1">{workload.desc}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-gray-600">
               Total: {config.workloadTraining + config.workloadInference + config.workloadFinetuning}%
               {config.workloadTraining + config.workloadInference + config.workloadFinetuning !== 100 && 
                 <span className="text-gray-600 ml-1">(Must equal 100%)</span>
@@ -713,35 +777,53 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           </div>
 
           {/* Multi-Tenant Distribution Sliders */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-800 mb-3">Multi-Tenant Distribution (%)</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-3 bg-gray-100 rounded border border-gray-200">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="text-xs font-semibold text-gray-800">Multi-Tenant Distribution (%)</h4>
+              <button
+                type="button"
+                onClick={() => { 
+                  setTenantWhale(60); 
+                  setTenantMedium(30); 
+                  setTenantSmall(10); 
+                }}
+                className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+              >Reset</button>
+            </div>
+            <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of tenant types. Total must equal 100%.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {[
-                { id: 'whale', name: 'Whale Tenants', desc: 'Dedicated partitions, 99.9% SLA', value: config.tenantWhale, setter: setTenantWhale },
-                { id: 'medium', name: 'Medium Tenants', desc: 'Shared with QoS guarantees', value: config.tenantMedium, setter: setTenantMedium },
-                { id: 'small', name: 'Small Tenants', desc: 'Best effort pools, container CSI', value: config.tenantSmall, setter: setTenantSmall }
+                { id: 'whale', name: 'Whale Tenants (>1000 GPUs)', desc: 'Dedicated partitions, 99.9% SLA', value: config.tenantWhale, setter: setTenantWhale },
+                { id: 'medium', name: 'Medium Tenants (100-1000 GPUs)', desc: 'Shared with QoS guarantees', value: config.tenantMedium, setter: setTenantMedium },
+                { id: 'small', name: 'Small Tenants (<100 GPUs)', desc: 'Best effort pools, container CSI', value: config.tenantSmall, setter: setTenantSmall }
               ].map((tenant) => (
-                <div key={tenant.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-gray-700">{tenant.name}</label>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="5"
-                        value={tenant.value}
-                        onChange={(e) => tenant.setter(parseInt(e.target.value) || 0)}
-                        className="w-12 px-1 py-0.5 text-xs border border-gray-300 rounded"
-                      />
-                      <span className="text-xs text-gray-600">%</span>
-                    </div>
+                <div key={tenant.id} className="p-3 bg-white rounded border border-gray-200">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{tenant.name}</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={tenant.value}
+                      onChange={(e) => tenant.setter(parseInt(e.target.value))}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={tenant.value}
+                      onChange={(e) => tenant.setter(parseInt(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
+                    />
+                    <span className="text-sm font-semibold text-gray-600">%</span>
                   </div>
-                  <div className="text-xs text-gray-500">{tenant.desc}</div>
+                  <div className="text-xs text-gray-500 mt-1">{tenant.desc}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-gray-600">
               Total: {config.tenantWhale + config.tenantMedium + config.tenantSmall}%
               {config.tenantWhale + config.tenantMedium + config.tenantSmall !== 100 && 
                 <span className="text-gray-600 ml-1">(Must equal 100%)</span>
