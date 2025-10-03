@@ -52,7 +52,7 @@ USERS = {
     },
     'Thomas': {
         'password_hash': hashlib.sha256('Th0mas@99'.encode()).hexdigest(),
-        'role': 'analyst',
+        'role': 'power_user',
         'created_at': '2025-09-05T09:15:00Z',  # Early team member
         'expires_at': '2025-11-05T09:15:00Z',  # 2 months from creation
         'last_login': '2025-09-28T11:45:00Z',
@@ -68,8 +68,8 @@ USERS = {
     },
     'Maciej': {
         'password_hash': hashlib.sha256('Mac1ej*77'.encode()).hexdigest(),
-        'role': 'analyst',
-        'created_at': '2025-09-12T13:45:00Z',  # Analyst role
+        'role': 'power_user',
+        'created_at': '2025-09-12T13:45:00Z',  # Power user role
         'expires_at': '2025-11-12T13:45:00Z',  # 2 months from creation
         'last_login': '2025-09-27T16:10:00Z',
         'is_active': True
@@ -824,7 +824,7 @@ def update_user(username):
     # Update role
     if 'role' in data:
         new_role = data['role'].strip()
-        if new_role in ['admin', 'user']:
+        if new_role in ['admin', 'power_user', 'user']:
             user['role'] = new_role
             updated_fields.append(f'role: {new_role}')
             
@@ -832,6 +832,8 @@ def update_user(username):
             if new_role == 'admin':
                 user['expires_at'] = None
                 updated_fields.append('removed expiry (admin user)')
+        else:
+            return jsonify({'error': f'Invalid role: {new_role}. Valid roles are: admin, power_user, user'}), 400
     
     # Update active status
     if 'is_active' in data:

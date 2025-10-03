@@ -420,18 +420,22 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({ currentUse
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             user.role === 'admin' 
                               ? 'bg-purple-100 text-purple-800' 
-                              : user.role === 'analyst'
+                              : user.role === 'power_user'
                               ? 'bg-blue-100 text-blue-800'
-                              : user.role === 'viewer'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-gray-100 text-gray-800'
+                              : user.role === 'user'
+                              ? 'bg-gray-100 text-gray-800'
+                              : 'bg-red-100 text-red-800'
                           }`}>
                             {user.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
-                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            {user.role === 'power_user' ? 'Power User' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                           </span>
-                          {roles[user.role] && (
+                          {roles[user.role] ? (
                             <span className="text-xs text-gray-500 mt-1">
                               {roles[user.role].description}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-red-500 mt-1">
+                              Unknown role - needs update
                             </span>
                           )}
                         </div>
