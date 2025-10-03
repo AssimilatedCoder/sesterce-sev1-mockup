@@ -130,6 +130,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
     advanced: false
   });
   const [touchedTiers, setTouchedTiers] = useState<string[]>([]);
+  const [touchedStorageTiers, setTouchedStorageTiers] = useState<string[]>([]);
+  const [touchedWorkloadTypes, setTouchedWorkloadTypes] = useState<string[]>([]);
+  const [touchedTenantTypes, setTouchedTenantTypes] = useState<string[]>([]);
 
   // Initialize storage configuration
   useEffect(() => {
@@ -193,6 +196,253 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       [tierId]: percentage
     };
     setStorageTierDistribution(newDist);
+  };
+
+  const handleStorageTierChange = (tierId: string, value: number) => {
+    // Track first-touch order
+    if (!touchedStorageTiers.includes(tierId)) {
+      setTouchedStorageTiers(prev => [...prev, tierId]);
+    }
+
+    const keys = config.selectedStorageTiers || [];
+    const current: any = { ...config.storageTierDistribution };
+    const oldValue = current[tierId] || 0;
+    let target = Math.max(0, Math.min(100, value));
+    let diff = target - oldValue;
+
+    // Determine adjustable keys: only untouched ones (excluding current).
+    const untouched = keys.filter((k: string) => k !== tierId && !touchedStorageTiers.includes(k));
+    const adjustable = untouched.length > 0 ? untouched : keys.filter((k: string) => k !== tierId);
+    if (adjustable.length === 0) {
+      // No degrees of freedom; keep original
+      return;
+    }
+
+    const epsilon = 1e-6;
+
+    if (diff > 0) {
+      // Need to take from adjustable equally without going below 0
+      let remaining = diff;
+      let pool = adjustable.slice();
+      while (remaining > epsilon && pool.length > 0) {
+        const share = remaining / pool.length;
+        let takenThisRound = 0;
+        const nextPool: string[] = [];
+        for (const k of pool) {
+          const take = Math.min(share, current[k] || 0);
+          current[k] = Number(Math.max(0, (current[k] || 0) - take).toFixed(1));
+          takenThisRound += take;
+          if ((current[k] || 0) > 0) nextPool.push(k);
+        }
+        if (takenThisRound <= epsilon) break;
+        remaining -= takenThisRound;
+        pool = nextPool;
+      }
+      const actuallyTaken = diff - Math.max(0, remaining);
+      target = oldValue + actuallyTaken;
+      current[tierId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+    } else if (diff < 0) {
+      // Need to give to adjustable equally without exceeding 100
+      let remaining = -diff;
+      let pool = adjustable.slice();
+      while (remaining > epsilon && pool.length > 0) {
+        const share = remaining / pool.length;
+        let givenThisRound = 0;
+        const nextPool: string[] = [];
+        for (const k of pool) {
+          const headroom = 100 - (current[k] || 0);
+          const give = Math.min(share, headroom);
+          current[k] = Number(Math.min(100, (current[k] || 0) + give).toFixed(1));
+          givenThisRound += give;
+          if ((current[k] || 0) < 100) nextPool.push(k);
+        }
+        if (givenThisRound <= epsilon) break;
+        remaining -= givenThisRound;
+        pool = nextPool;
+      }
+      const actuallyGiven = -diff - Math.max(0, remaining);
+      target = oldValue - actuallyGiven;
+      current[tierId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+    } else {
+      // No change
+      return;
+    }
+
+    // Fix rounding error to ensure sum = 100 by adjusting the last adjustable (or any other if none)
+    const sum = keys.reduce((s: number, k: string) => s + (current[k] || 0), 0);
+    const delta = Number((100 - sum).toFixed(1));
+    const adjustKey = adjustable.find((k: string) => k !== tierId) || adjustable[0] || keys.find((k: string) => k !== tierId) || tierId;
+    current[adjustKey] = Number(Math.max(0, Math.min(100, (current[adjustKey] || 0) + delta)).toFixed(1));
+
+    setStorageTierDistribution(current);
+  };
+
+  const handleWorkloadChange = (workloadId: string, value: number) => {
+    // Track first-touch order
+    if (!touchedWorkloadTypes.includes(workloadId)) {
+      setTouchedWorkloadTypes(prev => [...prev, workloadId]);
+    }
+
+    const keys = ['training', 'inference', 'finetuning'];
+    const current: any = {
+      training: config.workloadTraining,
+      inference: config.workloadInference,
+      finetuning: config.workloadFinetuning
+    };
+    const oldValue = current[workloadId] || 0;
+    let target = Math.max(0, Math.min(100, value));
+    let diff = target - oldValue;
+
+    // Determine adjustable keys: only untouched ones (excluding current).
+    const untouched = keys.filter((k: string) => k !== workloadId && !touchedWorkloadTypes.includes(k));
+    const adjustable = untouched.length > 0 ? untouched : keys.filter((k: string) => k !== workloadId);
+    if (adjustable.length === 0) {
+      return;
+    }
+
+    const epsilon = 1e-6;
+
+    if (diff > 0) {
+      // Need to take from adjustable equally without going below 0
+      let remaining = diff;
+      let pool = adjustable.slice();
+      while (remaining > epsilon && pool.length > 0) {
+        const share = remaining / pool.length;
+        let takenThisRound = 0;
+        const nextPool: string[] = [];
+        for (const k of pool) {
+          const take = Math.min(share, current[k] || 0);
+          current[k] = Number(Math.max(0, (current[k] || 0) - take).toFixed(1));
+          takenThisRound += take;
+          if ((current[k] || 0) > 0) nextPool.push(k);
+        }
+        if (takenThisRound <= epsilon) break;
+        remaining -= takenThisRound;
+        pool = nextPool;
+      }
+      const actuallyTaken = diff - Math.max(0, remaining);
+      target = oldValue + actuallyTaken;
+      current[workloadId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+    } else if (diff < 0) {
+      // Need to give to adjustable equally without exceeding 100
+      let remaining = -diff;
+      let pool = adjustable.slice();
+      while (remaining > epsilon && pool.length > 0) {
+        const share = remaining / pool.length;
+        let givenThisRound = 0;
+        const nextPool: string[] = [];
+        for (const k of pool) {
+          const headroom = 100 - (current[k] || 0);
+          const give = Math.min(share, headroom);
+          current[k] = Number(Math.min(100, (current[k] || 0) + give).toFixed(1));
+          givenThisRound += give;
+          if ((current[k] || 0) < 100) nextPool.push(k);
+        }
+        if (givenThisRound <= epsilon) break;
+        remaining -= givenThisRound;
+        pool = nextPool;
+      }
+      const actuallyGiven = -diff - Math.max(0, remaining);
+      target = oldValue - actuallyGiven;
+      current[workloadId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+    } else {
+      return;
+    }
+
+    // Fix rounding error to ensure sum = 100
+    const sum = keys.reduce((s: number, k: string) => s + (current[k] || 0), 0);
+    const delta = Number((100 - sum).toFixed(1));
+    const adjustKey = adjustable.find((k: string) => k !== workloadId) || adjustable[0] || keys.find((k: string) => k !== workloadId) || workloadId;
+    current[adjustKey] = Number(Math.max(0, Math.min(100, (current[adjustKey] || 0) + delta)).toFixed(1));
+
+    // Update the individual state setters
+    setWorkloadTraining(current.training);
+    setWorkloadInference(current.inference);
+    setWorkloadFinetuning(current.finetuning);
+  };
+
+  const handleTenantChange = (tenantId: string, value: number) => {
+    // Track first-touch order
+    if (!touchedTenantTypes.includes(tenantId)) {
+      setTouchedTenantTypes(prev => [...prev, tenantId]);
+    }
+
+    const keys = ['whale', 'medium', 'small'];
+    const current: any = {
+      whale: config.tenantWhale,
+      medium: config.tenantMedium,
+      small: config.tenantSmall
+    };
+    const oldValue = current[tenantId] || 0;
+    let target = Math.max(0, Math.min(100, value));
+    let diff = target - oldValue;
+
+    // Determine adjustable keys: only untouched ones (excluding current).
+    const untouched = keys.filter((k: string) => k !== tenantId && !touchedTenantTypes.includes(k));
+    const adjustable = untouched.length > 0 ? untouched : keys.filter((k: string) => k !== tenantId);
+    if (adjustable.length === 0) {
+      return;
+    }
+
+    const epsilon = 1e-6;
+
+    if (diff > 0) {
+      // Need to take from adjustable equally without going below 0
+      let remaining = diff;
+      let pool = adjustable.slice();
+      while (remaining > epsilon && pool.length > 0) {
+        const share = remaining / pool.length;
+        let takenThisRound = 0;
+        const nextPool: string[] = [];
+        for (const k of pool) {
+          const take = Math.min(share, current[k] || 0);
+          current[k] = Number(Math.max(0, (current[k] || 0) - take).toFixed(1));
+          takenThisRound += take;
+          if ((current[k] || 0) > 0) nextPool.push(k);
+        }
+        if (takenThisRound <= epsilon) break;
+        remaining -= takenThisRound;
+        pool = nextPool;
+      }
+      const actuallyTaken = diff - Math.max(0, remaining);
+      target = oldValue + actuallyTaken;
+      current[tenantId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+    } else if (diff < 0) {
+      // Need to give to adjustable equally without exceeding 100
+      let remaining = -diff;
+      let pool = adjustable.slice();
+      while (remaining > epsilon && pool.length > 0) {
+        const share = remaining / pool.length;
+        let givenThisRound = 0;
+        const nextPool: string[] = [];
+        for (const k of pool) {
+          const headroom = 100 - (current[k] || 0);
+          const give = Math.min(share, headroom);
+          current[k] = Number(Math.min(100, (current[k] || 0) + give).toFixed(1));
+          givenThisRound += give;
+          if ((current[k] || 0) < 100) nextPool.push(k);
+        }
+        if (givenThisRound <= epsilon) break;
+        remaining -= givenThisRound;
+        pool = nextPool;
+      }
+      const actuallyGiven = -diff - Math.max(0, remaining);
+      target = oldValue - actuallyGiven;
+      current[tenantId] = Number(Math.max(0, Math.min(100, target)).toFixed(1));
+    } else {
+      return;
+    }
+
+    // Fix rounding error to ensure sum = 100
+    const sum = keys.reduce((s: number, k: string) => s + (current[k] || 0), 0);
+    const delta = Number((100 - sum).toFixed(1));
+    const adjustKey = adjustable.find((k: string) => k !== tenantId) || adjustable[0] || keys.find((k: string) => k !== tenantId) || tenantId;
+    current[adjustKey] = Number(Math.max(0, Math.min(100, (current[adjustKey] || 0) + delta)).toFixed(1));
+
+    // Update the individual state setters
+    setTenantWhale(current.whale);
+    setTenantMedium(current.medium);
+    setTenantSmall(current.small);
   };
 
   return (
@@ -676,6 +926,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       newDist[tierId] = index === 0 ? 100 - (equalShare * (config.selectedStorageTiers.length - 1)) : equalShare;
                     });
                     setStorageTierDistribution(newDist);
+                    setTouchedStorageTiers([]);
                   }}
                   className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
                 >Reset</button>
@@ -693,7 +944,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                           min="0"
                           max="100"
                           value={config.storageTierDistribution?.[tierId] || 0}
-                          onChange={(e) => updateTierDistribution(tierId, parseInt(e.target.value))}
+                          onChange={(e) => handleStorageTierChange(tierId, parseInt(e.target.value))}
                           className="flex-1"
                         />
                         <input
@@ -702,7 +953,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                           max={100}
                           step={1}
                           value={config.storageTierDistribution?.[tierId] || 0}
-                          onChange={(e) => updateTierDistribution(tierId, parseInt(e.target.value) || 0)}
+                          onChange={(e) => handleStorageTierChange(tierId, parseInt(e.target.value) || 0)}
                           className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
                         />
                         <span className="text-sm font-semibold text-gray-600">%</span>
@@ -734,6 +985,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   setWorkloadTraining(70); 
                   setWorkloadInference(20); 
                   setWorkloadFinetuning(10); 
+                  setTouchedWorkloadTypes([]);
                 }}
                 className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
               >Reset</button>
@@ -753,7 +1005,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       min="0"
                       max="100"
                       value={workload.value}
-                      onChange={(e) => workload.setter(parseInt(e.target.value))}
+                      onChange={(e) => handleWorkloadChange(workload.id, parseInt(e.target.value))}
                       className="flex-1"
                     />
                     <input
@@ -762,7 +1014,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       max={100}
                       step={5}
                       value={workload.value}
-                      onChange={(e) => workload.setter(parseInt(e.target.value) || 0)}
+                      onChange={(e) => handleWorkloadChange(workload.id, parseInt(e.target.value) || 0)}
                       className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
                     />
                     <span className="text-sm font-semibold text-gray-600">%</span>
@@ -789,6 +1041,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   setTenantWhale(60); 
                   setTenantMedium(30); 
                   setTenantSmall(10); 
+                  setTouchedTenantTypes([]);
                 }}
                 className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
               >Reset</button>
@@ -808,7 +1061,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       min="0"
                       max="100"
                       value={tenant.value}
-                      onChange={(e) => tenant.setter(parseInt(e.target.value))}
+                      onChange={(e) => handleTenantChange(tenant.id, parseInt(e.target.value))}
                       className="flex-1"
                     />
                     <input
@@ -817,7 +1070,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                       max={100}
                       step={5}
                       value={tenant.value}
-                      onChange={(e) => tenant.setter(parseInt(e.target.value) || 0)}
+                      onChange={(e) => handleTenantChange(tenant.id, parseInt(e.target.value) || 0)}
                       className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
                     />
                     <span className="text-sm font-semibold text-gray-600">%</span>
