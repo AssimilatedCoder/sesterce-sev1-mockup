@@ -729,6 +729,118 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           </div>
         </div>
         {/* End Service Tier Distribution */}
+
+        {/* Workload Distribution Sliders */}
+        <div className="p-3 bg-gray-100 rounded border border-gray-200 mt-4">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="text-xs font-semibold text-gray-800">Workload Distribution (%)</h4>
+            <button
+              type="button"
+              onClick={() => { 
+                setWorkloadTraining(70); 
+                setWorkloadInference(20); 
+                setWorkloadFinetuning(10); 
+                setTouchedWorkloadTypes([]);
+              }}
+              className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+            >Reset</button>
+          </div>
+          <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of workload types. Total must equal 100%.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { id: 'training', name: 'Training Workloads', desc: 'High bandwidth, 2.7 GiB/s per GPU', value: config.workloadTraining, setter: setWorkloadTraining },
+              { id: 'inference', name: 'Inference Workloads', desc: 'Lower bandwidth, 100-500 MB/s per GPU', value: config.workloadInference, setter: setWorkloadInference },
+              { id: 'finetuning', name: 'Fine-tuning Workloads', desc: 'Medium bandwidth, 2.0 GiB/s per GPU', value: config.workloadFinetuning, setter: setWorkloadFinetuning }
+            ].map((workload) => (
+              <div key={workload.id} className="p-3 bg-white rounded border border-gray-200">
+                <label className="block text-xs font-medium text-gray-700 mb-1">{workload.name}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={workload.value}
+                    onChange={(e) => handleWorkloadChange(workload.id, parseInt(e.target.value))}
+                    className="flex-1"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={workload.value}
+                    onChange={(e) => handleWorkloadChange(workload.id, parseInt(e.target.value) || 0)}
+                    className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
+                  />
+                  <span className="text-sm font-semibold text-gray-600">%</span>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">{workload.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            Total: {config.workloadTraining + config.workloadInference + config.workloadFinetuning}%
+            {config.workloadTraining + config.workloadInference + config.workloadFinetuning !== 100 && 
+              <span className="text-gray-600 ml-1">(Must equal 100%)</span>
+            }
+          </div>
+        </div>
+
+        {/* Multi-Tenant Distribution Sliders */}
+        <div className="p-3 bg-gray-100 rounded border border-gray-200 mt-4">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="text-xs font-semibold text-gray-800">Multi-Tenant Distribution (%)</h4>
+            <button
+              type="button"
+              onClick={() => { 
+                setTenantWhale(60); 
+                setTenantMedium(30); 
+                setTenantSmall(10); 
+                setTouchedTenantTypes([]);
+              }}
+              className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+            >Reset</button>
+          </div>
+          <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of tenant types. Total must equal 100%.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { id: 'whale', name: 'Whale Tenants (>1000 GPUs)', desc: 'Dedicated partitions, 99.9% SLA', value: config.tenantWhale, setter: setTenantWhale },
+              { id: 'medium', name: 'Medium Tenants (100-1000 GPUs)', desc: 'Shared with QoS guarantees', value: config.tenantMedium, setter: setTenantMedium },
+              { id: 'small', name: 'Small Tenants (<100 GPUs)', desc: 'Best effort pools, container CSI', value: config.tenantSmall, setter: setTenantSmall }
+            ].map((tenant) => (
+              <div key={tenant.id} className="p-3 bg-white rounded border border-gray-200">
+                <label className="block text-xs font-medium text-gray-700 mb-1">{tenant.name}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={tenant.value}
+                    onChange={(e) => handleTenantChange(tenant.id, parseInt(e.target.value))}
+                    className="flex-1"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={tenant.value}
+                    onChange={(e) => handleTenantChange(tenant.id, parseInt(e.target.value) || 0)}
+                    className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
+                  />
+                  <span className="text-sm font-semibold text-gray-600">%</span>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">{tenant.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            Total: {config.tenantWhale + config.tenantMedium + config.tenantSmall}%
+            {config.tenantWhale + config.tenantMedium + config.tenantSmall !== 100 && 
+              <span className="text-gray-600 ml-1">(Must equal 100%)</span>
+            }
+          </div>
+        </div>
       </div>
 
       {/* Storage Configuration */}
@@ -776,15 +888,16 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           </div>
         </div>
 
-        {/* Expandable: Storage Tiers and Distribution */}
-        <div className="mb-6">
-          <h4 
-            className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
-            onClick={() => toggleSection('storageTiers')}
-          >
-            Storage Tiers and Distribution
-            {expandedSections.storageTiers ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
-          </h4>
+        {/* Storage Tiers and Distribution - Only show for Custom Configuration */}
+        {(config.storagePreset === 'custom') && (
+          <div className="mb-6">
+            <h4 
+              className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
+              onClick={() => toggleSection('storageTiers')}
+            >
+              Storage Tiers and Distribution
+              {expandedSections.storageTiers ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
+            </h4>
           
           {expandedSections.storageTiers && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -911,13 +1024,11 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               </div>
             </div>
           )}
-        </div>
-
-        {/* Configuration Sliders */}
-        <div className="space-y-6">
-          {/* Tier Distribution Sliders */}
-          {config.selectedStorageTiers?.length > 0 && (
-            <div className="p-3 bg-gray-100 rounded border border-gray-200">
+            {/* Configuration Sliders */}
+            <div className="space-y-6">
+              {/* Tier Distribution Sliders */}
+              {config.selectedStorageTiers?.length > 0 && (
+                <div className="p-3 bg-gray-100 rounded border border-gray-200">
               <div className="flex items-center justify-between mb-1">
                 <h4 className="text-xs font-semibold text-gray-800">Tier Distribution (%)</h4>
                 <button
@@ -975,121 +1086,10 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   <span className="text-gray-600 ml-1">(Must equal 100%)</span>
                 }
               </div>
-            </div>
-          )}
-
-          {/* Workload Distribution Sliders */}
-          <div className="p-3 bg-gray-100 rounded border border-gray-200">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="text-xs font-semibold text-gray-800">Workload Distribution (%)</h4>
-              <button
-                type="button"
-                onClick={() => { 
-                  setWorkloadTraining(70); 
-                  setWorkloadInference(20); 
-                  setWorkloadFinetuning(10); 
-                  setTouchedWorkloadTypes([]);
-                }}
-                className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
-              >Reset</button>
-            </div>
-            <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of workload types. Total must equal 100%.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {[
-                { id: 'training', name: 'Training Workloads', desc: 'High bandwidth, 2.7 GiB/s per GPU', value: config.workloadTraining, setter: setWorkloadTraining },
-                { id: 'inference', name: 'Inference Workloads', desc: 'Lower bandwidth, 100-500 MB/s per GPU', value: config.workloadInference, setter: setWorkloadInference },
-                { id: 'finetuning', name: 'Fine-tuning Workloads', desc: 'Medium bandwidth, 2.0 GiB/s per GPU', value: config.workloadFinetuning, setter: setWorkloadFinetuning }
-              ].map((workload) => (
-                <div key={workload.id} className="p-3 bg-white rounded border border-gray-200">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{workload.name}</label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={workload.value}
-                      onChange={(e) => handleWorkloadChange(workload.id, parseInt(e.target.value))}
-                      className="flex-1"
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      step={5}
-                      value={workload.value}
-                      onChange={(e) => handleWorkloadChange(workload.id, parseInt(e.target.value) || 0)}
-                      className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
-                    />
-                    <span className="text-sm font-semibold text-gray-600">%</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">{workload.desc}</div>
                 </div>
-              ))}
-            </div>
-            <div className="mt-2 text-xs text-gray-600">
-              Total: {config.workloadTraining + config.workloadInference + config.workloadFinetuning}%
-              {config.workloadTraining + config.workloadInference + config.workloadFinetuning !== 100 && 
-                <span className="text-gray-600 ml-1">(Must equal 100%)</span>
-              }
-            </div>
-          </div>
+              )}
 
-          {/* Multi-Tenant Distribution Sliders */}
-          <div className="p-3 bg-gray-100 rounded border border-gray-200">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="text-xs font-semibold text-gray-800">Multi-Tenant Distribution (%)</h4>
-              <button
-                type="button"
-                onClick={() => { 
-                  setTenantWhale(60); 
-                  setTenantMedium(30); 
-                  setTenantSmall(10); 
-                  setTouchedTenantTypes([]);
-                }}
-                className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
-              >Reset</button>
             </div>
-            <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of tenant types. Total must equal 100%.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {[
-                { id: 'whale', name: 'Whale Tenants (>1000 GPUs)', desc: 'Dedicated partitions, 99.9% SLA', value: config.tenantWhale, setter: setTenantWhale },
-                { id: 'medium', name: 'Medium Tenants (100-1000 GPUs)', desc: 'Shared with QoS guarantees', value: config.tenantMedium, setter: setTenantMedium },
-                { id: 'small', name: 'Small Tenants (<100 GPUs)', desc: 'Best effort pools, container CSI', value: config.tenantSmall, setter: setTenantSmall }
-              ].map((tenant) => (
-                <div key={tenant.id} className="p-3 bg-white rounded border border-gray-200">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{tenant.name}</label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={tenant.value}
-                      onChange={(e) => handleTenantChange(tenant.id, parseInt(e.target.value))}
-                      className="flex-1"
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      step={5}
-                      value={tenant.value}
-                      onChange={(e) => handleTenantChange(tenant.id, parseInt(e.target.value) || 0)}
-                      className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
-                    />
-                    <span className="text-sm font-semibold text-gray-600">%</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">{tenant.desc}</div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 text-xs text-gray-600">
-              Total: {config.tenantWhale + config.tenantMedium + config.tenantSmall}%
-              {config.tenantWhale + config.tenantMedium + config.tenantSmall !== 100 && 
-                <span className="text-gray-600 ml-1">(Must equal 100%)</span>
-              }
-            </div>
-          </div>
-        </div>
 
         {/* Validation Warnings */}
         {config.storageWarnings?.length > 0 && (
@@ -1106,6 +1106,8 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 </li>
               ))}
             </ul>
+          </div>
+        )}
           </div>
         )}
       </div>
