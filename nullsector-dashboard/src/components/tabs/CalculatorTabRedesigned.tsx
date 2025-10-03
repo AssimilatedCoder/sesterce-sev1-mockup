@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Zap, AlertTriangle, Network, HardDrive,
   ChevronDown, ChevronUp, Package, DollarSign
@@ -30,6 +30,7 @@ import {
 import { ValidationSummary } from '../common/ValidationSummary';
 import { ArchitectureFlowDiagram } from '../common/ArchitectureFlowDiagram';
 import { DesignModeSelector, DesignMode } from '../common/DesignModeSelector';
+import ErrorBoundary from '../common/ErrorBoundary';
 import { InfrastructureConfiguration, InfrastructureConfig } from '../common/InfrastructureConfiguration';
 import { InfrastructurePresetSelector } from '../common/InfrastructurePresetSelector';
 import { DerivedServiceMix } from '../common/DerivedServiceMix';
@@ -208,6 +209,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
   const [derivedServiceMix, setDerivedServiceMix] = useState<ServiceMixRecommendation | null>(null);
   const [derivedWorkloadDist, setDerivedWorkloadDist] = useState<WorkloadDistribution | null>(null);
   const [infrastructureConstraints, setInfrastructureConstraints] = useState<ServiceConstraint[]>([]);
+  
+  // Ref to prevent infinite loops in infrastructure-first mode
+  const isUpdatingFromInfrastructure = useRef(false);
 
   // Check for missing required inputs
   const checkMissingInputs = useCallback(() => {
@@ -290,21 +294,42 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
 
   // Infrastructure-first mode calculations
   useEffect(() => {
-    if (designMode === 'infrastructure') {
-      const capabilities = analyzeInfrastructureCapabilities(infrastructureConfig);
-      const serviceMix = deriveOptimalServiceMix(capabilities);
-      const workloadDist = inferWorkloadDistribution(infrastructureConfig, serviceMix);
-      const constraints = identifyServiceConstraints(capabilities);
-      
-      setDerivedServiceMix(serviceMix);
-      setDerivedWorkloadDist(workloadDist);
-      setInfrastructureConstraints(constraints);
-      
-      // Update config to match infrastructure
-      setNumGPUs(infrastructureConfig.compute.totalGPUs);
-      setGpuModel(infrastructureConfig.compute.gpuModel);
+    if (designMode === 'infrastructure' && !isUpdatingFromInfrastructure.current) {
+      try {
+        isUpdatingFromInfrastructure.current = true;
+        
+        const capabilities = analyzeInfrastructureCapabilities(infrastructureConfig);
+        const serviceMix = deriveOptimalServiceMix(capabilities);
+        const workloadDist = inferWorkloadDistribution(infrastructureConfig, serviceMix);
+        const constraints = identifyServiceConstraints(capabilities);
+        
+        setDerivedServiceMix(serviceMix);
+        setDerivedWorkloadDist(workloadDist);
+        setInfrastructureConstraints(constraints);
+        
+        // Update config to match infrastructure (only if values are different)
+        if (config.numGPUs !== infrastructureConfig.compute.totalGPUs) {
+          setNumGPUs(infrastructureConfig.compute.totalGPUs);
+        }
+        if (config.gpuModel !== infrastructureConfig.compute.gpuModel) {
+          setGpuModel(infrastructureConfig.compute.gpuModel);
+        }
+      } catch (error) {
+        console.error('Error in infrastructure-first calculations:', error);
+        setInfrastructureConstraints([{
+          type: 'compute',
+          severity: 'critical',
+          message: 'Error analyzing infrastructure configuration',
+          impact: 'Please check your infrastructure settings and try again'
+        }]);
+      } finally {
+        // Reset the flag after a short delay to allow other effects to complete
+        setTimeout(() => {
+          isUpdatingFromInfrastructure.current = false;
+        }, 100);
+      }
     }
-  }, [designMode, infrastructureConfig, setNumGPUs, setGpuModel]);
+  }, [designMode, infrastructureConfig, config.numGPUs, config.gpuModel, setNumGPUs, setGpuModel]);
 
   // Check for missing inputs when configuration changes
   useEffect(() => {
@@ -804,26 +829,30 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           onInfrastructureRequirementsChange={setInfrastructureRequirements}
         />
       ) : (
-        <>
+        <ErrorBoundary>
           {/* Infrastructure Preset Selector */}
           <InfrastructurePresetSelector onPresetSelect={setInfrastructureConfig} />
           
           {/* Infrastructure Configuration */}
-          <InfrastructureConfiguration
-            config={infrastructureConfig}
-            onChange={setInfrastructureConfig}
-          />
+          <ErrorBoundary>
+            <InfrastructureConfiguration
+              config={infrastructureConfig}
+              onChange={setInfrastructureConfig}
+            />
+          </ErrorBoundary>
           
           {/* Derived Service Mix Display */}
           {derivedServiceMix && derivedWorkloadDist && (
-            <DerivedServiceMix
-              serviceMix={derivedServiceMix}
-              workloadDistribution={derivedWorkloadDist}
-              constraints={infrastructureConstraints}
-              totalGPUs={infrastructureConfig.compute.totalGPUs}
-            />
+            <ErrorBoundary>
+              <DerivedServiceMix
+                serviceMix={derivedServiceMix}
+                workloadDistribution={derivedWorkloadDist}
+                constraints={infrastructureConstraints}
+                totalGPUs={infrastructureConfig.compute.totalGPUs}
+              />
+            </ErrorBoundary>
           )}
-        </>
+        </ErrorBoundary>
       )}
 
       {/* Validation Summary */}
@@ -839,6 +868,225 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           formatCurrency={formatCurrency}
         />
       )}
+
+      {/* Storage Override */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <HardDrive className="w-3 h-3 text-gray-500" />
+          Storage Override
+        </h3>
+        <p className="text-xs text-gray-600 mb-4">Override calculated storage requirements with custom configuration</p>
+        
+        {/* Total PB Override */}
+        <div className="mb-6">
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">Total Storage Capacity Override</label>
+          <div className="flex items-center gap-2">
+            <input 
+              type="number"
+              value={config.totalStorage}
+              onChange={(e) => setTotalStorage(parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+              placeholder="Enter total PB required"
+            />
+            <span className="text-sm text-gray-600 font-medium">PB</span>
+          </div>
+          <span className="text-xs text-gray-500 mt-1 block">Override calculated storage requirements</span>
+        </div>
+
+        {/* Storage Tier Selection and Distribution */}
+        <div className="mb-6">
+          <h4 className="text-sm font-semibold text-gray-800 mb-4">Storage Tier Configuration</h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {/* Extreme Performance */}
+            <div>
+              <h5 className="text-xs font-semibold text-gray-800 mb-1">Extreme Performance</h5>
+              <p className="text-xs text-gray-600 mb-3">All-NVMe, &lt;100μs latency</p>
+              <div className="relative">
+                <select 
+                  value={config.selectedStorageTiers?.find((t: string) => ['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) || ''}
+                  onChange={(e) => {
+                    const newTiers = config.selectedStorageTiers?.filter((t: string) => !['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) || [];
+                    if (e.target.value) {
+                      newTiers.push(e.target.value);
+                    }
+                    setSelectedStorageTiers(newTiers);
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">Select Option</option>
+                  <option value="vast-universal">VAST Universal - 1+ TB/GPU, €598K/PB</option>
+                  <option value="weka-parallel">WEKA Parallel - 720 GB/GPU, €437K/PB</option>
+                  <option value="ddn-exascaler">DDN EXAScaler - 1+ TB/GPU, €920K/PB</option>
+                </select>
+                {config.selectedStorageTiers?.find((t: string) => ['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                    {config.selectedStorageTiers.includes('vast-universal') && "QLC economics, 100k+ GPU scale"}
+                    {config.selectedStorageTiers.includes('weka-parallel') && "GPUDirect, software-defined"}
+                    {config.selectedStorageTiers.includes('ddn-exascaler') && "HW accelerated, 100k+ GPUs"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* High Performance */}
+            <div>
+              <h5 className="text-xs font-semibold text-gray-800 mb-1">High Performance</h5>
+              <p className="text-xs text-gray-600 mb-3">All-Flash, &lt;1ms latency</p>
+              <div className="relative">
+                <select 
+                  value={config.selectedStorageTiers?.find((t: string) => ['pure-flashblade', 'netapp-aff'].includes(t)) || ''}
+                  onChange={(e) => {
+                    const newTiers = config.selectedStorageTiers?.filter((t: string) => !['pure-flashblade', 'netapp-aff'].includes(t)) || [];
+                    if (e.target.value) {
+                      newTiers.push(e.target.value);
+                    }
+                    setSelectedStorageTiers(newTiers);
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">Select Option</option>
+                  <option value="pure-flashblade">Pure FlashBlade/E - 3.4 TB/GPU, €736K/PB</option>
+                  <option value="netapp-aff">NetApp AFF - 350 GB/GPU, €644K/PB</option>
+                </select>
+                {config.selectedStorageTiers?.find((t: string) => ['pure-flashblade', 'netapp-aff'].includes(t)) && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                    {config.selectedStorageTiers.includes('pure-flashblade') && "Enterprise, Evergreen sub"}
+                    {config.selectedStorageTiers.includes('netapp-aff') && "Enterprise NAS/SAN"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Balanced Performance */}
+            <div>
+              <h5 className="text-xs font-semibold text-gray-800 mb-1">Balanced Performance</h5>
+              <p className="text-xs text-gray-600 mb-3">Ceph-based, &lt;5ms latency</p>
+              <div className="relative">
+                <select 
+                  value={config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || ''}
+                  onChange={(e) => {
+                    const newTiers = config.selectedStorageTiers?.filter((t: string) => !['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || [];
+                    if (e.target.value) {
+                      newTiers.push(e.target.value);
+                    }
+                    setSelectedStorageTiers(newTiers);
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">Select Option</option>
+                  <option value="ceph-nvme">Ceph All-NVMe (EC 8+3) - 100 GB/GPU, €312K/PB</option>
+                  <option value="ceph-replicated">Ceph 3-Way Replication - 120 GB/GPU, €450K/PB</option>
+                  <option value="ceph-hybrid">Ceph Hybrid (EC 8+3) - 50 GB/GPU, €184K/PB</option>
+                  <option value="dell-powerscale">Dell PowerScale - 100 GB/GPU, €352K/PB</option>
+                </select>
+                {config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                    {config.selectedStorageTiers.includes('ceph-nvme') && "Erasure coding 8+3, 73% efficiency"}
+                    {config.selectedStorageTiers.includes('ceph-replicated') && "3-way replication, 33% efficiency, high performance"}
+                    {config.selectedStorageTiers.includes('ceph-hybrid') && "NVMe cache + SSD capacity, erasure coding"}
+                    {config.selectedStorageTiers.includes('dell-powerscale') && "Enterprise scale-out"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cost-Optimized */}
+            <div>
+              <h5 className="text-xs font-semibold text-gray-800 mb-1">Cost-Optimized</h5>
+              <p className="text-xs text-gray-600 mb-3">HDD/Object, &lt;100ms latency</p>
+              <div className="relative">
+                <select 
+                  value={config.selectedStorageTiers?.find((t: string) => ['ceph-hdd', 's3-compatible'].includes(t)) || ''}
+                  onChange={(e) => {
+                    const newTiers = config.selectedStorageTiers?.filter((t: string) => !['ceph-hdd', 's3-compatible'].includes(t)) || [];
+                    if (e.target.value) {
+                      newTiers.push(e.target.value);
+                    }
+                    setSelectedStorageTiers(newTiers);
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">Select Option</option>
+                  <option value="ceph-hdd">Ceph HDD - 10 GB/GPU, €92K/PB</option>
+                  <option value="s3-compatible">S3 Object - 5 GB/GPU, €49K/PB CAPEX</option>
+                </select>
+                {config.selectedStorageTiers?.find((t: string) => ['ceph-hdd', 's3-compatible'].includes(t)) && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                    {config.selectedStorageTiers.includes('ceph-hdd') && "SSD cache + HDD capacity"}
+                    {config.selectedStorageTiers.includes('s3-compatible') && "Archive, 11 9s durability"}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Storage Distribution Sliders */}
+          {config.selectedStorageTiers?.length > 0 && (
+            <div className="p-3 bg-gray-100 rounded border border-gray-200">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-xs font-semibold text-gray-800">Storage Tier Distribution (%)</h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const equalShare = Math.floor(100 / config.selectedStorageTiers.length);
+                    const newDist: any = {};
+                    config.selectedStorageTiers.forEach((tierId: string, index: number) => {
+                      newDist[tierId] = index === 0 ? 100 - (equalShare * (config.selectedStorageTiers.length - 1)) : equalShare;
+                    });
+                    setStorageTierDistribution(newDist);
+                    setTouchedStorageTiers([]);
+                  }}
+                  className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
+                >
+                  Reset
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 mb-2">Adjust the percentage distribution across selected storage tiers. Total must equal 100%.</p>
+              
+              <div className="space-y-3">
+                {config.selectedStorageTiers.map((tierId: string) => {
+                  const tierName = {
+                    'vast-universal': 'VAST Universal',
+                    'weka-parallel': 'WEKA Parallel',
+                    'ddn-exascaler': 'DDN EXAScaler',
+                    'pure-flashblade': 'Pure FlashBlade/E',
+                    'netapp-aff': 'NetApp AFF',
+                    'ceph-nvme': 'Ceph All-NVMe',
+                    'ceph-replicated': 'Ceph 3-Way Replication',
+                    'ceph-hybrid': 'Ceph Hybrid',
+                    'dell-powerscale': 'Dell PowerScale',
+                    'ceph-hdd': 'Ceph HDD',
+                    's3-compatible': 'S3 Object'
+                  }[tierId] || tierId;
+
+                  const percentage = config.storageTierDistribution?.[tierId] || 0;
+                  const capacityPB = (config.totalStorage * percentage / 100).toFixed(1);
+
+                  return (
+                    <div key={tierId} className="flex items-center gap-3">
+                      <div className="w-32 text-xs font-medium text-gray-700">{tierName}</div>
+                      <div className="flex-1">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          value={percentage}
+                          onChange={(e) => handleStorageTierChange(tierId, parseInt(e.target.value))}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-gray"
+                        />
+                      </div>
+                      <div className="w-12 text-xs font-medium text-gray-700 text-right">{percentage}%</div>
+                      <div className="w-16 text-xs text-gray-500 text-right">{capacityPB} PB</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Infrastructure Requirements */}
       {infrastructureRequirements && (
@@ -1119,557 +1367,6 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         </div>
       </div>
 
-      {/* Storage Configuration */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <HardDrive className="w-3 h-3 text-gray-500" />
-          Storage Configuration
-        </h3>
-        
-        {/* Always Visible: Total Capacity and Quick Presets */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Total use-able Storage Capacity</label>
-            <div className="flex items-center gap-2">
-              <input 
-                type="number"
-                value={config.totalStorage}
-                onChange={(e) => setTotalStorage(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
-              />
-              <span className="text-sm text-gray-600 font-medium">PB</span>
-            </div>
-            <span className="text-xs text-gray-500 mt-1 block">Total across all tiers</span>
-          </div>
-          
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Quick Architecture Presets</label>
-            <select 
-              value={config.storagePreset || 'vast-ceph-optimal'}
-              onChange={(e) => {
-                setStoragePreset(e.target.value);
-                if (e.target.value !== 'custom') {
-                  applyStoragePreset(e.target.value);
-                }
-              }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
-            >
-              <option value="vast-ceph-optimal">VAST + Ceph Multi-Tier (Recommended) - {formatCurrency(615000)}/PB TCO</option>
-              <option value="all-flash-performance">All-Flash Maximum Performance - {formatCurrency(1280000)}/PB TCO</option>
-              <option value="cost-optimized-scale">Cost-Optimized at Scale - {formatCurrency(435000)}/PB TCO</option>
-              <option value="enterprise-balanced">Enterprise Balanced - {formatCurrency(1400000)}/PB TCO</option>
-              <option value="custom">Custom Configuration</option>
-            </select>
-            <span className="text-xs text-gray-500 mt-1 block">Pre-configured storage architectures</span>
-          </div>
-        </div>
-
-        {/* Storage Tiers and Distribution - Only show for Custom Configuration */}
-        {(config.storagePreset === 'custom') && (
-          <div className="mb-6">
-            <h4 
-              className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
-              onClick={() => toggleSection('storageTiers')}
-            >
-              Storage Tiers and Distribution
-              {expandedSections.storageTiers ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
-            </h4>
-          
-          {expandedSections.storageTiers && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Extreme Performance */}
-              <div>
-                <h5 className="text-xs font-semibold text-gray-800 mb-1">Extreme Performance</h5>
-                <p className="text-xs text-gray-600 mb-3">All-NVMe, &lt;100μs latency</p>
-                <div className="relative">
-                  <select 
-                    value={config.selectedStorageTiers?.find((t: string) => ['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) || ''}
-                    onChange={(e) => {
-                      const newTiers = config.selectedStorageTiers?.filter((t: string) => !['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) || [];
-                      if (e.target.value) {
-                        newTiers.push(e.target.value);
-                      }
-                      setSelectedStorageTiers(newTiers);
-                    }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">Select Option</option>
-                    <option value="vast-universal">VAST Universal - 1+ TB/GPU, €598K/PB</option>
-                    <option value="weka-parallel">WEKA Parallel - 720 GB/GPU, €437K/PB</option>
-                    <option value="ddn-exascaler">DDN EXAScaler - 1+ TB/GPU, €920K/PB</option>
-                  </select>
-                  {config.selectedStorageTiers?.find((t: string) => ['vast-universal', 'weka-parallel', 'ddn-exascaler'].includes(t)) && (
-                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                      {config.selectedStorageTiers.includes('vast-universal') && "QLC economics, 100k+ GPU scale"}
-                      {config.selectedStorageTiers.includes('weka-parallel') && "GPUDirect, software-defined"}
-                      {config.selectedStorageTiers.includes('ddn-exascaler') && "HW accelerated, 100k+ GPUs"}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* High Performance */}
-              <div>
-                <h5 className="text-xs font-semibold text-gray-800 mb-1">High Performance</h5>
-                <p className="text-xs text-gray-600 mb-3">All-Flash, &lt;1ms latency</p>
-                <div className="relative">
-                  <select 
-                    value={config.selectedStorageTiers?.find((t: string) => ['pure-flashblade', 'netapp-aff'].includes(t)) || ''}
-                    onChange={(e) => {
-                      const newTiers = config.selectedStorageTiers?.filter((t: string) => !['pure-flashblade', 'netapp-aff'].includes(t)) || [];
-                      if (e.target.value) {
-                        newTiers.push(e.target.value);
-                      }
-                      setSelectedStorageTiers(newTiers);
-                    }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">Select Option</option>
-                    <option value="pure-flashblade">Pure FlashBlade/E - 3.4 TB/GPU, €736K/PB</option>
-                    <option value="netapp-aff">NetApp AFF - 350 GB/GPU, €644K/PB</option>
-                  </select>
-                  {config.selectedStorageTiers?.find((t: string) => ['pure-flashblade', 'netapp-aff'].includes(t)) && (
-                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                      {config.selectedStorageTiers.includes('pure-flashblade') && "Enterprise, Evergreen sub"}
-                      {config.selectedStorageTiers.includes('netapp-aff') && "Enterprise NAS/SAN"}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Balanced Performance */}
-              <div>
-                <h5 className="text-xs font-semibold text-gray-800 mb-1">Balanced Performance</h5>
-                <p className="text-xs text-gray-600 mb-3">Ceph-based, &lt;5ms latency</p>
-                <div className="relative">
-                  <select 
-                    value={config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || ''}
-                    onChange={(e) => {
-                      const newTiers = config.selectedStorageTiers?.filter((t: string) => !['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || [];
-                      if (e.target.value) {
-                        newTiers.push(e.target.value);
-                      }
-                      setSelectedStorageTiers(newTiers);
-                    }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">Select Option</option>
-                    <option value="ceph-nvme">Ceph All-NVMe (EC 8+3) - 100 GB/GPU, €312K/PB</option>
-                    <option value="ceph-replicated">Ceph 3-Way Replication - 120 GB/GPU, €450K/PB</option>
-                    <option value="ceph-hybrid">Ceph Hybrid (EC 8+3) - 50 GB/GPU, €184K/PB</option>
-                    <option value="dell-powerscale">Dell PowerScale - 100 GB/GPU, €352K/PB</option>
-                  </select>
-                  {config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) && (
-                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                      {config.selectedStorageTiers.includes('ceph-nvme') && "Erasure coding 8+3, 73% efficiency"}
-                      {config.selectedStorageTiers.includes('ceph-replicated') && "3-way replication, 33% efficiency, high performance"}
-                      {config.selectedStorageTiers.includes('ceph-hybrid') && "NVMe cache + SSD capacity, erasure coding"}
-                      {config.selectedStorageTiers.includes('dell-powerscale') && "Enterprise scale-out"}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Cost-Optimized */}
-              <div>
-                <h5 className="text-xs font-semibold text-gray-800 mb-1">Cost-Optimized</h5>
-                <p className="text-xs text-gray-600 mb-3">HDD/Object, &lt;100ms latency</p>
-                <div className="relative">
-                  <select 
-                    value={config.selectedStorageTiers?.find((t: string) => ['ceph-hdd', 's3-compatible'].includes(t)) || ''}
-                    onChange={(e) => {
-                      const newTiers = config.selectedStorageTiers?.filter((t: string) => !['ceph-hdd', 's3-compatible'].includes(t)) || [];
-                      if (e.target.value) {
-                        newTiers.push(e.target.value);
-                      }
-                      setSelectedStorageTiers(newTiers);
-                    }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">Select Option</option>
-                    <option value="ceph-hdd">Ceph HDD - 10 GB/GPU, €92K/PB</option>
-                    <option value="s3-compatible">S3 Object - 5 GB/GPU, €49K/PB CAPEX</option>
-                  </select>
-                  {config.selectedStorageTiers?.find((t: string) => ['ceph-hdd', 's3-compatible'].includes(t)) && (
-                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                      {config.selectedStorageTiers.includes('ceph-hdd') && "SSD cache + HDD capacity"}
-                      {config.selectedStorageTiers.includes('s3-compatible') && "Archive, 11 9s durability"}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-            {/* Configuration Sliders */}
-            <div className="space-y-6">
-              {/* Tier Distribution Sliders */}
-              {config.selectedStorageTiers?.length > 0 && (
-                <div className="p-3 bg-gray-100 rounded border border-gray-200">
-              <div className="flex items-center justify-between mb-1">
-                <h4 className="text-xs font-semibold text-gray-800">Tier Distribution (%)</h4>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const equalShare = Math.floor(100 / config.selectedStorageTiers.length);
-                    const newDist: any = {};
-                    config.selectedStorageTiers.forEach((tierId: string, index: number) => {
-                      newDist[tierId] = index === 0 ? 100 - (equalShare * (config.selectedStorageTiers.length - 1)) : equalShare;
-                    });
-                    setStorageTierDistribution(newDist);
-                    setTouchedStorageTiers([]);
-                  }}
-                  className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50"
-                >Reset</button>
-              </div>
-              <p className="text-xs text-gray-600 mb-2">Adjust the percentage mix of storage tiers. Total must equal 100%.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {config.selectedStorageTiers.map((tierId: string) => {
-                  const tier = storageArchitectures[tierId];
-                  return (
-                    <div key={tierId} className="p-3 bg-white rounded border border-gray-200">
-                      <label className="block text-xs font-medium text-gray-700 mb-1">{tier?.name || tierId}</label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={config.storageTierDistribution?.[tierId] || 0}
-                          onChange={(e) => handleStorageTierChange(tierId, parseInt(e.target.value))}
-                          className="flex-1"
-                        />
-                        <input
-                          type="number"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={config.storageTierDistribution?.[tierId] || 0}
-                          onChange={(e) => handleStorageTierChange(tierId, parseInt(e.target.value) || 0)}
-                          className="w-20 px-2 py-1 text-sm border border-gray-300 rounded"
-                        />
-                        <span className="text-sm font-semibold text-gray-600">%</span>
-                      </div>
-                      <div className="text-xs text-blue-600 font-medium mt-1">
-                        {((config.storageTierDistribution?.[tierId] || 0) * config.totalStorage / 100).toFixed(1)} PB
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">{tier?.description || 'Storage tier'}</div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-2 text-xs text-gray-600">
-                Total: {Object.values(config.storageTierDistribution || {}).reduce((sum: number, val: any) => sum + (val || 0), 0)}%
-                {Object.values(config.storageTierDistribution || {}).reduce((sum: number, val: any) => sum + (val || 0), 0) !== 100 && 
-                  <span className="text-gray-600 ml-1">(Must equal 100%)</span>
-                }
-              </div>
-                </div>
-              )}
-
-            </div>
-
-        {/* Validation Warnings */}
-        {config.storageWarnings?.length > 0 && (
-          <div className="bg-gray-100 border border-gray-300 rounded-lg p-3 mt-4">
-            <h4 className="text-xs font-semibold text-gray-800 mb-2 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3 text-gray-500" />
-              Configuration Warnings
-            </h4>
-            <ul className="space-y-1">
-              {config.storageWarnings.map((warning: string, index: number) => (
-                <li key={index} className="text-xs text-gray-700 flex items-start gap-2">
-                  <span className="text-gray-600 mt-0.5">•</span>
-                  <span>{warning}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-          </div>
-        )}
-      </div>
-
-      {/* Software Stack Configuration */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 
-          className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
-          onClick={() => toggleSection('software')}
-        >
-          <Package className="w-3 h-3 text-gray-500" />
-          Software Stack Configuration
-          {expandedSections.software ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
-        </h3>
-        
-        {expandedSections.software && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Software Stack</label>
-                <select 
-                  value={config.softwareStack || 'canonical-enterprise'}
-                  onChange={(e) => setSoftwareStack(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  {Object.entries(softwareStacks).map(([id, stack]) => (
-                    <option key={id} value={id}>
-                      {stack.name} (~{formatCurrency(stack.totalCostPerGPU)}/GPU equiv/yr)
-                    </option>
-                  ))}
-                </select>
-                <span className="text-xs text-gray-500 mt-1 block">
-                  {softwareStacks[config.softwareStack || 'canonical-enterprise']?.description}
-                </span>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Support Tier</label>
-                <select 
-                  value={config.supportTier || 'business'}
-                  onChange={(e) => setSupportTier(e.target.value as any)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="community">Community Support (Lowest Cost)</option>
-                  <option value="business">Business Support (Recommended)</option>
-                  <option value="enterprise">Enterprise Support (24/7 SLA)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Budget Priority</label>
-                <select 
-                  value={config.budget || 'medium'}
-                  onChange={(e) => setBudget(e.target.value as any)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="low">Cost Optimized</option>
-                  <option value="medium">Balanced</option>
-                  <option value="high">Performance</option>
-                  <option value="unlimited">Maximum Performance</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Team Expertise</label>
-                <select 
-                  value={config.expertise || 'intermediate'}
-                  onChange={(e) => setExpertise(e.target.value as any)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="basic">Basic (Prefer Managed)</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced (Can Handle OSS)</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Primary Use Case</label>
-                <select 
-                  value={config.primaryUseCase || 'mixed'}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="training">AI Training</option>
-                  <option value="inference">Inference</option>
-                  <option value="mixed">Mixed Workloads</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">Compliance Requirements</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {['SOC2', 'HIPAA', 'ISO27001', 'SecNumCloud', 'GDPR', 'FedRAMP', 'PCI-DSS', 'None'].map(compliance => (
-                  <label key={compliance} className="flex items-center text-sm">
-                    <input
-                      type="checkbox"
-                      checked={(config.complianceRequirements || []).includes(compliance)}
-                      onChange={(e) => {
-                        const current = config.complianceRequirements || [];
-                        if (e.target.checked) {
-                          setComplianceRequirements([...current, compliance]);
-                        } else {
-                          setComplianceRequirements(current.filter((c: string) => c !== compliance));
-                        }
-                      }}
-                      className="rounded border-gray-300 text-gray-600 focus:ring-gray-500 mr-2"
-                    />
-                    {compliance}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Stack Cost Breakdown */}
-            {config.softwareStack && config.numGPUs > 0 && (
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                  <DollarSign className="w-3 h-3 text-gray-500" />
-                  Software Stack Cost Analysis
-                </h4>
-                {(() => {
-                  const stackCost = calculateStackCost(
-                    config.softwareStack || 'canonical-enterprise',
-                    config.numGPUs,
-                    3,
-                    config.supportTier || 'business'
-                  );
-                  return (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                      <div>
-                        <span className="text-gray-600">Setup Cost:</span>
-                        <span className="block font-semibold">{formatNumber(stackCost.upfrontCost)}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Annual Cost:</span>
-                        <span className="block font-semibold">{formatNumber(stackCost.annualCost)}/yr</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">3-Year TCO:</span>
-                        <span className="block font-semibold">{formatNumber(stackCost.totalTCO)}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Per GPU Equiv/Year:</span>
-                        <span className="block font-semibold">{formatNumber(stackCost.perGPUCost)}</span>
-                        <span className="text-xs text-gray-500">*Canonical priced per-node</span>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* Recommended Stack Based on Requirements */}
-            {config.numGPUs > 0 && (
-              <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="text-xs font-semibold text-gray-800 mb-1 flex items-center gap-2">
-                  <Zap className="w-3 h-3 text-gray-500" />
-                  AI-Recommended Stack
-                </h4>
-                {(() => {
-                  const recommended = recommendStack({
-                    gpuCount: config.numGPUs,
-                    budget: config.budget || 'medium',
-                    expertise: config.expertise || 'intermediate',
-                    supportNeeds: config.supportTier || 'business',
-                    complianceRequirements: config.complianceRequirements || [],
-                    primaryUseCase: config.primaryUseCase || 'mixed',
-                    multiTenancy: (config.tenantWhale || 0) + (config.tenantMedium || 0) + (config.tenantSmall || 0) > 0
-                  });
-                  const recommendedStack = softwareStacks[recommended];
-                  return (
-                    <p className="text-xs text-gray-700">
-                      Based on your requirements, we recommend: <strong>{recommendedStack.name}</strong>
-                      {config.softwareStack !== recommended && (
-                        <button
-                          onClick={() => setSoftwareStack(recommended)}
-                          className="ml-2 text-gray-600 underline hover:text-gray-800"
-                        >
-                          Apply Recommendation
-                        </button>
-                      )}
-                    </p>
-                  );
-                })()}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Networking Configuration */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 
-          className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
-          onClick={() => toggleSection('networking')}
-        >
-          <Network className="w-3 h-3 text-gray-500" />
-          Networking Configuration
-          {expandedSections.networking ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
-        </h3>
-        
-        {expandedSections.networking && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Fabric Type</label>
-                <select 
-                  value={config.fabricType}
-                  onChange={(e) => setFabricType(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                >
-                  <option value="ethernet">Ethernet RoCEv2 (400GbE)</option>
-                  <option value="ethernet-800g">Ethernet RoCEv2 (800GbE)</option>
-                  <option value="infiniband">InfiniBand NDR (400Gbps)</option>
-                  <option value="infiniband-xdr">InfiniBand XDR (800Gbps)</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Topology</label>
-                <select 
-                  value={config.topology}
-                  onChange={(e) => setTopology(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                >
-                  <option value="fat-tree">Fat-Tree (Non-blocking)</option>
-                  <option value="dragonfly">Dragonfly+</option>
-                  <option value="bcube">BCube</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Oversubscription Ratio</label>
-                <select 
-                  value={config.oversubscription}
-                  onChange={(e) => setOversubscription(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                >
-                  <option value="1:1">1:1 (Non-blocking)</option>
-                  <option value="2:1">2:1</option>
-                  <option value="3:1">3:1</option>
-                  <option value="4:1">4:1</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Rails per GPU</label>
-                <input 
-                  type="number"
-                  value={config.railsPerGPU}
-                  onChange={(e) => setRailsPerGPU(parseInt(e.target.value) || 8)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                  min="1"
-                  max="16"
-                />
-                <span className="text-xs text-gray-500 mt-1 block">
-                  GB200/300: 9, H100: 8
-                </span>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <label className="flex items-center gap-2 text-xs font-medium text-gray-700">
-                <input 
-                  type="checkbox"
-                  checked={config.enableBluefield}
-                  onChange={(e) => setEnableBluefield(e.target.checked)}
-                  className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
-                />
-                Enable BlueField-3 DPUs
-              </label>
-              {config.enableBluefield && (
-                <div className="text-xs text-gray-500 mt-2 ml-6">
-                  • RDMA offload & acceleration<br/>
-                  • 150W per DPU, {formatCurrency(2500)}/unit<br/>
-                  • {config.gpuModel.startsWith('gb') ? '4 per NVL72 system (72 GPUs)' : '1 per 8 GPUs'}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
-
 
       {/* Results Section */}
       {results && (
@@ -1702,35 +1399,13 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               <div className="text-xs text-gray-500">At {config.utilization}% utilization</div>
             </div>
             
-            <div className="bg-green-500 text-white p-4 rounded-lg shadow-sm">
-              <div className="text-xs mb-1">10-Year TCO</div>
-              <div className="text-2xl font-bold">{formatNumber(results.tco10year)}</div>
-              <div className="text-xs opacity-90">Total ownership cost</div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-xs text-gray-500 mb-1">5-Year TCO</div>
+              <div className="text-2xl font-bold text-gray-900">{formatNumber(results.totalCapex + (results.annualOpex * 5))}</div>
+              <div className="text-xs text-gray-500">Total cost of ownership</div>
             </div>
           </div>
 
-          {/* Infrastructure Metrics */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Infrastructure Metrics</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <div className="text-xs text-gray-500">GPU Systems</div>
-                <div className="text-xl font-semibold">{results.details?.systemsNeeded || 0}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Total Power</div>
-                <div className="text-xl font-semibold">{results.totalPowerMW.toFixed(1)} MW</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Network BW</div>
-                <div className="text-xl font-semibold">{results.networkBandwidth.toFixed(1)} Tbps</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Storage $/GB/mo</div>
-                <div className="text-xl font-semibold">{formatCurrency(results.storageGbMonth)}</div>
-              </div>
-            </div>
-          </div>
 
           {/* Cost Breakdowns */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1742,9 +1417,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Component</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit Cost</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Cost</th>
                       <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">%</th>
                     </tr>
                   </thead>
@@ -1801,44 +1476,6 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
               </div>
             </div>
           </div>
-
-          {/* Storage Architecture Summary */}
-          {config.selectedStorageTiers?.length > 0 && (
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Selected Storage Architecture</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {config.selectedStorageTiers.map((tierId: string) => {
-                  const tier = storageArchitectures[tierId];
-                  const percentage = config.storageTierDistribution?.[tierId] || 0;
-                  const capacityPB = (config.totalStorage * percentage / 100).toFixed(1);
-                  
-                  return (
-                    <div key={tierId} className="bg-gray-50 p-3 rounded border border-gray-200">
-                      <h4 className="font-semibold text-sm mb-2">{tier?.name}</h4>
-                      <div className="space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Capacity:</span>
-                          <span className="font-medium">{capacityPB} PB ({percentage}%)</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Performance:</span>
-                          <span className="font-medium">{tier?.performance.throughputPerPB}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Latency:</span>
-                          <span className="font-medium">{tier?.performance.latency}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">5yr TCO/PB:</span>
-                          <span className="font-medium">{formatCurrency(tier?.costPerPB.total5Year / 1000 || 0)}K</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
           </div>
         </div>
       )}

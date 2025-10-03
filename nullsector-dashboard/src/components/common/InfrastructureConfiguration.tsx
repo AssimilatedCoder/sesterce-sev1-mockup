@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Cpu, Network, HardDrive, Zap, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface InfrastructureConfig {
@@ -52,7 +52,12 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
     }));
   };
 
-  const updateConfig = (section: keyof InfrastructureConfig, field: string, value: any) => {
+  const updateConfig = useCallback((section: keyof InfrastructureConfig, field: string, value: any) => {
+    // Validate the value to prevent invalid states
+    if (value === null || value === undefined) {
+      return;
+    }
+    
     const newConfig = {
       ...config,
       [section]: {
@@ -61,9 +66,14 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
       }
     };
     onChange(newConfig);
-  };
+  }, [config, onChange]);
 
-  const updateStorageConfig = (tier: string, field: string, value: any) => {
+  const updateStorageConfig = useCallback((tier: string, field: string, value: any) => {
+    // Validate the value to prevent invalid states
+    if (value === null || value === undefined) {
+      return;
+    }
+    
     const newConfig = {
       ...config,
       storage: {
@@ -75,7 +85,7 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
       }
     };
     onChange(newConfig);
-  };
+  }, [config, onChange]);
 
   const ConfigSection = ({ 
     title, 
@@ -171,7 +181,7 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
               max="50000"
               step="100"
               value={config.compute.totalGPUs}
-              onChange={(e) => updateConfig('compute', 'totalGPUs', parseInt(e.target.value))}
+              onChange={(e) => updateConfig('compute', 'totalGPUs', parseInt(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -343,7 +353,7 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
                     min="0"
                     step={tier.unit === 'TB' ? '10' : '0.1'}
                     value={config.storage[tier.key as keyof typeof config.storage].capacity}
-                    onChange={(e) => updateStorageConfig(tier.key, 'capacity', parseFloat(e.target.value))}
+                    onChange={(e) => updateStorageConfig(tier.key, 'capacity', parseFloat(e.target.value) || 0)}
                     className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-600">{tier.unit}</span>
@@ -372,7 +382,7 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
               max="100"
               step="0.1"
               value={config.power.totalPowerCapacity}
-              onChange={(e) => updateConfig('power', 'totalPowerCapacity', parseFloat(e.target.value))}
+              onChange={(e) => updateConfig('power', 'totalPowerCapacity', parseFloat(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -425,7 +435,7 @@ export const InfrastructureConfiguration: React.FC<InfrastructureConfigurationPr
               max="2.0"
               step="0.1"
               value={config.power.pue}
-              onChange={(e) => updateConfig('power', 'pue', parseFloat(e.target.value))}
+              onChange={(e) => updateConfig('power', 'pue', parseFloat(e.target.value) || 1.0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">
