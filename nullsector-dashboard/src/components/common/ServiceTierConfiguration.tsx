@@ -46,35 +46,62 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
     const tierIndex = newTiers.findIndex(t => t.id === tierId);
     if (tierIndex === -1) return;
 
+    // Clamp the new value between 0 and 100
+    const clampedValue = Math.max(0, Math.min(100, value));
     const oldValue = newTiers[tierIndex].clusterPercent;
-    const diff = value - oldValue;
+    const diff = clampedValue - oldValue;
+    
+    // Calculate current total of other tiers
+    const otherTiersTotal = newTiers
+      .filter((_, i) => i !== tierIndex)
+      .reduce((sum, t) => sum + t.clusterPercent, 0);
+    
+    // Check if the new value would cause total to exceed 100%
+    const wouldExceed100 = clampedValue + otherTiersTotal > 100;
+    
+    if (wouldExceed100) {
+      // Calculate the maximum allowed value for this tier
+      const maxAllowed = 100 - otherTiersTotal;
+      const finalValue = Math.max(0, Math.min(maxAllowed, clampedValue));
+      
+      // Only update if the value actually changed
+      if (Math.abs(finalValue - oldValue) > 0.01) {
+        newTiers[tierIndex].clusterPercent = finalValue;
+        setServiceTiers(newTiers);
+      }
+      return;
+    }
     
     // Update the changed tier
-    newTiers[tierIndex].clusterPercent = Math.max(0, Math.min(100, value));
+    newTiers[tierIndex].clusterPercent = clampedValue;
     
-    // Adjust other tiers proportionally
-    const otherTiers = newTiers.filter((_, i) => i !== tierIndex);
-    const untouchedTiers = otherTiers.filter(t => !touchedTiers.includes(t.id));
-    const adjustableTiers = untouchedTiers.length > 0 ? untouchedTiers : otherTiers;
-
-    if (adjustableTiers.length > 0 && Math.abs(diff) > 0.1) {
-      const totalAdjustable = adjustableTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+    // If we have room to adjust other tiers and there's a meaningful change
+    if (Math.abs(diff) > 0.1 && otherTiersTotal > 0) {
+      const otherTiers = newTiers.filter((_, i) => i !== tierIndex);
+      const untouchedTiers = otherTiers.filter(t => !touchedTiers.includes(t.id));
+      const adjustableTiers = untouchedTiers.length > 0 ? untouchedTiers : otherTiers;
       
-      if (totalAdjustable > 0) {
-        adjustableTiers.forEach(tier => {
-          const proportion = tier.clusterPercent / totalAdjustable;
-          const adjustment = diff * proportion;
-          tier.clusterPercent = Math.max(0, Math.min(100, tier.clusterPercent - adjustment));
-        });
+      if (adjustableTiers.length > 0) {
+        const totalAdjustable = adjustableTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+        
+        if (totalAdjustable > 0) {
+          // Distribute the difference proportionally among adjustable tiers
+          adjustableTiers.forEach(tier => {
+            const proportion = tier.clusterPercent / totalAdjustable;
+            const adjustment = diff * proportion;
+            tier.clusterPercent = Math.max(0, tier.clusterPercent - adjustment);
+          });
+        }
       }
     }
 
-    // Ensure total sums to 100%
-    const total = newTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
-    if (Math.abs(total - 100) > 0.1) {
-      const adjustment = (100 - total) / newTiers.length;
+    // Final safety check - ensure total doesn't exceed 100%
+    const finalTotal = newTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+    if (finalTotal > 100.01) { // Small tolerance for floating point
+      // Proportionally reduce all tiers to sum to 100%
+      const scaleFactor = 100 / finalTotal;
       newTiers.forEach(tier => {
-        tier.clusterPercent = Math.max(0, Math.min(100, tier.clusterPercent + adjustment));
+        tier.clusterPercent = tier.clusterPercent * scaleFactor;
       });
     }
 
@@ -158,7 +185,7 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                 <input
                   type="range"
                   min="0"
-                  max="100"
+                  max={Math.min(100, tier.clusterPercent + (100 - totalClusterPercent))}
                   step="1"
                   value={tier.clusterPercent}
                   onChange={(e) => handleClusterPercentChange(tier.id, parseInt(e.target.value))}
@@ -167,7 +194,7 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                 <input
                   type="number"
                   min={0}
-                  max={100}
+                  max={Math.min(100, tier.clusterPercent + (100 - totalClusterPercent))}
                   step={1}
                   value={Math.round(tier.clusterPercent)}
                   onChange={(e) => handleClusterPercentChange(tier.id, parseInt(e.target.value) || 0)}
