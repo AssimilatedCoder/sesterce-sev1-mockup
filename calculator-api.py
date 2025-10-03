@@ -444,6 +444,9 @@ ELECTRICITY_RATES = {
     'Netherlands': 0.226, # 0.208 EUR converted to USD
     'Finland': 0.105,  # 0.097 EUR converted to USD
     'United Kingdom': 0.308, # 0.243 GBP converted to USD
+    'England': 0.308,  # 0.243 GBP converted to USD
+    'Scotland': 0.301, # 0.238 GBP converted to USD (lower due to renewables)
+    'London': 0.314,   # 0.248 GBP converted to USD (London premium)
     'Canada': 0.135,   # 0.182 CAD converted to USD
     'Sweden': 0.179,   # Already in USD
     

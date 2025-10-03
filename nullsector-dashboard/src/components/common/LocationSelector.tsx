@@ -17,29 +17,15 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   compact = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterBy, setFilterBy] = useState<'all' | 'region' | 'country'>('all');
+  // Removed search and filter functionality as requested
   const { selectedCurrency } = useCurrency();
 
   // Group locations by region and country
   const groupedLocations = useMemo(() => {
-    const filtered = ELECTRICITY_RATES.filter(rate => {
-      const matchesSearch = rate.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           rate.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (rate.region && rate.region.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      if (filterBy === 'region') {
-        return matchesSearch && rate.region;
-      } else if (filterBy === 'country') {
-        return matchesSearch;
-      }
-      return matchesSearch;
-    });
-
     // Group by region first, then by country
     const grouped: Record<string, Record<string, ElectricityRate[]>> = {};
     
-    filtered.forEach(rate => {
+    ELECTRICITY_RATES.forEach(rate => {
       const region = rate.region || 'Other';
       const country = rate.country;
       
@@ -53,7 +39,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     });
 
     return grouped;
-  }, [searchTerm, filterBy]);
+  }, []);
 
   const selectedRate = useMemo(() => {
     return getRecommendedRate(selectedLocation) || ELECTRICITY_RATES.find(rate => rate.location === selectedLocation);
@@ -78,10 +64,11 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     return (
       <div className="relative">
         <select
-          value={selectedLocation}
+          value={selectedLocation === 'us-texas' ? '' : selectedLocation}
           onChange={(e) => onLocationChange(e.target.value)}
           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
         >
+          <option value="">Select Cluster Location</option>
           {Object.entries(groupedLocations).map(([region, countries]) => (
             <optgroup key={region} label={region}>
               {Object.entries(countries).map(([country, rates]) =>
@@ -113,8 +100,10 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-yellow-500" />
           <div className="text-left">
-            <div className="font-medium">{selectedLocation}</div>
-            {selectedRate && (
+            <div className="font-medium">
+              {selectedLocation === 'us-texas' || !selectedLocation ? 'Select Cluster Location' : selectedLocation}
+            </div>
+            {selectedRate && selectedLocation !== 'us-texas' && selectedLocation && (
               <div className="text-xs text-gray-500">
                 {formatRate(selectedRate)} • {selectedRate.customerType}
               </div>
@@ -127,38 +116,16 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-96 overflow-hidden">
-          {/* Search and Filter */}
-          <div className="p-3 border-b border-gray-200">
-            <input
-              type="text"
-              placeholder="Search locations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 mb-2"
-            />
-            <div className="flex gap-1">
-              {['all', 'region', 'country'].map(filter => (
-                <button
-                  key={filter}
-                  onClick={() => setFilterBy(filter as any)}
-                  className={`px-2 py-1 text-xs rounded capitalize ${
-                    filterBy === filter
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Location List */}
-          <div className="max-h-64 overflow-y-auto">
-            {Object.entries(groupedLocations).map(([region, countries]) => (
+          <div className="max-h-80 overflow-y-auto">
+            {Object.entries(groupedLocations).map(([region, countries], regionIndex) => (
               <div key={region}>
-                <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-700 sticky top-0">
-                  {region}
+                {regionIndex > 0 && <div className="h-1 bg-gray-200"></div>}
+                <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-sm font-bold text-white sticky top-0 shadow-md border-b-2 border-blue-800 z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🌍</span>
+                    <span className="tracking-wide">{region.toUpperCase()}</span>
+                  </div>
                 </div>
                 {Object.entries(countries).map(([country, rates]) => (
                   <div key={country}>

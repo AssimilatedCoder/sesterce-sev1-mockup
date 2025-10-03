@@ -246,6 +246,39 @@ const otherRates: ElectricityRate[] = [
     period: 'Q2 2025',
     notes: 'Non-domestic average (incl. CCL)'
   },
+  {
+    location: 'England',
+    country: 'United Kingdom',
+    region: 'Europe',
+    originalPrice: 0.243,
+    originalCurrency: 'GBP',
+    priceUSD: convertToUSD(0.243, 'GBP'),
+    customerType: 'business',
+    period: 'Q2 2025',
+    notes: 'Non-domestic average (incl. CCL)'
+  },
+  {
+    location: 'Scotland',
+    country: 'United Kingdom',
+    region: 'Europe',
+    originalPrice: 0.238,
+    originalCurrency: 'GBP',
+    priceUSD: convertToUSD(0.238, 'GBP'),
+    customerType: 'business',
+    period: 'Q2 2025',
+    notes: 'Non-domestic average (slightly lower due to renewables)'
+  },
+  {
+    location: 'London',
+    country: 'United Kingdom',
+    region: 'Europe',
+    originalPrice: 0.248,
+    originalCurrency: 'GBP',
+    priceUSD: convertToUSD(0.248, 'GBP'),
+    customerType: 'business',
+    period: 'Q2 2025',
+    notes: 'London area premium'
+  },
 
   // Canada
   {
