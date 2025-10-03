@@ -24,6 +24,7 @@ import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
 import { AccessLogsTab } from './tabs/AccessLogsTab';
 import { UserManagementTab } from './tabs/UserManagementTab';
+import { LandingOverviewTab } from './tabs/LandingOverviewTab';
 import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
@@ -90,13 +91,20 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   const isAdmin = currentUser === 'admin' || currentUser === 'David' || currentUser === 'Thomas' || currentUser === 'Kiko' || currentUser === 'Maciej';
   const isSuperAdmin = currentUser === 'admin'; // Only admin can see access logs
   
+  // Determine user role for display
+  const getUserRole = () => {
+    if (isSuperAdmin) return 'admin';
+    if (isAdmin) return 'power_user';
+    return 'user';
+  };
+  
   // Debug logging
   console.log('Current user:', currentUser);
   console.log('Is admin:', isAdmin);
   console.log('Is super admin:', isSuperAdmin);
   
   // State management
-  const [activeTab, setActiveTab] = useState('calculator');
+  const [activeTab, setActiveTab] = useState('overview');
   
   // Currency conversion hook (for future use in calculations)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -105,10 +113,10 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Redirect non-admin users away from admin-only tabs
   React.useEffect(() => {
     if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise' || activeTab === 'documentation')) {
-      setActiveTab('calculator');
+      setActiveTab('overview');
     }
     if (!isSuperAdmin && (activeTab === 'logs' || activeTab === 'users')) {
-      setActiveTab('calculator');
+      setActiveTab('overview');
     }
   }, [activeTab, isAdmin, isSuperAdmin]);
   
@@ -706,6 +714,12 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
   // Organized tab structure with logical groupings
   const tabGroups = [
     {
+      title: 'Overview',
+      tabs: [
+        { id: 'overview', label: 'TCO Calculator Overview', icon: <FileText className="w-4 h-4" /> }
+      ]
+    },
+    {
       title: 'User Input',
       tabs: [
         { id: 'calculator', label: 'Cluster Config Options', icon: <Calculator className="w-4 h-4" /> },
@@ -957,6 +971,13 @@ const GPUSuperclusterCalculatorV5Enhanced: React.FC = () => {
             <div className="p-2 md:p-6">
               <div className="bg-white rounded-2xl shadow-xl border border-gray-200">
                 <div className="p-4 md:p-8">
+                  {activeTab === 'overview' && (
+                    <LandingOverviewTab 
+                      currentUser={currentUser || 'Guest'} 
+                      userRole={getUserRole()} 
+                    />
+                  )}
+
                   {activeTab === 'calculator' && (
                     <div className="mb-4 text-gray-600">
                       Configure your GPU cluster parameters and options.

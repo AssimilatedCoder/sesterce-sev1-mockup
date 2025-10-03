@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>GPU Cluster Technical Architecture - Null Sector Systems</title>
+    <title>GPU Cluster Technical Architecture</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
         
@@ -30,27 +30,12 @@
             font-weight: 400;
         }
         
-        /* Logo Header */
-        .logo-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 0;
-            margin-bottom: 20px;
-        }
-        
-        .logo-header img {
-            height: 50px;
-            width: auto;
-        }
-        
-        /* Document Header with Null Sector Colors */
+        /* Document Header */
         .document-header {
             text-align: center;
-            padding: 30px 0 30px 0;
+            padding: 40px 0 30px 0;
             margin-bottom: 30px;
-            border-bottom: 3px solid #00c896; /* Null Sector green */
-            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 2px solid #34495e;
         }
         
         .document-header h1 {
@@ -63,7 +48,7 @@
         
         .document-header .subtitle {
             font-size: 12pt;
-            color: #6c757d; /* Light grey */
+            color: #7f8c8d;
             font-weight: 400;
             line-height: 1.4;
         }
@@ -74,10 +59,10 @@
             color: #95a5a6;
         }
         
-        /* Change Log with Null Sector accent */
+        /* Change Log */
         .change-log {
             background: #f8f9fa;
-            border-left: 3px solid #00c896; /* Null Sector green */
+            border-left: 3px solid #3498db;
             padding: 15px;
             margin: 20px 0 30px 0;
             font-size: 10pt;
@@ -99,14 +84,14 @@
             border-bottom: 1px solid #dee2e6;
         }
         
-        /* Headings with Null Sector green accent */
+        /* Headings */
         h2 {
             font-size: 16pt;
             font-weight: 500;
             color: #2c3e50;
             margin: 40px 0 20px 0;
             padding-bottom: 8px;
-            border-bottom: 2px solid #00c896; /* Null Sector green */
+            border-bottom: 1px solid #bdc3c7;
         }
         
         h3 {
@@ -140,7 +125,7 @@
             line-height: 1.6;
         }
         
-        /* Tables with Null Sector styling */
+        /* Tables - Consistent Professional Style */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -151,13 +136,13 @@
         }
         
         th {
-            background: #00c896; /* Null Sector green */
+            background: #34495e;
             color: #ffffff;
             padding: 12px 15px;
             text-align: left;
             font-weight: 500;
             font-size: 10pt;
-            border: 1px solid #00b185;
+            border: 1px solid #2c3e50;
         }
         
         td {
@@ -172,14 +157,14 @@
         }
         
         tr:hover td {
-            background: #e8f5f1; /* Light green tint */
+            background: #f5f6f7;
         }
         
         /* Code Blocks and Technical Specs */
         .technical-spec, pre {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-left: 3px solid #6c757d; /* Light grey */
+            border-left: 3px solid #7f8c8d;
             padding: 15px 20px;
             margin: 20px 0;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -194,35 +179,35 @@
             padding: 2px 6px;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 9pt;
-            color: #00c896; /* Null Sector green for code */
+            color: #e74c3c;
             border-radius: 2px;
         }
         
-        /* Alert Boxes with Null Sector colors */
+        /* Alert Boxes - Simplified Professional */
         .alert-box {
             padding: 15px 20px;
             margin: 20px 0;
-            border-left: 3px solid #6c757d;
+            border-left: 3px solid #7f8c8d;
             background: #f8f9fa;
         }
         
         .alert-critical {
-            border-left-color: #dc3545;
+            border-left-color: #e74c3c;
             background: #fef5f5;
         }
         
         .alert-warning {
-            border-left-color: #ffc107;
+            border-left-color: #f39c12;
             background: #fef9f0;
         }
         
         .alert-success {
-            border-left-color: #00c896; /* Null Sector green */
-            background: #e8f5f1;
+            border-left-color: #27ae60;
+            background: #f0fdf4;
         }
         
         .alert-info {
-            border-left-color: #17a2b8;
+            border-left-color: #3498db;
             background: #f0f7ff;
         }
         
@@ -246,17 +231,11 @@
             border: 1px solid #dee2e6;
             padding: 15px;
             text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .metric-card:hover {
-            border-color: #00c896; /* Null Sector green */
-            box-shadow: 0 2px 8px rgba(0, 200, 150, 0.1);
         }
         
         .metric-label {
             font-size: 9pt;
-            color: #6c757d;
+            color: #7f8c8d;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 500;
@@ -265,7 +244,7 @@
         .metric-value {
             font-size: 16pt;
             font-weight: 400;
-            color: #00c896; /* Null Sector green */
+            color: #2c3e50;
             margin-top: 5px;
         }
         
@@ -294,12 +273,6 @@
             padding: 15px;
             border: 1px solid #dee2e6;
             background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        
-        .comparison-item:hover {
-            border-color: #00c896;
-            background: #e8f5f1;
         }
         
         .comparison-item h4 {
@@ -307,7 +280,7 @@
             font-size: 11pt;
             font-weight: 500;
             color: #2c3e50;
-            border-bottom: 1px solid #00c896;
+            border-bottom: 1px solid #dee2e6;
             padding-bottom: 8px;
         }
         
@@ -317,16 +290,14 @@
             margin: 40px 0;
         }
         
-        /* Document Footer with Null Sector branding */
+        /* Document Footer */
         .document-footer {
             margin-top: 60px;
             padding-top: 20px;
-            border-top: 2px solid #00c896;
+            border-top: 1px solid #dee2e6;
             font-size: 9pt;
-            color: #6c757d;
+            color: #7f8c8d;
             text-align: center;
-            background: #f8f9fa;
-            padding: 20px;
         }
         
         /* Remove excessive styling */
@@ -335,15 +306,14 @@
             color: inherit;
         }
         
-        /* Links with Null Sector green */
+        /* Links */
         a {
-            color: #00c896;
+            color: #3498db;
             text-decoration: none;
         }
         
         a:hover {
             text-decoration: underline;
-            color: #00b185;
         }
         
         /* Print Optimizations */
@@ -351,10 +321,6 @@
             body {
                 font-size: 10pt;
                 padding: 0;
-            }
-            
-            .logo-header {
-                display: none; /* Hide logo in print */
             }
             
             .page-break {
@@ -372,7 +338,6 @@
     </style>
 </head>
 <body>
-
 
 <div class="document-header">
     <h1>GPU Cluster Technical Architecture</h1>

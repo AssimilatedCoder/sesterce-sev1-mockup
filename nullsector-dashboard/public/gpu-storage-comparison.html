@@ -5,30 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPU Supercluster Storage Platform Comparison</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-        
-        :root {
-            --nullsector-green: #00c896;
-            --nullsector-green-dark: #00b185;
-            --nullsector-green-light: #e6f7f3;
-            --nullsector-text-primary: #2c3e50;
-            --nullsector-text-secondary: #6c757d;
-            --nullsector-text-muted: #95a5a6;
-            --nullsector-text-light: #ffffff;
-            --nullsector-bg-primary: #ffffff;
-            --nullsector-bg-secondary: #f8f9fa;
-            --nullsector-bg-gradient: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
-            --nullsector-border-light: #dee2e6;
-            --nullsector-border-medium: #ced4da;
-            --nullsector-border-accent: #00c896;
-            --nullsector-success: #28a745;
-            --nullsector-warning: #ffc107;
-            --nullsector-error: #dc3545;
-            --nullsector-info: #17a2b8;
-            --nullsector-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --nullsector-font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -36,58 +12,46 @@
         }
         
         body {
-            font-family: var(--nullsector-font-family);
-            font-size: 11pt;
-            line-height: 1.6;
-            color: var(--nullsector-text-primary);
-            max-width: 210mm;
-            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            background: var(--nullsector-bg-primary);
-            font-weight: 400;
         }
         
         .container {
-            max-width: 100%;
+            max-width: 1600px;
             margin: 0 auto;
-            background: var(--nullsector-bg-primary);
+            background: white;
             border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
         
         header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
-            padding: 30px 0;
-            margin-bottom: 30px;
-            border-bottom: 3px solid var(--nullsector-green);
-            background: var(--nullsector-bg-gradient);
-            color: var(--nullsector-text-primary);
         }
         
         h1 {
-            font-size: 24pt;
-            font-weight: 300;
-            color: var(--nullsector-text-primary);
-            letter-spacing: 0.5px;
+            font-size: 2.5rem;
             margin-bottom: 10px;
         }
         
         .subtitle {
-            font-size: 12pt;
-            color: var(--nullsector-text-secondary);
-            font-weight: 400;
-            line-height: 1.4;
+            font-size: 1.1rem;
+            opacity: 0.9;
             margin-bottom: 5px;
         }
         
         .date {
-            font-size: 10pt;
-            color: var(--nullsector-text-muted);
-            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
         
         .content {
-            padding: 0;
+            padding: 30px;
         }
         
         .table-container {
@@ -98,65 +62,51 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10pt;
-            background: var(--nullsector-bg-primary);
-            border: 1px solid var(--nullsector-border-light);
+            font-size: 0.9rem;
         }
         
         th {
-            background: var(--nullsector-green);
-            color: var(--nullsector-text-light);
-            padding: 12px 8px;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            padding: 12px;
             text-align: left;
-            font-weight: 500;
-            font-size: 10pt;
+            font-weight: 600;
             position: sticky;
             top: 0;
             z-index: 10;
-            border-bottom: 2px solid var(--nullsector-green-dark);
         }
         
         td {
-            padding: 8px;
-            border-bottom: 1px solid var(--nullsector-border-light);
-            font-size: 9pt;
-            vertical-align: top;
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         tr:hover {
-            background: var(--nullsector-green-light);
+            background: #f7fafc;
         }
         
-        tr:nth-child(even) td {
-            background: var(--nullsector-bg-secondary);
-        }
-        
-        tr:hover td {
-            background: var(--nullsector-green-light);
+        tr:nth-child(even) {
+            background: #f9fafb;
         }
         
         .metric-name {
-            font-weight: 500;
-            color: var(--nullsector-text-primary);
-            background: var(--nullsector-bg-secondary);
-            border-right: 2px solid var(--nullsector-border-medium);
+            font-weight: 600;
+            color: #2d3748;
+            background: #edf2f7;
         }
         
         /* Highlight key cells */
         .best {
             background: #d4f8e8;
-            font-weight: 500;
-            color: var(--nullsector-text-primary);
+            font-weight: 600;
         }
         
         .good {
-            background: var(--nullsector-green-light);
-            color: var(--nullsector-text-primary);
+            background: #e6fffa;
         }
         
         .warning {
             background: #fef5e7;
-            color: var(--nullsector-text-primary);
         }
         
         .section {
@@ -164,24 +114,22 @@
         }
         
         h2 {
-            font-size: 16pt;
-            font-weight: 500;
-            color: var(--nullsector-text-primary);
-            margin: 40px 0 20px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--nullsector-green);
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
         }
         
         h3 {
-            font-size: 13pt;
-            font-weight: 500;
-            color: var(--nullsector-text-primary);
+            color: #4a5568;
+            font-size: 1.3rem;
             margin: 20px 0 15px 0;
         }
         
         .deployment-pattern {
-            background: var(--nullsector-bg-secondary);
-            border-left: 4px solid var(--nullsector-green);
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 4px;
@@ -189,7 +137,7 @@
         
         .deployment-pattern h3 {
             margin-top: 0;
-            color: var(--nullsector-green);
+            color: #667eea;
         }
         
         ul {
@@ -202,44 +150,36 @@
         }
         
         .key-insights {
-            background: var(--nullsector-green-light);
-            border: 1px solid var(--nullsector-green);
+            background: linear-gradient(135deg, #fef5e7 0%, #fdeaa8 100%);
             border-radius: 8px;
             padding: 25px;
             margin-bottom: 30px;
         }
         
         .key-insights h3 {
-            color: var(--nullsector-green-dark);
+            color: #d68910;
             margin-bottom: 15px;
         }
         
         .conclusions {
-            background: var(--nullsector-bg-secondary);
+            background: #edf2f7;
             border-radius: 8px;
             padding: 25px;
             margin-top: 40px;
-            border: 1px solid var(--nullsector-border-light);
         }
         
         .conclusions h2 {
-            color: var(--nullsector-text-primary);
-            border-bottom: 2px solid var(--nullsector-green);
+            color: #2d3748;
+            border-bottom: 2px solid #cbd5e0;
         }
         
         strong {
-            color: var(--nullsector-text-primary);
-            font-weight: 500;
+            color: #2d3748;
         }
         
         .vendor-name {
-            font-weight: 500;
-            color: var(--nullsector-green-dark);
-        }
-        
-        p {
-            margin-bottom: 12px;
-            color: var(--nullsector-text-primary);
+            font-weight: 700;
+            color: #5a67d8;
         }
         
         @media (max-width: 768px) {
@@ -248,15 +188,15 @@
             }
             
             h1 {
-                font-size: 18pt;
+                font-size: 1.8rem;
             }
             
             table {
-                font-size: 8pt;
+                font-size: 0.75rem;
             }
             
             th, td {
-                padding: 4px;
+                padding: 6px;
             }
         }
     </style>
