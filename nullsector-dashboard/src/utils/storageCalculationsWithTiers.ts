@@ -2,6 +2,12 @@
 import { StorageConfig, StorageResults } from './storageCalculationsEnhanced';
 import { storageArchitectures } from '../data/storageArchitectures';
 import { calculateEnhancedStorage as calculateBase } from './storageCalculationsEnhanced';
+import { 
+  calculateRawStorageRequirements, 
+  getStorageOptimizationRecommendations,
+  calculateRawStorageCostImpact,
+  StorageRawCalculation 
+} from './rawStorageCalculations';
 
 export function calculateStorageWithSelectedTiers(config: StorageConfig): StorageResults {
   // If no selected tiers, use the base calculation
@@ -15,6 +21,11 @@ export function calculateStorageWithSelectedTiers(config: StorageConfig): Storag
   // Override with selected tier calculations
   if (config.selectedTiers && config.tierDistributionPercentages && config.totalCapacityPB) {
     const { selectedTiers, tierDistributionPercentages, totalCapacityPB } = config;
+    
+    // Calculate raw storage requirements
+    const rawStorageCalc = calculateRawStorageRequirements(tierDistributionPercentages, totalCapacityPB);
+    const rawStorageCostImpact = calculateRawStorageCostImpact(rawStorageCalc, tierDistributionPercentages);
+    const optimizationRecommendations = getStorageOptimizationRecommendations(rawStorageCalc, config.gpuCount);
     
     // Calculate costs based on selected tiers
     let totalCapex = 0;
@@ -66,19 +77,17 @@ export function calculateStorageWithSelectedTiers(config: StorageConfig): Storag
       }
     });
     
-    // Calculate raw capacity needed (accounting for efficiency)
-    const avgEfficiency = selectedTiers.reduce((sum, tierId) => {
-      const tier = storageArchitectures[tierId];
-      const percentage = tierDistributionPercentages[tierId] || 0;
-      return sum + (tier?.infrastructure.efficiency || 0.8) * (percentage / 100);
-    }, 0);
-    
-    const rawCapacityPB = totalCapacityPB / avgEfficiency;
+    // Use the enhanced raw storage calculation
+    const rawCapacityPB = rawStorageCalc.totalRawPB;
     
     // Override base results with selected tier calculations
     baseResults.totalCapacity.totalPB = totalCapacityPB;
     baseResults.totalCapacity.rawPB = rawCapacityPB;
     baseResults.totalCapacity.tierBreakdown = tierBreakdown;
+    
+    // Add raw storage breakdown to results
+    (baseResults as any).rawStorageBreakdown = rawStorageCalc;
+    (baseResults as any).rawStorageCostImpact = rawStorageCostImpact;
     
     baseResults.costs.capex.total = totalCapex;
     baseResults.costs.opex.annual = totalOpex;
@@ -106,6 +115,11 @@ export function calculateStorageWithSelectedTiers(config: StorageConfig): Storag
         'Single vendor';
       baseResults.vendors.architecture = `${selectedTiers.length}-tier architecture`;
       baseResults.vendors.rationale = `User-selected configuration with ${selectedTiers.map(t => storageArchitectures[t]?.name).join(', ')}`;
+    }
+    
+    // Add storage optimization recommendations to warnings
+    if (optimizationRecommendations.length > 0) {
+      baseResults.warnings = baseResults.warnings.concat(optimizationRecommendations);
     }
   }
   

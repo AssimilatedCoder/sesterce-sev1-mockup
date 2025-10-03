@@ -29,6 +29,13 @@ export interface StorageArchitecture {
     maxCapacityPB: number;
     sweetSpotPB: number;
   };
+  cephConfig?: {
+    type: 'erasure_coding' | 'replication';
+    dataChunks?: number;
+    codingChunks?: number;
+    replicas?: number;
+    rawMultiplier: number; // Raw storage multiplier (e.g., 3.0 for 3-way replication, 1.375 for 8+3 EC)
+  };
 }
 
 export const storageArchitectures: Record<string, StorageArchitecture> = {
@@ -205,13 +212,19 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
     infrastructure: {
       mediaType: 'all-nvme',
       redundancy: 'Erasure coding 8+3',
-      efficiency: 0.73,
+      efficiency: 0.73, // 8/(8+3) = 72.7% usable
       powerPerPB: 20 // kW per PB - open source efficiency
     },
     scalability: {
       minCapacityPB: 1,
       maxCapacityPB: 100,
       sweetSpotPB: 20
+    },
+    cephConfig: {
+      type: 'erasure_coding',
+      dataChunks: 8,
+      codingChunks: 3,
+      rawMultiplier: 1.375 // (8+3)/8 = 1.375x raw storage needed
     }
   },
 
@@ -242,6 +255,12 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
       minCapacityPB: 2,
       maxCapacityPB: 500,
       sweetSpotPB: 50
+    },
+    cephConfig: {
+      type: 'erasure_coding',
+      dataChunks: 8,
+      codingChunks: 3,
+      rawMultiplier: 1.375 // (8+3)/8 = 1.375x raw storage needed
     }
   },
 
@@ -273,6 +292,48 @@ export const storageArchitectures: Record<string, StorageArchitecture> = {
       minCapacityPB: 5,
       maxCapacityPB: 1000,
       sweetSpotPB: 100
+    },
+    cephConfig: {
+      type: 'erasure_coding',
+      dataChunks: 8,
+      codingChunks: 3,
+      rawMultiplier: 1.375 // (8+3)/8 = 1.375x raw storage needed
+    }
+  },
+
+  // CEPH 3-WAY REPLICATION OPTION
+  'ceph-replicated': {
+    id: 'ceph-replicated',
+    name: 'Ceph 3-Way Replication',
+    category: 'balanced',
+    description: 'Traditional 3-way replication for high performance and simplicity',
+    vendors: ['Canonical Ubuntu Ceph', 'SUSE Enterprise Storage', 'Proxmox Ceph'],
+    performance: {
+      throughputPerPB: '120 GB/s',
+      iopsPerPB: '600K',
+      latency: '<1ms'
+    },
+    costPerPB: {
+      capex: 450000,
+      opex: 90000,
+      total5Year: 900000
+    },
+    useCases: ['High-performance AI', 'Low-latency workloads', 'Small clusters'],
+    infrastructure: {
+      mediaType: 'all-nvme',
+      redundancy: '3-way replication',
+      efficiency: 0.33, // 1/3 usable storage
+      powerPerPB: 25 // kW per PB - higher due to 3x storage
+    },
+    scalability: {
+      minCapacityPB: 0.5,
+      maxCapacityPB: 50,
+      sweetSpotPB: 10
+    },
+    cephConfig: {
+      type: 'replication',
+      replicas: 3,
+      rawMultiplier: 3.0 // 3x raw storage needed
     }
   },
 

@@ -4,7 +4,7 @@ import { Login } from './components/Login';
 import './styles/null-sector-theme.css';
 
 // Lazy load the calculator for better performance
-const GPUSuperclusterCalculatorV5Enhanced = React.lazy(() => import('./components/GPUSuperclusterCalculatorV5Enhanced'));
+const GPUSuperclusterCalculator = React.lazy(() => import('./components/GPUSuperclusterCalculator'));
 
 function AppContent() {
 
@@ -28,8 +28,8 @@ function AppContent() {
             </div>
           }>
             <Routes>
-              <Route path="/" element={<GPUSuperclusterCalculatorV5Enhanced />} />
-              <Route path="/calculator" element={<GPUSuperclusterCalculatorV5Enhanced />} />
+              <Route path="/" element={<GPUSuperclusterCalculator />} />
+              <Route path="/calculator" element={<GPUSuperclusterCalculator />} />
               <Route path="/pricing" element={<Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

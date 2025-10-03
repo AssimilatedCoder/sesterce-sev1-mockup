@@ -85,7 +85,7 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
     {
       icon: <Server className="w-5 h-5 text-gray-600" />,
       label: "Scale Range",
-      value: "100 - 100K",
+      value: "100 - 200K",
       description: "From small clusters to hyperscale"
     },
     {
@@ -112,7 +112,7 @@ export const LandingOverviewTab: React.FC<LandingOverviewTabProps> = ({
           </h1>
           <p className="text-lg text-gray-700 mb-6">
             Comprehensive Total Cost of Ownership analysis for AI/ML infrastructure at scale. 
-            Design, configure, and optimize GPU clusters from 100 to 100,000+ GPUs with 
+            Design, configure, and optimize GPU clusters from 100 to 200,000+ GPUs with 
             production-validated calculations and enterprise-grade architecture guidance.
           </p>
           <div className="flex items-center gap-4">

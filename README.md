@@ -1,6 +1,6 @@
 # NullSector GPU SuperCluster Calculator
 
-A production-grade calculator for designing, costing, and monetizing large-scale GPU clusters (10,000–200,000 GPUs) based on NVIDIA GB200/GB300 NVL72 systems. Features sophisticated networking algorithms, dynamic service tier pricing, and comprehensive TCO analysis.
+A production-grade calculator for designing, costing, and monetizing large-scale GPU clusters (100–200,000 GPUs) based on NVIDIA GB200/GB300 NVL72 systems. Features sophisticated networking algorithms, dynamic service tier pricing, and comprehensive TCO analysis.
 
 ## 🧮 Complete Calculation Breakdown
 

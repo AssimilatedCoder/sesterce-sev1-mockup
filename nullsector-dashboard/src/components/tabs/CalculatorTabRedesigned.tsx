@@ -161,6 +161,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
         'vast-universal': 'vast',
         'weka-parallel': 'weka',
         'ceph-nvme': 'ceph',
+        'ceph-replicated': 'ceph',
         'ceph-hybrid': 'ceph-ssd',
         'ceph-hdd': 'ceph',
         's3-compatible': 'glacier'
@@ -853,9 +854,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                 <p className="text-xs text-gray-600 mb-3">Ceph-based, &lt;5ms latency</p>
                 <div className="relative">
                   <select 
-                    value={config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || ''}
+                    value={config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || ''}
                     onChange={(e) => {
-                      const newTiers = config.selectedStorageTiers?.filter((t: string) => !['ceph-nvme', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || [];
+                      const newTiers = config.selectedStorageTiers?.filter((t: string) => !['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) || [];
                       if (e.target.value) {
                         newTiers.push(e.target.value);
                       }
@@ -864,14 +865,16 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   >
                     <option value="">Select Option</option>
-                    <option value="ceph-nvme">Ceph All-NVMe - 100 GB/GPU, €312K/PB</option>
-                    <option value="ceph-hybrid">Ceph Hybrid - 50 GB/GPU, €184K/PB</option>
+                    <option value="ceph-nvme">Ceph All-NVMe (EC 8+3) - 100 GB/GPU, €312K/PB</option>
+                    <option value="ceph-replicated">Ceph 3-Way Replication - 120 GB/GPU, €450K/PB</option>
+                    <option value="ceph-hybrid">Ceph Hybrid (EC 8+3) - 50 GB/GPU, €184K/PB</option>
                     <option value="dell-powerscale">Dell PowerScale - 100 GB/GPU, €352K/PB</option>
                   </select>
-                  {config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-hybrid', 'dell-powerscale'].includes(t)) && (
+                  {config.selectedStorageTiers?.find((t: string) => ['ceph-nvme', 'ceph-replicated', 'ceph-hybrid', 'dell-powerscale'].includes(t)) && (
                     <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                      {config.selectedStorageTiers.includes('ceph-nvme') && "Open-source, all-flash"}
-                      {config.selectedStorageTiers.includes('ceph-hybrid') && "NVMe cache + SSD capacity"}
+                      {config.selectedStorageTiers.includes('ceph-nvme') && "Erasure coding 8+3, 73% efficiency"}
+                      {config.selectedStorageTiers.includes('ceph-replicated') && "3-way replication, 33% efficiency, high performance"}
+                      {config.selectedStorageTiers.includes('ceph-hybrid') && "NVMe cache + SSD capacity, erasure coding"}
                       {config.selectedStorageTiers.includes('dell-powerscale') && "Enterprise scale-out"}
                     </div>
                   )}
