@@ -164,6 +164,215 @@ const europeRates: ElectricityRate[] = [
     priceUSD: convertToUSD(0.253, 'EUR'),
     customerType: 'business',
     period: 'Mar 2025'
+  },
+
+  // Additional EEA Countries - Commercial/Business Rates (2024 data)
+  // Source: Eurostat, National Energy Agencies, Q3-Q4 2024
+  
+  // Eastern Europe
+  {
+    location: 'Bulgaria',
+    country: 'Bulgaria',
+    region: 'Europe',
+    originalPrice: 0.125,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.125, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Croatia',
+    country: 'Croatia',
+    region: 'Europe',
+    originalPrice: 0.145,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.145, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Czech Republic',
+    country: 'Czech Republic',
+    region: 'Europe',
+    originalPrice: 0.165,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.165, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Estonia',
+    country: 'Estonia',
+    region: 'Europe',
+    originalPrice: 0.138,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.138, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Hungary',
+    country: 'Hungary',
+    region: 'Europe',
+    originalPrice: 0.115,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.115, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Latvia',
+    country: 'Latvia',
+    region: 'Europe',
+    originalPrice: 0.152,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.152, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Lithuania',
+    country: 'Lithuania',
+    region: 'Europe',
+    originalPrice: 0.148,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.148, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Poland',
+    country: 'Poland',
+    region: 'Europe',
+    originalPrice: 0.158,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.158, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Romania',
+    country: 'Romania',
+    region: 'Europe',
+    originalPrice: 0.142,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.142, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Slovakia',
+    country: 'Slovakia',
+    region: 'Europe',
+    originalPrice: 0.175,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.175, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Slovenia',
+    country: 'Slovenia',
+    region: 'Europe',
+    originalPrice: 0.162,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.162, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+
+  // Western/Central Europe
+  {
+    location: 'Ireland',
+    country: 'Ireland',
+    region: 'Europe',
+    originalPrice: 0.285,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.285, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+  {
+    location: 'Luxembourg',
+    country: 'Luxembourg',
+    region: 'Europe',
+    originalPrice: 0.195,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.195, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+
+  // Mediterranean
+  {
+    location: 'Cyprus',
+    country: 'Cyprus',
+    region: 'Europe',
+    originalPrice: 0.276,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.276, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Highest in EU - island premium'
+  },
+  {
+    location: 'Malta',
+    country: 'Malta',
+    region: 'Europe',
+    originalPrice: 0.135,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.135, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Non-household, medium consumption'
+  },
+
+  // Nordic/EFTA Countries
+  {
+    location: 'Iceland',
+    country: 'Iceland',
+    region: 'Europe',
+    originalPrice: 0.089,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.089, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Abundant geothermal/hydro power'
+  },
+  {
+    location: 'Norway',
+    country: 'Norway',
+    region: 'Europe',
+    originalPrice: 0.095,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.095, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Abundant hydroelectric power'
+  },
+  {
+    location: 'Liechtenstein',
+    country: 'Liechtenstein',
+    region: 'Europe',
+    originalPrice: 0.185,
+    originalCurrency: 'EUR',
+    priceUSD: convertToUSD(0.185, 'EUR'),
+    customerType: 'business',
+    period: 'Q4 2024',
+    notes: 'Estimated based on regional average'
   }
 ];
 
@@ -245,39 +454,6 @@ const otherRates: ElectricityRate[] = [
     customerType: 'business',
     period: 'Q2 2025',
     notes: 'Non-domestic average (incl. CCL)'
-  },
-  {
-    location: 'England',
-    country: 'United Kingdom',
-    region: 'Europe',
-    originalPrice: 0.243,
-    originalCurrency: 'GBP',
-    priceUSD: convertToUSD(0.243, 'GBP'),
-    customerType: 'business',
-    period: 'Q2 2025',
-    notes: 'Non-domestic average (incl. CCL)'
-  },
-  {
-    location: 'Scotland',
-    country: 'United Kingdom',
-    region: 'Europe',
-    originalPrice: 0.238,
-    originalCurrency: 'GBP',
-    priceUSD: convertToUSD(0.238, 'GBP'),
-    customerType: 'business',
-    period: 'Q2 2025',
-    notes: 'Non-domestic average (slightly lower due to renewables)'
-  },
-  {
-    location: 'London',
-    country: 'United Kingdom',
-    region: 'Europe',
-    originalPrice: 0.248,
-    originalCurrency: 'GBP',
-    priceUSD: convertToUSD(0.248, 'GBP'),
-    customerType: 'business',
-    period: 'Q2 2025',
-    notes: 'London area premium'
   },
 
   // Canada

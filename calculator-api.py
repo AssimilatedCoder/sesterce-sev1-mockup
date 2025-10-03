@@ -438,17 +438,49 @@ ELECTRICITY_RATES = {
     'Illinois': 0.1366,
     'Arizona (Industrial)': 0.0944,
     
-    # International
+    # International - Western Europe
     'Germany': 0.273,  # 0.251 EUR converted to USD
     'France': 0.166,   # 0.153 EUR converted to USD
     'Netherlands': 0.226, # 0.208 EUR converted to USD
     'Finland': 0.105,  # 0.097 EUR converted to USD
     'United Kingdom': 0.308, # 0.243 GBP converted to USD
-    'England': 0.308,  # 0.243 GBP converted to USD
-    'Scotland': 0.301, # 0.238 GBP converted to USD (lower due to renewables)
-    'London': 0.314,   # 0.248 GBP converted to USD (London premium)
-    'Canada': 0.135,   # 0.182 CAD converted to USD
     'Sweden': 0.179,   # Already in USD
+    'Austria': 0.292,  # 0.269 EUR converted to USD
+    'Belgium': 0.262,  # 0.241 EUR converted to USD
+    'Denmark': 0.307,  # From DKK conversion
+    'Italy': 0.370,    # 0.340 EUR converted to USD
+    'Spain': 0.149,    # 0.137 EUR converted to USD
+    'Portugal': 0.162, # 0.149 EUR converted to USD
+    'Greece': 0.275,   # 0.253 EUR converted to USD
+    
+    # Eastern Europe EEA Countries
+    'Bulgaria': 0.136,     # 0.125 EUR converted to USD
+    'Croatia': 0.158,      # 0.145 EUR converted to USD
+    'Czech Republic': 0.179, # 0.165 EUR converted to USD
+    'Estonia': 0.150,      # 0.138 EUR converted to USD
+    'Hungary': 0.125,      # 0.115 EUR converted to USD
+    'Latvia': 0.165,       # 0.152 EUR converted to USD
+    'Lithuania': 0.161,    # 0.148 EUR converted to USD
+    'Poland': 0.172,       # 0.158 EUR converted to USD
+    'Romania': 0.154,      # 0.142 EUR converted to USD
+    'Slovakia': 0.190,     # 0.175 EUR converted to USD
+    'Slovenia': 0.176,     # 0.162 EUR converted to USD
+    
+    # Western/Central Europe
+    'Ireland': 0.310,      # 0.285 EUR converted to USD
+    'Luxembourg': 0.212,   # 0.195 EUR converted to USD
+    
+    # Mediterranean
+    'Cyprus': 0.300,       # 0.276 EUR converted to USD
+    'Malta': 0.147,        # 0.135 EUR converted to USD
+    
+    # Nordic/EFTA Countries
+    'Iceland': 0.097,      # 0.089 EUR converted to USD
+    'Norway': 0.103,       # 0.095 EUR converted to USD
+    'Liechtenstein': 0.201, # 0.185 EUR converted to USD
+    
+    # Other International
+    'Canada': 0.135,       # 0.182 CAD converted to USD
     
     # Legacy region mappings for backward compatibility
     'us-texas': 0.0660,

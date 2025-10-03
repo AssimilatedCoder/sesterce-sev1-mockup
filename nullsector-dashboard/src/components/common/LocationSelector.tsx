@@ -88,7 +88,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   return (
     <div className="relative">
       <label className="block text-xs font-medium text-gray-700 mb-1.5">
-        <MapPin className="w-3 h-3 inline mr-1" />
+        <MapPin className="w-3 h-3 inline mr-1 text-gray-500" />
         Location & Electricity Rate
       </label>
       
@@ -98,7 +98,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 bg-white flex items-center justify-between"
       >
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-yellow-500" />
+          <Zap className="w-3 h-3 text-gray-500" />
           <div className="text-left">
             <div className="font-medium">
               {selectedLocation === 'us-texas' || !selectedLocation ? 'Select Cluster Location' : selectedLocation}
@@ -110,7 +110,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             )}
           </div>
         </div>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 transition-transform text-gray-500 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown */}
@@ -121,11 +121,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             {Object.entries(groupedLocations).map(([region, countries], regionIndex) => (
               <div key={region}>
                 {regionIndex > 0 && <div className="h-1 bg-gray-200"></div>}
-                <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-sm font-bold text-white sticky top-0 shadow-md border-b-2 border-blue-800 z-10">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🌍</span>
-                    <span className="tracking-wide">{region.toUpperCase()}</span>
-                  </div>
+                <div className="px-3 py-2 bg-gray-100 text-xs font-semibold text-gray-700 sticky top-0 border-b border-gray-200 z-10">
+                  {region}
                 </div>
                 {Object.entries(countries).map(([country, rates]) => (
                   <div key={country}>
@@ -169,7 +166,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           {showRateInfo && (
             <div className="p-3 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Info className="w-3 h-3" />
+                <Info className="w-3 h-3 text-gray-500" />
                 <span>Rates converted to {selectedCurrency} using Q3 2025 averages</span>
               </div>
               {selectedRate && (

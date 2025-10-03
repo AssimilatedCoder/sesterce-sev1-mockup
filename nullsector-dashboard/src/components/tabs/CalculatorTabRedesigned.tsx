@@ -238,7 +238,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
       {/* GPU Configuration + Service Tier Distribution */}
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-green-500" />
+          <Zap className="w-3 h-3 text-gray-500" />
           GPU Configuration
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -515,9 +515,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           className="text-sm font-semibold text-blue-800 mb-4 flex items-center gap-2 cursor-pointer"
           onClick={() => toggleSection('storage')}
         >
-          <HardDrive className="w-4 h-4 text-blue-600" />
+          <HardDrive className="w-3 h-3 text-gray-500" />
           Comprehensive Storage Architecture Configuration
-          {expandedSections.storage ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+          {expandedSections.storage ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
         </h3>
         
         {expandedSections.storage && (
@@ -887,9 +887,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
           onClick={() => toggleSection('software')}
         >
-          <Package className="w-4 h-4 text-indigo-500" />
+          <Package className="w-3 h-3 text-gray-500" />
           Software Stack Configuration
-          {expandedSections.software ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+          {expandedSections.software ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
         </h3>
         
         {expandedSections.software && (
@@ -996,7 +996,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {config.softwareStack && config.numGPUs > 0 && (
               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                 <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
+                  <DollarSign className="w-3 h-3 text-gray-500" />
                   Software Stack Cost Analysis
                 </h4>
                 {(() => {
@@ -1035,7 +1035,7 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
             {config.numGPUs > 0 && (
               <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                 <h4 className="text-xs font-semibold text-green-800 mb-1 flex items-center gap-2">
-                  <Zap className="w-3 h-3" />
+                  <Zap className="w-3 h-3 text-gray-500" />
                   AI-Recommended Stack
                 </h4>
                 {(() => {
@@ -1075,9 +1075,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
           onClick={() => toggleSection('networking')}
         >
-          <Network className="w-4 h-4 text-purple-500" />
+          <Network className="w-3 h-3 text-gray-500" />
           Networking Configuration
-          {expandedSections.networking ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+          {expandedSections.networking ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
         </h3>
         
         {expandedSections.networking && (
@@ -1168,9 +1168,9 @@ export const CalculatorTabRedesigned: React.FC<CalculatorTabRedesignedProps> = (
           className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer"
           onClick={() => toggleSection('advanced')}
         >
-          <Settings className="w-4 h-4 text-gray-600" />
+          <Settings className="w-3 h-3 text-gray-500" />
           Advanced Options
-          {expandedSections.advanced ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+          {expandedSections.advanced ? <ChevronUp className="w-3 h-3 ml-auto text-gray-500" /> : <ChevronDown className="w-3 h-3 ml-auto text-gray-500" />}
         </h3>
         
         {expandedSections.advanced && (
