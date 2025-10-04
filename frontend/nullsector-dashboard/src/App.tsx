@@ -4,7 +4,7 @@ import { Login } from './components/Login';
 import './styles/null-sector-theme.css';
 
 // Lazy load the calculator for better performance
-const GPUSuperclusterCalculator = React.lazy(() => import('./components/GPUSuperclusterCalculator'));
+const GPUSuperclusterCalculator = React.lazy(() => import('./components/GPUSuperclusterCalculatorV5Enhanced'));
 
 function AppContent() {
 
