@@ -19,8 +19,6 @@ import { FinancialAnalyticsTab } from './tabs/FinancialAnalyticsTab';
 import { CapexBreakdownTab } from './tabs/CapexBreakdownTab';
 import { DocumentationTab } from './tabs/DocumentationTab';
 import { ReferencesTab } from './tabs/ReferencesTab';
-import { DesignTab } from './tabs/DesignTab';
-import { DesignExerciseTab } from './tabs/DesignExerciseTab';
 import { OperationsPlaybookTab } from './tabs/OperationsPlaybookTab';
 import { AccessLogsTab } from './tabs/AccessLogsTab';
 import { UserManagementTab } from './tabs/UserManagementTab';
@@ -114,7 +112,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
   
   // Redirect non-admin users away from admin-only tabs
   React.useEffect(() => {
-    if (!isAdmin && (activeTab === 'design' || activeTab === 'exercise' || activeTab === 'documentation')) {
+    if (!isAdmin && activeTab === 'documentation') {
       setActiveTab('overview');
     }
     if (!isSuperAdmin && (activeTab === 'logs' || activeTab === 'users')) {
@@ -775,9 +773,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
         ...(isSuperAdmin ? [
           { id: 'users', label: 'User Management', icon: <Settings className="w-4 h-4" /> },
           { id: 'logs', label: 'Access Logs', icon: <Shield className="w-4 h-4" /> }
-        ] : []),
-        { id: 'design', label: 'Calculated Design Summary', icon: <FileText className="w-4 h-4" /> },
-        { id: 'exercise', label: '10k-100k Design Exercise', icon: <FileText className="w-4 h-4" /> }
+        ] : [])
       ]
     }] : [])
   ];
@@ -1169,13 +1165,6 @@ const GPUSuperclusterCalculator: React.FC = () => {
               <AccessLogsTab config={config} results={results} />
             )}
             
-            {activeTab === 'design' && isAdmin && (
-              <DesignTab config={config} results={results} />
-            )}
-
-            {activeTab === 'exercise' && isAdmin && (
-              <DesignExerciseTab />
-            )}
                 </div>
               </div>
             </div>
