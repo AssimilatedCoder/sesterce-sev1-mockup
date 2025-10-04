@@ -59,11 +59,12 @@ show_help() {
     echo "  test-deployment    Test deployment functionality"
     echo "  verify             Verify system health"
     echo ""
-    echo "TROUBLESHOOTING COMMANDS:"
-    echo "  debug              Run debugging checks"
-    echo "  troubleshoot       Run troubleshooting tools"
-    echo "  check-ports        Check port availability"
-    echo "  clean              Clean up temporary files"
+echo "TROUBLESHOOTING COMMANDS:"
+echo "  debug              Run debugging checks"
+echo "  fix-docker         Fix Docker path issues"
+echo "  troubleshoot       Run troubleshooting tools"
+echo "  check-ports        Check port availability"
+echo "  clean              Clean up temporary files"
     echo ""
     echo "SETUP COMMANDS:"
     echo "  setup-dev          Setup development environment"
@@ -192,6 +193,11 @@ debug_system() {
     ./scripts/troubleshooting/debug-frontend-blackscreen.sh
 }
 
+fix_docker_paths() {
+    print_info "Fixing Docker path issues..."
+    ./scripts/troubleshooting/fix-docker-paths.sh
+}
+
 troubleshoot_system() {
     print_info "Running troubleshooting tools..."
     ./scripts/troubleshooting/troubleshoot-remote.sh
@@ -282,6 +288,9 @@ case "$1" in
     # Troubleshooting commands
     "debug")
         debug_system
+        ;;
+    "fix-docker")
+        fix_docker_paths
         ;;
     "troubleshoot")
         troubleshoot_system

@@ -19,13 +19,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy package files first for better caching
-COPY nullsector-dashboard/package*.json ./
+COPY frontend/nullsector-dashboard/package*.json ./
 
 # Install dependencies (including dev dependencies for build)
 RUN npm ci --only=production=false
 
 # Copy React source code
-COPY nullsector-dashboard/ ./
+COPY frontend/nullsector-dashboard/ ./
 
 # Build the application
 RUN npm run build
@@ -38,7 +38,7 @@ RUN rm -f /etc/nginx/sites-enabled/default \
     && rm -f /etc/nginx/sites-available/default
 
 # Copy custom nginx configuration
-COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf
+COPY config/nginx/nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
 # Add health check endpoint
 RUN echo 'server { listen 8080; location /health { return 200 "healthy\n"; access_log off; } }' > /etc/nginx/conf.d/health.conf

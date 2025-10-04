@@ -18,8 +18,8 @@ RUN rm -f /etc/nginx/sites-enabled/default \
     && rm -rf /var/www/html/*
 
 # Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY nginx-production-ssl.conf /etc/nginx/conf.d/default.conf
+COPY config/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY config/nginx/nginx-production-ssl.conf /etc/nginx/conf.d/default.conf
 
 # Note: Health check endpoint is configured in the main nginx config file
 
