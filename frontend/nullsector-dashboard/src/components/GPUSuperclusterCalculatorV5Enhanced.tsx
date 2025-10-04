@@ -108,7 +108,13 @@ const GPUSuperclusterCalculator: React.FC = () => {
   // State management
   const [activeTab, setActiveTab] = useState('basic');
   const [isUsingBasicConfig, setIsUsingBasicConfig] = useState(true);
-  const [basicConfigData, setBasicConfigData] = useState({
+  const [basicConfigData, setBasicConfigData] = useState<{
+    gpuCount: number;
+    gpuModel: string;
+    powerCapacity: number;
+    storageCapacity: number;
+    networkingType: string;
+  } | null>({
     gpuCount: 5000,
     gpuModel: 'h100-sxm',
     powerCapacity: 15,
@@ -134,7 +140,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
   const [gpuModel, setGpuModel] = useState('gb200');
   const [numGPUs, setNumGPUs] = useState(10000);
   const [coolingType, setCoolingType] = useState('liquid');
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState('us-west-2');
   const [utilization, setUtilization] = useState(90);
   const [depreciation, setDepreciation] = useState(4);
   
@@ -936,21 +942,25 @@ const GPUSuperclusterCalculator: React.FC = () => {
 
   // Check if configuration is complete for financial analysis
   const configValidation = useMemo(() => {
+    // Check advanced config completeness
     const isConfigComplete = isConfigurationComplete(config);
-    const isBasicConfigSufficient = isBasicConfigurationSufficient(
-      basicConfigData.gpuCount,
-      basicConfigData.powerCapacity,
-      basicConfigData.storageCapacity,
-      basicConfigData.gpuModel,
-      basicConfigData.networkingType
-    );
-    
+
+    // Check basic config if we're using basic mode
+    const isBasicConfigSufficient = isUsingBasicConfig && basicConfigData ?
+      isBasicConfigurationSufficient(
+        basicConfigData.gpuCount,
+        basicConfigData.powerCapacity,
+        basicConfigData.storageCapacity,
+        basicConfigData.gpuModel,
+        basicConfigData.networkingType
+      ) : false;
+
     return {
       isConfigComplete,
       isBasicConfigSufficient,
       showFinancialTabs: isConfigComplete || (isUsingBasicConfig && isBasicConfigSufficient)
     };
-  }, [config, basicConfigData, isUsingBasicConfig]);
+  }, [config, isUsingBasicConfig, basicConfigData]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('nullSectorUser');

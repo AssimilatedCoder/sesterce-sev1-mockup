@@ -19,6 +19,11 @@ export interface ConfigurationState {
 }
 
 export function isConfigurationComplete(config: ConfigurationState): boolean {
+  // Defensive check - if config is not an object, return false
+  if (!config || typeof config !== 'object') {
+    return false;
+  }
+
   // Check if essential parameters are set to non-default values
   const essentialFields = [
     'gpuModel',
@@ -32,7 +37,14 @@ export function isConfigurationComplete(config: ConfigurationState): boolean {
   // Check if all essential fields have meaningful values
   for (const field of essentialFields) {
     const value = config[field];
-    if (value === undefined || value === null || value === '' || value === 0) {
+    if (value === undefined || value === null) {
+      return false;
+    }
+    if (value === 0) {
+      return false;
+    }
+    // Allow empty strings for optional override fields and region
+    if (typeof value === 'string' && value === '' && !['pueOverride', 'gpuPriceOverride', 'customEnergyRate', 'region'].includes(field)) {
       return false;
     }
   }
