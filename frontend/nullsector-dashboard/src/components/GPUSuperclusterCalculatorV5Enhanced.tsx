@@ -718,15 +718,8 @@ const GPUSuperclusterCalculator: React.FC = () => {
     
     // Apply infrastructure settings from basic config
     if (basicConfig.infrastructure) {
-      // Set GPU model based on optimization
-      const gpuModelMap: Record<string, string> = {
-        'H100 SXM': 'h100-sxm',
-        'H100 PCIe': 'h100-pcie', 
-        'A100 80GB': 'a100-80gb',
-        'L40S': 'l40s'
-      };
-      const mappedGpuModel = gpuModelMap[basicConfig.infrastructure.gpuModel] || 'h100-sxm';
-      setGpuModel(mappedGpuModel);
+      // Set GPU model directly from user selection
+      setGpuModel(basicConfig.infrastructure.gpuModel);
       
       // Set GPU count
       setNumGPUs(basicConfig.infrastructure.totalGPUs);
@@ -787,20 +780,21 @@ const GPUSuperclusterCalculator: React.FC = () => {
     setDepreciation(4); // 4 years depreciation
     setStorageArchitecture('mixed'); // Mixed architecture
     
-    // Set networking based on scale
-    const gpuCount = basicConfig.infrastructure?.totalGPUs || 5000;
-    if (gpuCount >= 10000) {
+    // Set networking based on user selection
+    const networkingType = basicConfig.infrastructure?.networking || 'roce-400';
+    if (networkingType.includes('roce')) {
+      setFabricType('ethernet');
+      setTopology('fat-tree');
+      // Set oversubscription based on networking speed
+      if (networkingType === 'roce-800') {
+        setOversubscription('1:1');
+      } else {
+        setOversubscription('2:1');
+      }
+    } else {
       setFabricType('infiniband');
       setTopology('fat-tree');
       setOversubscription('1:1');
-    } else if (gpuCount >= 2000) {
-      setFabricType('infiniband');
-      setTopology('fat-tree');
-      setOversubscription('2:1');
-    } else {
-      setFabricType('ethernet');
-      setTopology('fat-tree');
-      setOversubscription('2:1');
     }
     
     // Set workload distribution based on service tiers
@@ -829,8 +823,8 @@ const GPUSuperclusterCalculator: React.FC = () => {
     {
       title: 'Configuration',
       tabs: [
-        { id: 'basic', label: 'Basic Config', icon: <Zap className="w-4 h-4" />, description: 'Quick setup with automatic optimization', default: true },
-        ...(isPowerUser || isAdmin ? [{ id: 'advanced', label: 'Advanced Config', icon: <Settings className="w-4 h-4" />, description: 'Full control over service tiers and infrastructure' }] : []),
+        { id: 'basic', label: 'Basic Cluster Config', icon: <Zap className="w-4 h-4" />, description: 'Quick setup with automatic optimization', default: true },
+        ...(isPowerUser || isAdmin ? [{ id: 'advanced', label: 'Advanced Cluster Config', icon: <Settings className="w-4 h-4" />, description: 'Full control over service tiers and infrastructure' }] : []),
         { id: 'overrides', label: 'TCO Overrides', icon: <DollarSign className="w-4 h-4" />, description: 'Fine-tune calculations' }
       ]
     },

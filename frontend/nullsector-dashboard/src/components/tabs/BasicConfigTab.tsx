@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Zap, HardDrive, Cpu, TrendingUp, Settings, ArrowRight, Info, Sparkles } from 'lucide-react';
+import { Zap, HardDrive, Cpu, Network, ArrowRight, Info, Settings } from 'lucide-react';
 import { 
   ClusterOptimizer, 
   OptimizedConfiguration,
@@ -16,8 +16,10 @@ interface BasicConfigTabProps {
 
 export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanced }) => {
   const [gpuCount, setGpuCount] = useState(5000);
+  const [gpuModel, setGpuModel] = useState('h100-sxm');
   const [powerCapacity, setPowerCapacity] = useState(15); // MW
   const [storageCapacity, setStorageCapacity] = useState(125); // PB
+  const [networkingType, setNetworkingType] = useState('roce-400'); // RoCEv2 400Gbps default
 
   // Computed values
   const minPowerRequired = useMemo(() => getMinPowerRequired(gpuCount), [gpuCount]);
@@ -32,6 +34,22 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
     const optimizer = new ClusterOptimizer(gpuCount, powerCapacity, storageCapacity);
     return optimizer.calculateOptimalConfiguration();
   }, [gpuCount, powerCapacity, storageCapacity]);
+
+  // GPU model options
+  const gpuOptions = [
+    { value: 'gb200', label: 'GB200 NVL72', description: 'Latest Blackwell architecture' },
+    { value: 'h100-sxm', label: 'H100 SXM', description: 'High-performance training' },
+    { value: 'h100-pcie', label: 'H100 PCIe', description: 'Flexible deployment' },
+    { value: 'a100-80gb', label: 'A100 80GB', description: 'Proven performance' },
+    { value: 'l40s', label: 'L40S', description: 'Inference optimized' }
+  ];
+
+  // Networking options
+  const networkingOptions = [
+    { value: 'roce-200', label: 'RoCEv2 200Gbps', description: 'Cost-effective for most workloads' },
+    { value: 'roce-400', label: 'RoCEv2 400Gbps', description: 'Balanced performance and cost' },
+    { value: 'roce-800', label: 'RoCEv2 800Gbps', description: 'Maximum performance for large models' }
+  ];
 
   // Formatted tier data for display
   const optimizedTiers = useMemo(() => {
@@ -132,9 +150,9 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           }
         },
         infrastructure: {
-          gpuModel: optimizedConfig.constraints.gpuModel,
+          gpuModel: gpuModel, // Use selected GPU model
           totalGPUs: gpuCount,
-          networking: optimizedConfig.infrastructure.network,
+          networking: networkingType, // Use selected networking
           cooling: optimizedConfig.infrastructure.cooling,
           powerCapacity: powerCapacity,
           storageCapacity: storageCapacity
@@ -155,14 +173,32 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
       </div>
 
       {/* Core Inputs Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         {/* GPU Input Card */}
         <div className="input-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center mb-4">
-            <Cpu className="w-6 h-6 text-blue-600 mr-3" />
-            <h3 className="text-xl font-semibold text-gray-900">GPU Compute</h3>
+            <Cpu className="w-6 h-6 text-gray-600 mr-3" />
+            <h3 className="text-xl font-semibold text-gray-900">GPU Selection</h3>
           </div>
           
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">GPU Model</label>
+            <select
+              value={gpuModel}
+              onChange={(e) => setGpuModel(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              {gpuOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {gpuOptions.find(opt => opt.value === gpuModel)?.description}
+            </p>
+          </div>
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Total GPUs</label>
             <input
@@ -177,32 +213,27 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           <div className="value-display bg-gray-50 rounded-lg p-4 text-center mb-4">
-            <span className="text-3xl font-bold text-blue-600">{gpuCount.toLocaleString()}</span>
-            <span className="text-lg text-gray-600 ml-2">GPUs</span>
+            <span className="text-2xl font-bold text-gray-800">{gpuCount.toLocaleString()}</span>
+            <span className="text-sm text-gray-600 ml-2">GPUs</span>
           </div>
 
-          <div className="quick-select-buttons flex gap-2 justify-center mb-4">
+          <div className="quick-select-buttons flex gap-2 justify-center">
             {[500, 1000, 5000, 10000, 25000].map(value => (
               <button
                 key={value}
                 onClick={() => setGpuCount(value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors"
+                className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors"
               >
                 {value >= 1000 ? `${value/1000}K` : value}
               </button>
             ))}
-          </div>
-
-          <div className="auto-recommendation flex items-center text-sm text-gray-600">
-            <Info className="w-4 h-4 mr-2" />
-            <span>Recommended: {optimizedConfig.constraints.gpuModel}</span>
           </div>
         </div>
 
         {/* Power Input Card */}
         <div className="input-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center mb-4">
-            <Zap className="w-6 h-6 text-yellow-600 mr-3" />
+            <Zap className="w-6 h-6 text-gray-600 mr-3" />
             <h3 className="text-xl font-semibold text-gray-900">Power Capacity</h3>
           </div>
           
@@ -220,8 +251,8 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           <div className="value-display bg-gray-50 rounded-lg p-4 text-center mb-4">
-            <span className="text-3xl font-bold text-yellow-600">{powerCapacity}</span>
-            <span className="text-lg text-gray-600 ml-2">MW</span>
+            <span className="text-2xl font-bold text-gray-800">{powerCapacity}</span>
+            <span className="text-sm text-gray-600 ml-2">MW</span>
           </div>
 
           <div className="quick-select-buttons flex gap-2 justify-center mb-4">
@@ -229,7 +260,7 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
               <button
                 key={value}
                 onClick={() => setPowerCapacity(value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-yellow-600 hover:text-white hover:border-yellow-600 transition-colors"
+                className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors"
               >
                 {value} MW
               </button>
@@ -237,16 +268,16 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           <div className="power-validation">
-            <div className="power-bar bg-gray-200 rounded-full h-4 mb-2 overflow-hidden">
+            <div className="power-bar bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
               <div 
                 className={`h-full transition-all duration-300 ${
-                  powerUtilization > 95 ? 'bg-red-500' :
-                  powerUtilization > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                  powerUtilization > 95 ? 'bg-gray-800' :
+                  powerUtilization > 80 ? 'bg-gray-600' : 'bg-gray-400'
                 }`}
                 style={{ width: `${Math.min(100, powerUtilization)}%` }}
               />
             </div>
-            <span className={`text-sm font-medium ${powerStatusInfo.className}`}>
+            <span className={`text-xs font-medium ${powerStatusInfo.className}`}>
               {powerStatusInfo.status}
             </span>
           </div>
@@ -255,7 +286,7 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
         {/* Storage Input Card */}
         <div className="input-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center mb-4">
-            <HardDrive className="w-6 h-6 text-purple-600 mr-3" />
+            <HardDrive className="w-6 h-6 text-gray-600 mr-3" />
             <h3 className="text-xl font-semibold text-gray-900">Storage Capacity</h3>
           </div>
           
@@ -273,8 +304,8 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           <div className="value-display bg-gray-50 rounded-lg p-4 text-center mb-4">
-            <span className="text-3xl font-bold text-purple-600">{storageCapacity}</span>
-            <span className="text-lg text-gray-600 ml-2">PB</span>
+            <span className="text-2xl font-bold text-gray-800">{storageCapacity}</span>
+            <span className="text-sm text-gray-600 ml-2">PB</span>
           </div>
 
           <div className="quick-select-buttons flex gap-2 justify-center mb-4">
@@ -282,7 +313,7 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
               <button
                 key={value}
                 onClick={() => setStorageCapacity(value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-colors"
+                className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors"
               >
                 {value} PB
               </button>
@@ -290,41 +321,76 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           <div className="storage-ratio">
-            <div className="text-center text-sm text-gray-600 mb-1">
+            <div className="text-center text-xs text-gray-600 mb-1">
               {storagePerGPU.toFixed(1)} TB per GPU
             </div>
-            <div className={`text-sm font-medium text-center ${storageStatusInfo.className}`}>
+            <div className={`text-xs font-medium text-center ${storageStatusInfo.className}`}>
               {storageStatusInfo.status}
+            </div>
+          </div>
+        </div>
+
+        {/* Networking Input Card */}
+        <div className="input-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div className="flex items-center mb-4">
+            <Network className="w-6 h-6 text-gray-600 mr-3" />
+            <h3 className="text-xl font-semibold text-gray-900">Networking</h3>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Network Fabric</label>
+            <select
+              value={networkingType}
+              onChange={(e) => setNetworkingType(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              {networkingOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {networkingOptions.find(opt => opt.value === networkingType)?.description}
+            </p>
+          </div>
+
+          <div className="networking-info bg-gray-50 rounded-lg p-4">
+            <div className="text-xs text-gray-600 mb-2">Recommended for:</div>
+            <div className="text-sm font-medium text-gray-800">
+              {networkingType === 'roce-200' && 'Small to medium clusters, cost-sensitive deployments'}
+              {networkingType === 'roce-400' && 'Most production workloads, balanced performance'}
+              {networkingType === 'roce-800' && 'Large-scale training, maximum throughput required'}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Auto-Optimized Results Section */}
-      <div className="optimization-results bg-gradient-to-br from-blue-600 to-purple-700 text-white rounded-xl p-8 mb-8">
-        <h3 className="flex items-center text-2xl font-bold mb-6">
-          <Sparkles className="w-6 h-6 mr-3" />
-          AI-Optimized Configuration
+      {/* Dynamic Configuration Results Section */}
+      <div className="optimization-results bg-gray-100 border border-gray-200 rounded-xl p-8 mb-8">
+        <h3 className="flex items-center text-2xl font-bold text-gray-900 mb-6">
+          <Settings className="w-6 h-6 mr-3 text-gray-600" />
+          Dynamic Configuration
         </h3>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Service Mix */}
-          <div className="optimization-card bg-white/10 rounded-lg p-6">
-            <h4 className="text-lg font-semibold mb-4">Recommended Service Mix</h4>
+          <div className="optimization-card bg-white border border-gray-200 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Recommended Service Mix</h4>
             <div className="space-y-3">
               {optimizedTiers.map((tier, index) => (
                 <div key={index} className="tier-allocation">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">{tier.name}</span>
-                    <span className="text-sm font-bold">{tier.percent}%</span>
+                    <span className="text-sm font-medium text-gray-700">{tier.name}</span>
+                    <span className="text-sm font-bold text-gray-900">{tier.percent}%</span>
                   </div>
-                  <div className="tier-bar bg-white/20 rounded-full h-2 mb-2 overflow-hidden">
+                  <div className="tier-bar bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
                     <div 
-                      className="bg-white h-full transition-all duration-500"
+                      className="bg-gray-600 h-full transition-all duration-500"
                       style={{ width: `${tier.percent}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs opacity-90">
+                  <div className="flex justify-between text-xs text-gray-600">
                     <span>{tier.gpus.toLocaleString()} GPUs</span>
                     <span>~${tier.monthlyRevenue}M/mo</span>
                   </div>
@@ -334,39 +400,39 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           {/* Storage Performance Mix */}
-          <div className="optimization-card bg-white/10 rounded-lg p-6">
-            <h4 className="text-lg font-semibold mb-4">Storage Performance Mix</h4>
+          <div className="optimization-card bg-white border border-gray-200 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Storage Performance Mix</h4>
             <div className="space-y-3">
               {optimizedStorage.map((tier, index) => (
                 <div key={index} className="flex items-center justify-between py-2">
                   <div className="flex items-center">
                     <span className="text-lg mr-2">{tier.icon}</span>
                     <div>
-                      <div className="text-sm font-medium">{tier.name}</div>
-                      <div className="text-xs opacity-75">{tier.capacity} {tier.unit}</div>
+                      <div className="text-sm font-medium text-gray-700">{tier.name}</div>
+                      <div className="text-xs text-gray-500">{tier.capacity} {tier.unit}</div>
                     </div>
                   </div>
-                  <div className="text-sm font-bold">{tier.percent}%</div>
+                  <div className="text-sm font-bold text-gray-900">{tier.percent}%</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Infrastructure Allocation */}
-          <div className="optimization-card bg-white/10 rounded-lg p-6">
-            <h4 className="text-lg font-semibold mb-4">Infrastructure Allocation</h4>
+          <div className="optimization-card bg-white border border-gray-200 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Infrastructure Allocation</h4>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm">Network Fabric</span>
-                <span className="text-sm font-medium">{optimizedConfig.infrastructure.network}</span>
+                <span className="text-sm text-gray-600">Network Fabric</span>
+                <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.network}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Cooling Solution</span>
-                <span className="text-sm font-medium">{optimizedConfig.infrastructure.cooling}</span>
+                <span className="text-sm text-gray-600">Cooling Solution</span>
+                <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.cooling}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Rack Configuration</span>
-                <span className="text-sm font-medium">{optimizedConfig.infrastructure.racks} racks</span>
+                <span className="text-sm text-gray-600">Rack Configuration</span>
+                <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.racks} racks</span>
               </div>
             </div>
           </div>
@@ -374,21 +440,21 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
 
         {/* Financial Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="metric-card bg-white/20 rounded-lg p-4 text-center">
-            <div className="text-sm opacity-90 mb-1">Projected Annual Revenue</div>
-            <div className="text-2xl font-bold">${optimizedConfig.financial.annualRevenue}M</div>
+          <div className="metric-card bg-white border border-gray-300 rounded-lg p-4 text-center">
+            <div className="text-sm text-gray-600 mb-1">Projected Annual Revenue</div>
+            <div className="text-2xl font-bold text-gray-900">${optimizedConfig.financial.annualRevenue}M</div>
           </div>
-          <div className="metric-card bg-white/10 rounded-lg p-4 text-center">
-            <div className="text-sm opacity-90 mb-1">5-Year TCO</div>
-            <div className="text-2xl font-bold">${optimizedConfig.financial.totalTCO}M</div>
+          <div className="metric-card bg-white border border-gray-200 rounded-lg p-4 text-center">
+            <div className="text-sm text-gray-600 mb-1">5-Year TCO</div>
+            <div className="text-2xl font-bold text-gray-900">${optimizedConfig.financial.totalTCO}M</div>
           </div>
-          <div className="metric-card bg-white/10 rounded-lg p-4 text-center">
-            <div className="text-sm opacity-90 mb-1">ROI</div>
-            <div className="text-2xl font-bold">{optimizedConfig.financial.roi}%</div>
+          <div className="metric-card bg-white border border-gray-200 rounded-lg p-4 text-center">
+            <div className="text-sm text-gray-600 mb-1">ROI</div>
+            <div className="text-2xl font-bold text-gray-900">{optimizedConfig.financial.roi}%</div>
           </div>
-          <div className="metric-card bg-white/10 rounded-lg p-4 text-center">
-            <div className="text-sm opacity-90 mb-1">Payback Period</div>
-            <div className="text-2xl font-bold">{optimizedConfig.financial.paybackMonths} months</div>
+          <div className="metric-card bg-white border border-gray-200 rounded-lg p-4 text-center">
+            <div className="text-sm text-gray-600 mb-1">Payback Period</div>
+            <div className="text-2xl font-bold text-gray-900">{optimizedConfig.financial.paybackMonths} months</div>
           </div>
         </div>
       </div>
