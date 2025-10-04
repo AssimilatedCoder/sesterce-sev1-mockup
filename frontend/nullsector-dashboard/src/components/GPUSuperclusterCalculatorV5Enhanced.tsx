@@ -25,6 +25,7 @@ import { UserManagementTab } from './tabs/UserManagementTab';
 import { LandingOverviewTab } from './tabs/LandingOverviewTab';
 import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { BasicConfigTab } from './tabs/BasicConfigTab';
+import { DetailedClusterDesign } from './tabs/DetailedClusterDesign';
 import { ConfigurationIncompleteMessage } from './common/ConfigurationIncompleteMessage';
 import { isConfigurationComplete, isBasicConfigurationSufficient } from '../utils/configurationValidator';
 import { formatNumber } from '../utils/formatters';
@@ -864,6 +865,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
     {
       title: 'Technical Analysis',
       tabs: [
+        { id: 'detailed-design', label: 'Detailed Cluster Design', icon: <FileText className="w-4 h-4" />, description: 'Comprehensive technical design document' },
         { id: 'calculator', label: 'Advanced Config Details', icon: <Calculator className="w-4 h-4" /> },
         { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
         { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
@@ -1123,6 +1125,35 @@ const GPUSuperclusterCalculator: React.FC = () => {
                     <BasicConfigTab 
                       onSwitchToAdvanced={handleSwitchToAdvanced}
                       onConfigChange={(config) => setBasicConfigData(config)}
+                    />
+                  )}
+
+                  {activeTab === 'detailed-design' && (
+                    <DetailedClusterDesign 
+                      clusterConfig={{
+                        gpuCount: numGPUs,
+                        gpuModel: gpuModel,
+                        powerCapacity: 50, // Default MW, could be calculated from config
+                        storageCapacity: totalStorage,
+                        networkingType: fabricType,
+                        coolingType: coolingType,
+                        utilizationRate: utilization,
+                        powerCost: parseFloat(customEnergyRate as string) || regionRates[region]?.rate * 1000 || 50, // Convert to $/MWh
+                        region: region,
+                        serviceTiers: tierDistribution,
+                        storageTiers: {
+                          hot: hotPercent,
+                          warm: warmPercent,
+                          cold: coldPercent,
+                          archive: archivePercent
+                        },
+                        workloads: {
+                          training: workloadTraining,
+                          inference: workloadInference,
+                          finetuning: workloadFinetuning
+                        },
+                        depreciation: depreciation
+                      }}
                     />
                   )}
 
