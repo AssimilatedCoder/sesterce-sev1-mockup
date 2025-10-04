@@ -25,6 +25,8 @@ import { UserManagementTab } from './tabs/UserManagementTab';
 import { LandingOverviewTab } from './tabs/LandingOverviewTab';
 import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
 import { BasicConfigTab } from './tabs/BasicConfigTab';
+import { ConfigurationIncompleteMessage } from './common/ConfigurationIncompleteMessage';
+import { isConfigurationComplete, isBasicConfigurationSufficient } from '../utils/configurationValidator';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
@@ -105,6 +107,14 @@ const GPUSuperclusterCalculator: React.FC = () => {
   
   // State management
   const [activeTab, setActiveTab] = useState('basic');
+  const [isUsingBasicConfig, setIsUsingBasicConfig] = useState(true);
+  const [basicConfigData, setBasicConfigData] = useState({
+    gpuCount: 5000,
+    gpuModel: 'h100-sxm',
+    powerCapacity: 15,
+    storageCapacity: 125,
+    networkingType: 'roce-400'
+  });
   
   // Currency conversion hook (for future use in calculations)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -716,6 +726,9 @@ const GPUSuperclusterCalculator: React.FC = () => {
     // Populate advanced configuration with optimized values
     console.log('Switching to Advanced mode with config:', basicConfig);
     
+    // Mark that we're no longer using basic config only
+    setIsUsingBasicConfig(false);
+    
     // Apply infrastructure settings from basic config
     if (basicConfig.infrastructure) {
       // Set GPU model directly from user selection
@@ -821,17 +834,17 @@ const GPUSuperclusterCalculator: React.FC = () => {
   // Organized tab structure with logical groupings
   const tabGroups = [
     {
+      title: 'Overview',
+      tabs: [
+        { id: 'overview', label: 'TCO Calculator Overview', icon: <FileText className="w-4 h-4" /> }
+      ]
+    },
+    {
       title: 'Configuration',
       tabs: [
         { id: 'basic', label: 'Basic Cluster Config', icon: <Zap className="w-4 h-4" />, description: 'Quick setup with automatic optimization', default: true },
         ...(isPowerUser || isAdmin ? [{ id: 'advanced', label: 'Advanced Cluster Config', icon: <Settings className="w-4 h-4" />, description: 'Full control over service tiers and infrastructure' }] : []),
         { id: 'overrides', label: 'TCO Overrides', icon: <DollarSign className="w-4 h-4" />, description: 'Fine-tune calculations' }
-      ]
-    },
-    {
-      title: 'Overview',
-      tabs: [
-        { id: 'overview', label: 'TCO Calculator Overview', icon: <FileText className="w-4 h-4" /> }
       ]
     },
     {
@@ -920,6 +933,16 @@ const GPUSuperclusterCalculator: React.FC = () => {
     expertise,
     complianceRequirements
   };
+
+  // Check if configuration is complete for financial analysis
+  const isConfigComplete = isConfigurationComplete(config);
+  const isBasicConfigSufficient = isBasicConfigurationSufficient(
+    basicConfigData.gpuCount,
+    basicConfigData.powerCapacity,
+    basicConfigData.storageCapacity,
+    basicConfigData.gpuModel,
+    basicConfigData.networkingType
+  );
 
   const handleLogout = () => {
     sessionStorage.removeItem('nullSectorUser');
@@ -1079,7 +1102,10 @@ const GPUSuperclusterCalculator: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-xl border border-gray-200">
                 <div className="p-4 md:p-8">
                   {activeTab === 'basic' && (
-                    <BasicConfigTab onSwitchToAdvanced={handleSwitchToAdvanced} />
+                    <BasicConfigTab 
+                      onSwitchToAdvanced={handleSwitchToAdvanced}
+                      onConfigChange={(config) => setBasicConfigData(config)}
+                    />
                   )}
 
                   {activeTab === 'advanced' && (isPowerUser || isAdmin) && (
@@ -1205,11 +1231,25 @@ const GPUSuperclusterCalculator: React.FC = () => {
             )}
             
             {activeTab === 'financial' && (
-              <FinancialAnalyticsTab config={config} results={results} />
+              (isConfigComplete || (isUsingBasicConfig && isBasicConfigSufficient)) ? (
+                <FinancialAnalyticsTab config={config} results={results} />
+              ) : (
+                <ConfigurationIncompleteMessage 
+                  tabName="Revenue & EBITDA"
+                  description="Financial modeling requires complete cluster configuration. Please complete either the Basic Cluster Config or Advanced Cluster Config settings to view revenue and EBITDA analysis."
+                />
+              )
             )}
             
             {activeTab === 'capex' && (
-              <CapexBreakdownTab config={config} results={results} />
+              (isConfigComplete || (isUsingBasicConfig && isBasicConfigSufficient)) ? (
+                <CapexBreakdownTab config={config} results={results} />
+              ) : (
+                <ConfigurationIncompleteMessage 
+                  tabName="Complete CAPEX"
+                  description="CAPEX analysis requires complete cluster configuration. Please complete either the Basic Cluster Config or Advanced Cluster Config settings to view detailed capital expenditure breakdown."
+                />
+              )
             )}
             
             {activeTab === 'networking' && (

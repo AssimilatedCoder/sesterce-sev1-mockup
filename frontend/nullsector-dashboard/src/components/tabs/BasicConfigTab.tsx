@@ -12,14 +12,28 @@ import {
 
 interface BasicConfigTabProps {
   onSwitchToAdvanced?: (config: any) => void;
+  onConfigChange?: (config: any) => void;
 }
 
-export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanced }) => {
+export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanced, onConfigChange }) => {
   const [gpuCount, setGpuCount] = useState(5000);
   const [gpuModel, setGpuModel] = useState('h100-sxm');
   const [powerCapacity, setPowerCapacity] = useState(15); // MW
   const [storageCapacity, setStorageCapacity] = useState(125); // PB
   const [networkingType, setNetworkingType] = useState('roce-400'); // RoCEv2 400Gbps default
+
+  // Notify parent of configuration changes
+  useEffect(() => {
+    if (onConfigChange) {
+      onConfigChange({
+        gpuCount,
+        gpuModel,
+        powerCapacity,
+        storageCapacity,
+        networkingType
+      });
+    }
+  }, [gpuCount, gpuModel, powerCapacity, storageCapacity, networkingType, onConfigChange]);
 
   // Computed values
   const minPowerRequired = useMemo(() => getMinPowerRequired(gpuCount), [gpuCount]);
@@ -29,11 +43,17 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
   const storagePerGPU = useMemo(() => ((storageCapacity * 1000) / gpuCount), [storageCapacity, gpuCount]);
   const storageStatusInfo = useMemo(() => getStorageRatioStatus(storagePerGPU), [storagePerGPU]);
 
-  // Optimization results
+  // Optimization results - now includes GPU model and networking selections
   const optimizedConfig = useMemo(() => {
     const optimizer = new ClusterOptimizer(gpuCount, powerCapacity, storageCapacity);
-    return optimizer.calculateOptimalConfiguration();
-  }, [gpuCount, powerCapacity, storageCapacity]);
+    const config = optimizer.calculateOptimalConfiguration();
+    
+    // Override with user selections
+    config.constraints.gpuModel = gpuOptions.find(opt => opt.value === gpuModel)?.label || 'H100 SXM';
+    config.infrastructure.network = networkingOptions.find(opt => opt.value === networkingType)?.label || 'RoCEv2 400Gbps';
+    
+    return config;
+  }, [gpuCount, powerCapacity, storageCapacity, gpuModel, networkingType]);
 
   // GPU model options
   const gpuOptions = [
@@ -418,10 +438,14 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
             </div>
           </div>
 
-          {/* Infrastructure Allocation */}
+          {/* Infrastructure Calculations */}
           <div className="optimization-card bg-white border border-gray-200 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">Infrastructure Allocation</h4>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">Infrastructure Calculations</h4>
             <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Selected GPU Model</span>
+                <span className="text-sm font-medium text-gray-900">{optimizedConfig.constraints.gpuModel}</span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Network Fabric</span>
                 <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.network}</span>
@@ -431,8 +455,20 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
                 <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.cooling}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Rack Configuration</span>
+                <span className="text-sm text-gray-600">Total Racks</span>
                 <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.racks} racks</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Compute Nodes</span>
+                <span className="text-sm font-medium text-gray-900">{Math.ceil(gpuCount / 8)} nodes</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Power Utilization</span>
+                <span className="text-sm font-medium text-gray-900">{powerUtilization.toFixed(1)}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Storage per GPU</span>
+                <span className="text-sm font-medium text-gray-900">{storagePerGPU.toFixed(1)} TB</span>
               </div>
             </div>
           </div>
