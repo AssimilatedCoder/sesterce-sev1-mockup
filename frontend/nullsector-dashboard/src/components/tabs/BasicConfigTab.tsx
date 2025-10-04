@@ -316,7 +316,7 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
             <input
               type="range"
               min={minStorageRequired}
-              max="500"
+              max="2000"
               step="1"
               value={storageCapacity}
               onChange={(e) => setStorageCapacity(parseInt(e.target.value))}
@@ -330,7 +330,7 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
           </div>
 
           <div className="quick-select-buttons flex gap-2 justify-center mb-4">
-            {[10, 25, 50, 100].map(value => (
+            {[50, 100, 250, 500, 1000].map(value => (
               <button
                 key={value}
                 onClick={() => setStorageCapacity(value)}
