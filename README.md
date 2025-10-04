@@ -86,12 +86,19 @@ npm start
 
 ## 📊 Key Features
 
-### GPU Calculator
-- **Multi-GPU Support**: NVIDIA RTX 6000 Blackwell, AMD MI355X
-- **TCO Analysis**: Comprehensive cost modeling
-- **Power Consumption**: Real-time power calculations
-- **Cooling Requirements**: Advanced thermal modeling
-- **Custom Overrides**: User-configurable parameters
+### 🎯 Basic Configuration Mode (New!)
+- **3-Input Simplicity**: Just specify GPUs, power, and storage
+- **AI-Powered Optimization**: Automatic service tier and infrastructure optimization
+- **Instant Results**: Real-time financial projections and technical recommendations
+- **Smart Validation**: Constraint checking with visual feedback
+- **Seamless Upgrade**: Switch to Advanced mode with populated values
+
+### 🔧 Advanced GPU Calculator
+- **Multi-GPU Support**: NVIDIA RTX 6000 Blackwell, AMD MI355X, H100, A100, L40S
+- **TCO Analysis**: Comprehensive cost modeling with 5-year projections
+- **Power Consumption**: Real-time power calculations with PUE modeling
+- **Cooling Requirements**: Advanced thermal modeling (Air/Hybrid/Liquid)
+- **Custom Overrides**: User-configurable parameters and business rules
 
 ### User Management
 - **Web Interface**: Full CRUD operations for users

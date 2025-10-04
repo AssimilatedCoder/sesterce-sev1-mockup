@@ -715,8 +715,113 @@ const GPUSuperclusterCalculator: React.FC = () => {
   const handleSwitchToAdvanced = (basicConfig: any) => {
     // Populate advanced configuration with optimized values
     console.log('Switching to Advanced mode with config:', basicConfig);
+    
+    // Apply infrastructure settings from basic config
+    if (basicConfig.infrastructure) {
+      // Set GPU model based on optimization
+      const gpuModelMap: Record<string, string> = {
+        'H100 SXM': 'h100-sxm',
+        'H100 PCIe': 'h100-pcie', 
+        'A100 80GB': 'a100-80gb',
+        'L40S': 'l40s'
+      };
+      const mappedGpuModel = gpuModelMap[basicConfig.infrastructure.gpuModel] || 'h100-sxm';
+      setGpuModel(mappedGpuModel);
+      
+      // Set GPU count
+      setNumGPUs(basicConfig.infrastructure.totalGPUs);
+      
+      // Set cooling type based on recommendation
+      const coolingMap: Record<string, string> = {
+        'Liquid Cooled (Direct-to-chip)': 'liquid',
+        'Hybrid Air/Liquid': 'hybrid',
+        'Air Cooled (Hot aisle containment)': 'air'
+      };
+      const mappedCooling = coolingMap[basicConfig.infrastructure.cooling] || 'liquid';
+      setCoolingType(mappedCooling);
+      
+      // Set storage capacity
+      setTotalStorage(basicConfig.infrastructure.storageCapacity);
+    }
+    
+    // Apply service tier distribution
+    if (basicConfig.serviceTiers) {
+      setTierDistribution({
+        tier1: basicConfig.serviceTiers.tier1?.allocation || 0,
+        tier2: basicConfig.serviceTiers.tier2?.allocation || 0,
+        tier3: basicConfig.serviceTiers.tier3?.allocation || 0,
+        tier4: basicConfig.serviceTiers.tier4?.allocation || 0
+      });
+    }
+    
+    // Apply storage tier distribution
+    if (basicConfig.storageTiers) {
+      const storageDistribution: Record<string, number> = {};
+      
+      // Map storage tiers to the expected format
+      if (basicConfig.storageTiers.ultraHighPerf > 0) {
+        storageDistribution['vast-universal'] = basicConfig.storageTiers.ultraHighPerf;
+      }
+      if (basicConfig.storageTiers.highPerf > 0) {
+        storageDistribution['vast-performance'] = basicConfig.storageTiers.highPerf;
+      }
+      if (basicConfig.storageTiers.mediumPerf > 0) {
+        storageDistribution['ceph-nvme'] = basicConfig.storageTiers.mediumPerf;
+      }
+      if (basicConfig.storageTiers.capacityTier > 0) {
+        storageDistribution['ceph-hdd'] = basicConfig.storageTiers.capacityTier;
+      }
+      if (basicConfig.storageTiers.objectStore > 0) {
+        storageDistribution['s3-compatible'] = basicConfig.storageTiers.objectStore;
+      }
+      
+      setStorageTierDistribution(storageDistribution);
+      
+      // Update selected storage tiers
+      const selectedTiers = Object.keys(storageDistribution).filter(tier => storageDistribution[tier] > 0);
+      setSelectedStorageTiers(selectedTiers);
+    }
+    
+    // Set reasonable defaults for other advanced settings
+    setUtilization(70); // 70% utilization as used in basic calculations
+    setDepreciation(4); // 4 years depreciation
+    setStorageArchitecture('mixed'); // Mixed architecture
+    
+    // Set networking based on scale
+    const gpuCount = basicConfig.infrastructure?.totalGPUs || 5000;
+    if (gpuCount >= 10000) {
+      setFabricType('infiniband');
+      setTopology('fat-tree');
+      setOversubscription('1:1');
+    } else if (gpuCount >= 2000) {
+      setFabricType('infiniband');
+      setTopology('fat-tree');
+      setOversubscription('2:1');
+    } else {
+      setFabricType('ethernet');
+      setTopology('fat-tree');
+      setOversubscription('2:1');
+    }
+    
+    // Set workload distribution based on service tiers
+    const serviceTiers = basicConfig.serviceTiers;
+    if (serviceTiers) {
+      const trainingWeight = (serviceTiers.tier1?.allocation || 0) * 0.8 + 
+                            (serviceTiers.tier2?.allocation || 0) * 0.65 + 
+                            (serviceTiers.tier3?.allocation || 0) * 0.55;
+      const inferenceWeight = (serviceTiers.tier4?.allocation || 0) * 0.9 + 
+                             (serviceTiers.tier3?.allocation || 0) * 0.45;
+      
+      setWorkloadTraining(Math.round(trainingWeight));
+      setWorkloadInference(Math.round(inferenceWeight));
+      setWorkloadFinetuning(Math.max(0, 100 - Math.round(trainingWeight) - Math.round(inferenceWeight)));
+    }
+    
+    // Switch to advanced tab
     setActiveTab('advanced');
-    // TODO: Apply the basic config to the advanced settings
+    
+    // Show success notification (if notification system exists)
+    console.log('✅ Advanced mode populated with optimized values from Basic Config');
   };
 
   // Organized tab structure with logical groupings
