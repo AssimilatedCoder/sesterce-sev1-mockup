@@ -5,7 +5,12 @@
 
 set -e
 
+# Get the project root directory and change to it
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$PROJECT_ROOT"
+
 echo "🐳 Deploying NullSector Calculator with Docker..."
+echo "📁 Project root: $PROJECT_ROOT"
 
 # Colors for output
 RED='\033[0;31m'
@@ -134,11 +139,18 @@ if [ ! -f ".env.local" ]; then
     cp .env .env.local
 fi
 
+# Ensure we're using the correct docker-compose file
+COMPOSE_FILE="config/docker/docker-compose.yml"
+if [ ! -f "$COMPOSE_FILE" ]; then
+    print_error "Docker compose file not found: $COMPOSE_FILE"
+    exit 1
+fi
+
 print_status "Environment variables generated"
 
 # Build the application images
 print_info "Building Docker images..."
-if $COMPOSE_CMD build; then
+if $COMPOSE_CMD -f "$COMPOSE_FILE" build; then
     print_status "Docker images built successfully"
 else
     print_error "Failed to build Docker images"
@@ -151,7 +163,7 @@ mkdir -p logs
 
 # Start the services
 print_info "Starting NullSector services..."
-if $COMPOSE_CMD up -d; then
+if $COMPOSE_CMD -f "$COMPOSE_FILE" up -d; then
     print_status "Services started successfully"
 else
     print_error "Failed to start services"
@@ -165,13 +177,13 @@ sleep 45  # Wait for maximum start_period (40s) plus buffer
 
 # Check service health
 print_info "Checking service health..."
-if $COMPOSE_CMD ps | grep -q "Up"; then
+if $COMPOSE_CMD -f "$COMPOSE_FILE" ps | grep -q "Up"; then
     print_status "All services are running"
 
     # Show service status
     echo ""
     echo "📊 Service Status:"
-    docker-compose ps
+    $COMPOSE_CMD -f "$COMPOSE_FILE" ps
 
     echo ""
     echo "🎉 NullSector TCO Calculator is now running!"
@@ -187,19 +199,20 @@ if $COMPOSE_CMD ps | grep -q "Up"; then
     echo "   • Non-root user execution"
     echo "   • Rate limiting and security headers"
     echo "   • JWT authentication for API"
+    echo "   • Persistent user database with SQLite"
     echo ""
     echo "🔧 Management Commands:"
-    echo "   Stop:  docker-compose down"
-    echo "   Logs:  docker-compose logs -f"
-    echo "   Restart: docker-compose restart"
-    echo "   Status: docker-compose ps"
+    echo "   Stop:  $COMPOSE_CMD -f $COMPOSE_FILE down"
+    echo "   Logs:  $COMPOSE_CMD -f $COMPOSE_FILE logs -f"
+    echo "   Restart: $COMPOSE_CMD -f $COMPOSE_FILE restart"
+    echo "   Status: $COMPOSE_CMD -f $COMPOSE_FILE ps"
     echo ""
     print_warning "Note: Port changed from 3025 to 2053 as requested"
 
 else
     print_warning "Some services may not be fully ready yet"
-    echo "Check status with: docker-compose ps"
-    echo "View logs with: docker-compose logs"
+    echo "Check status with: $COMPOSE_CMD -f $COMPOSE_FILE ps"
+    echo "View logs with: $COMPOSE_CMD -f $COMPOSE_FILE logs"
 fi
 
 # Post-deployment verification for remote Ubuntu server

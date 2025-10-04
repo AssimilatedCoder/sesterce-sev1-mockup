@@ -13,6 +13,7 @@ import jwt
 import json
 from datetime import datetime, timedelta, timezone
 from functools import wraps
+from user_database import init_user_database, get_user_database
 
 app = Flask(__name__)
 
@@ -39,50 +40,14 @@ USER_ROLES = {
     }
 }
 
-# Secure user database (hashed passwords with expiry dates)
-# App created 4 weeks ago (early September 2025)
-USERS = {
-    'David': {
-        'password_hash': hashlib.sha256('Sk7walk3r!'.encode()).hexdigest(),
-        'role': 'admin',
-        'created_at': '2025-09-03T10:30:00Z',  # App creator - 4 weeks ago
-        'expires_at': None,  # Admin users don't expire
-        'last_login': '2025-09-30T14:22:00Z',
-        'is_active': True
-    },
-    'Thomas': {
-        'password_hash': hashlib.sha256('Th0mas@99'.encode()).hexdigest(),
-        'role': 'power_user',
-        'created_at': '2025-09-05T09:15:00Z',  # Early team member
-        'expires_at': '2025-11-05T09:15:00Z',  # 2 months from creation
-        'last_login': '2025-09-28T11:45:00Z',
-        'is_active': True
-    },
-    'Kiko': {
-        'password_hash': hashlib.sha256('K1ko#2025'.encode()).hexdigest(),
-        'role': 'user',
-        'created_at': '2025-09-10T16:20:00Z',  # Regular user
-        'expires_at': '2025-10-24T16:20:00Z',  # 2 weeks from today
-        'last_login': '2025-09-29T08:30:00Z',
-        'is_active': True
-    },
-    'Maciej': {
-        'password_hash': hashlib.sha256('Mac1ej*77'.encode()).hexdigest(),
-        'role': 'power_user',
-        'created_at': '2025-09-12T13:45:00Z',  # Power user role
-        'expires_at': '2025-11-12T13:45:00Z',  # 2 months from creation
-        'last_login': '2025-09-27T16:10:00Z',
-        'is_active': True
-    },
-    'admin': {
-        'password_hash': hashlib.sha256('Vader@66'.encode()).hexdigest(),
-        'role': 'admin',
-        'created_at': '2025-09-03T10:00:00Z',  # Super admin created with app
-        'expires_at': None,  # Super admin never expires
-        'last_login': '2025-10-01T09:00:00Z',  # Today
-        'is_active': True
-    }
-}
+# Initialize persistent user database
+# The database will automatically migrate the hardcoded users on first run
+try:
+    user_db = init_user_database()
+    print("✅ User database initialized successfully")
+except Exception as e:
+    print(f"❌ Failed to initialize user database: {e}")
+    raise
 
 # Rate limiting (simple implementation)
 request_times = {}
@@ -237,12 +202,11 @@ def login():
     user_agent = request.headers.get('User-Agent', 'Unknown')
     
     # Check user exists
-    if username not in USERS:
+    user = user_db.get_user(username)
+    if not user:
         log_login_attempt(client_ip, username, False, user_agent)
         time.sleep(1)  # Prevent timing attacks
         return jsonify({'error': 'Invalid credentials'}), 401
-    
-    user = USERS[username]
     
     # Check if user is active
     if not user.get('is_active', True):
@@ -269,7 +233,7 @@ def login():
     log_login_attempt(client_ip, username, True, user_agent)
     
     # Update last login time
-    USERS[username]['last_login'] = datetime.now(timezone.utc).isoformat()
+    user_db.update_user(username, last_login=datetime.now(timezone.utc).isoformat())
     
     # Generate JWT token
     token = generate_token(username, user['role'])
@@ -722,9 +686,9 @@ def get_users():
     
     # Return user list without password hashes
     users_list = []
-    for username, user_data in USERS.items():
+    for user_data in user_db.get_all_users():
         users_list.append({
-            'username': username,
+            'username': user_data['username'],
             'role': user_data['role'],
             'created_at': user_data.get('created_at'),
             'expires_at': user_data.get('expires_at'),
@@ -763,7 +727,7 @@ def create_user():
     if not username:
         return jsonify({'error': 'Username is required'}), 400
     
-    if username in USERS:
+    if user_db.user_exists(username):
         return jsonify({'error': 'Username already exists'}), 400
     
     if not password:
@@ -782,14 +746,17 @@ def create_user():
         expires_at = (datetime.now(timezone.utc) + timedelta(days=expires_days)).isoformat()
     
     # Create user
-    USERS[username] = {
-        'password_hash': hashlib.sha256(password.encode()).hexdigest(),
-        'role': role,
-        'created_at': datetime.now(timezone.utc).isoformat(),
-        'expires_at': expires_at,
-        'last_login': None,
-        'is_active': True
-    }
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    success = user_db.create_user(
+        username=username,
+        password_hash=password_hash,
+        role=role,
+        expires_at=expires_at,
+        is_active=True
+    )
+    
+    if not success:
+        return jsonify({'error': 'Failed to create user'}), 500
     
     # Log the action
     client_ip = get_client_ip()
@@ -811,44 +778,49 @@ def update_user(username):
     if request.user['role'] != 'admin':
         return jsonify({'error': 'Admin access required'}), 403
     
-    if username not in USERS:
+    user = user_db.get_user(username)
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Request data required'}), 400
     
-    user = USERS[username]
     updated_fields = []
+    update_data = {}
     
     # Update role
     if 'role' in data:
         new_role = data['role'].strip()
         if new_role in ['admin', 'power_user', 'user']:
-            user['role'] = new_role
+            update_data['role'] = new_role
             updated_fields.append(f'role: {new_role}')
             
             # If changing to admin, remove expiry
             if new_role == 'admin':
-                user['expires_at'] = None
+                update_data['expires_at'] = None
                 updated_fields.append('removed expiry (admin user)')
         else:
             return jsonify({'error': f'Invalid role: {new_role}. Valid roles are: admin, power_user, user'}), 400
     
     # Update active status
     if 'is_active' in data:
-        user['is_active'] = bool(data['is_active'])
-        updated_fields.append(f'active: {user["is_active"]}')
+        update_data['is_active'] = bool(data['is_active'])
+        updated_fields.append(f'active: {update_data["is_active"]}')
     
     # Update expiry date
-    if 'expires_days' in data and user['role'] != 'admin':
+    if 'expires_days' in data and user.get('role', 'user') != 'admin':
         expires_days = int(data['expires_days'])
         if expires_days > 0:
-            user['expires_at'] = (datetime.now(timezone.utc) + timedelta(days=expires_days)).isoformat()
+            update_data['expires_at'] = (datetime.now(timezone.utc) + timedelta(days=expires_days)).isoformat()
             updated_fields.append(f'expires in {expires_days} days')
         else:
-            user['expires_at'] = None
+            update_data['expires_at'] = None
             updated_fields.append('removed expiry')
+    
+    # Apply the updates to the database
+    if update_data:
+        user_db.update_user(username, **update_data)
     
     # Log the action
     client_ip = get_client_ip()
@@ -868,7 +840,7 @@ def reset_user_password(username):
     if request.user['role'] != 'admin':
         return jsonify({'error': 'Admin access required'}), 403
     
-    if username not in USERS:
+    if not user_db.user_exists(username):
         return jsonify({'error': 'User not found'}), 404
     
     data = request.get_json()
@@ -884,7 +856,8 @@ def reset_user_password(username):
         return jsonify({'error': 'Password must be at least 8 characters'}), 400
     
     # Update password
-    USERS[username]['password_hash'] = hashlib.sha256(new_password.encode()).hexdigest()
+    password_hash = hashlib.sha256(new_password.encode()).hexdigest()
+    user_db.update_password(username, password_hash)
     
     # Log the action
     client_ip = get_client_ip()
@@ -901,7 +874,7 @@ def delete_user(username):
     if request.user['role'] != 'admin':
         return jsonify({'error': 'Admin access required'}), 403
     
-    if username not in USERS:
+    if not user_db.user_exists(username):
         return jsonify({'error': 'User not found'}), 404
     
     # Prevent deleting the super admin
@@ -909,7 +882,7 @@ def delete_user(username):
         return jsonify({'error': 'Cannot delete super admin account'}), 403
     
     # Delete user
-    del USERS[username]
+    user_db.delete_user(username)
     
     # Log the action
     client_ip = get_client_ip()
@@ -918,6 +891,42 @@ def delete_user(username):
                      f'Deleted user: {username}', user_agent)
     
     return jsonify({'message': 'User deleted successfully'})
+
+@app.route('/api/database/stats', methods=['GET'])
+@require_auth
+def get_database_stats():
+    """Get database statistics - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    try:
+        stats = user_db.get_database_stats()
+        return jsonify({'stats': stats})
+    except Exception as e:
+        return jsonify({'error': f'Failed to get database stats: {str(e)}'}), 500
+
+@app.route('/api/database/backup', methods=['POST'])
+@require_auth
+def backup_database():
+    """Create a database backup - admin only"""
+    if request.user['role'] != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    try:
+        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+        backup_path = f'/app/data/users_backup_{timestamp}.db'
+        
+        success = user_db.backup_database(backup_path)
+        if success:
+            return jsonify({
+                'message': 'Database backup created successfully',
+                'backup_path': backup_path,
+                'timestamp': timestamp
+            })
+        else:
+            return jsonify({'error': 'Failed to create database backup'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Backup failed: {str(e)}'}), 500
 
 @app.route('/api/generate-password', methods=['POST'])
 @require_auth

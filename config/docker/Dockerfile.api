@@ -18,17 +18,18 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY calculator-api.py .
+COPY backend/api/calculator-api.py .
+COPY backend/database/user_database.py .
 COPY .env* ./
 
 # Create necessary directories and set permissions
-RUN mkdir -p /app/logs && \
+RUN mkdir -p /app/logs /app/data && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
