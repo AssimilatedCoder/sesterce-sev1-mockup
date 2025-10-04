@@ -148,12 +148,37 @@ fi
 
 print_status "Environment variables generated"
 
+# Pre-deployment cleanup and validation
+print_info "Running pre-deployment cleanup..."
+
+# Stop and remove any existing containers
+print_info "Stopping existing services..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" down --remove-orphans 2>/dev/null || true
+
+# Remove any containers with conflicting names
+print_info "Removing conflicting containers..."
+docker rm -f nullsector-api nullsector-frontend nullsector-nginx 2>/dev/null || true
+
+# Clean up dangling images and build cache
+print_info "Cleaning up Docker build cache..."
+docker builder prune -f 2>/dev/null || true
+
 # Build the application images
 print_info "Building Docker images..."
-if $COMPOSE_CMD -f "$COMPOSE_FILE" build; then
+if $COMPOSE_CMD -f "$COMPOSE_FILE" build --no-cache; then
     print_status "Docker images built successfully"
 else
     print_error "Failed to build Docker images"
+    print_info "Attempting to diagnose build issues..."
+    
+    # Show Docker system information
+    print_info "Docker system info:"
+    docker system df || true
+    
+    # Show available space
+    print_info "Available disk space:"
+    df -h . || true
+    
     exit 1
 fi
 
@@ -167,6 +192,15 @@ if $COMPOSE_CMD -f "$COMPOSE_FILE" up -d; then
     print_status "Services started successfully"
 else
     print_error "Failed to start services"
+    print_info "Attempting to diagnose the issue..."
+    
+    # Show detailed error information
+    print_info "Checking for container conflicts..."
+    docker ps -a | grep -E "(nullsector|docker)" || true
+    
+    print_info "Checking Docker Compose logs..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 || true
+    
     exit 1
 fi
 

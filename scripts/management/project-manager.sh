@@ -38,12 +38,13 @@ show_help() {
     echo ""
     echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
-    echo "DEPLOYMENT COMMANDS:"
-    echo "  deploy              Deploy the application using Docker"
-    echo "  deploy-secure       Deploy with HTTPS/SSL configuration"
-    echo "  stop               Stop all services"
-    echo "  restart            Restart all services"
-    echo "  status             Show service status"
+echo "DEPLOYMENT COMMANDS:"
+echo "  deploy              Deploy the application using Docker"
+echo "  force-deploy        Force deploy with full cleanup (removes all containers/images)"
+echo "  deploy-secure       Deploy with HTTPS/SSL configuration"
+echo "  stop               Stop all services"
+echo "  restart            Restart all services"
+echo "  status             Show service status"
     echo ""
     echo "MANAGEMENT COMMANDS:"
     echo "  logs               Show application logs"
@@ -65,6 +66,7 @@ echo "  fix-docker         Fix Docker path issues"
 echo "  troubleshoot       Run troubleshooting tools"
 echo "  check-ports        Check port availability"
 echo "  clean              Clean up temporary files"
+echo "  cleanup            Clean up Docker deployment (add --images to remove images)"
     echo ""
     echo "SETUP COMMANDS:"
     echo "  setup-dev          Setup development environment"
@@ -108,6 +110,17 @@ show_structure() {
 # Deployment functions
 deploy() {
     print_info "Starting deployment..."
+    ./scripts/deployment/deploy-docker.sh
+}
+
+force_deploy() {
+    print_info "Starting force deployment with full cleanup..."
+    print_info "This will remove all containers, images, and rebuild everything"
+    
+    # Full cleanup including images
+    ./scripts/management/cleanup-deployment.sh --images
+    
+    # Deploy fresh
     ./scripts/deployment/deploy-docker.sh
 }
 
@@ -216,6 +229,11 @@ clean_system() {
     print_status "Cleanup complete"
 }
 
+cleanup_deployment() {
+    print_info "Cleaning up Docker deployment..."
+    ./scripts/management/cleanup-deployment.sh "$@"
+}
+
 # Setup functions
 setup_dev() {
     print_info "Setting up development environment..."
@@ -237,6 +255,9 @@ case "$1" in
     # Deployment commands
     "deploy")
         deploy
+        ;;
+    "force-deploy")
+        force_deploy
         ;;
     "deploy-secure")
         deploy_secure
@@ -300,6 +321,9 @@ case "$1" in
         ;;
     "clean")
         clean_system
+        ;;
+    "cleanup")
+        cleanup_deployment "$2"
         ;;
     
     # Setup commands
