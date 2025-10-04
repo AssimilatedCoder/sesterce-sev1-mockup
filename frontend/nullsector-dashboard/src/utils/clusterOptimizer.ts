@@ -2,7 +2,7 @@
  * Cluster Optimization Engine for Basic Configuration Mode
  * Automatically optimizes service tiers and infrastructure based on constraints
  */
-
+import { gpuSpecs } from '../data/gpuSpecs';
 export interface OptimizationConstraints {
   gpuPowerBudget: number;
   maxGPUsFromPower: number;
@@ -57,16 +57,22 @@ export interface OptimizedConfiguration {
   constraints: OptimizationConstraints;
 }
 
+ 
+
 export class ClusterOptimizer {
   private gpus: number;
   private power: number; // in kW
   private storage: number; // in PB
   private constraints: OptimizationConstraints;
+  private selectedGpuKey?: string;
+  private selectedNetworking?: string;
 
-  constructor(gpus: number, powerMW: number, storagePB: number) {
+  constructor(gpus: number, powerMW: number, storagePB: number, gpuKey?: string, networkingType?: string) {
     this.gpus = gpus;
     this.power = powerMW * 1000; // Convert MW to kW
     this.storage = storagePB;
+    this.selectedGpuKey = gpuKey;
+    this.selectedNetworking = networkingType;
     this.constraints = this.analyzeConstraints();
   }
 
@@ -78,6 +84,7 @@ export class ClusterOptimizer {
     const storagePerGPU = (this.storage * 1000) / this.gpus; // TB per GPU
     const storageConstrained = storagePerGPU < 20; // Less than 20TB per GPU is constrained
     
+    const selectedName = this.selectedGpuKey && gpuSpecs[this.selectedGpuKey] ? gpuSpecs[this.selectedGpuKey].name : this.selectOptimalGPU(powerConstrained);
     return {
       gpuPowerBudget,
       maxGPUsFromPower,
@@ -85,7 +92,7 @@ export class ClusterOptimizer {
       storagePerGPU,
       storageConstrained,
       scale: this.categorizeScale(),
-      gpuModel: this.selectOptimalGPU(powerConstrained)
+      gpuModel: selectedName
     };
   }
 
@@ -99,6 +106,11 @@ export class ClusterOptimizer {
   private selectOptimalGPU(powerConstrained: boolean): string {
     const powerPerGPU = (this.power * 0.7) / this.gpus; // kW per GPU
     const powerPerGPUWatts = powerPerGPU * 1000;
+
+    // Prefer user-selected GPU if provided
+    if (this.selectedGpuKey && gpuSpecs[this.selectedGpuKey]) {
+      return gpuSpecs[this.selectedGpuKey].name;
+    }
 
     if (this.constraints?.scale === 'hyperscale' && powerPerGPUWatts >= 700) {
       return 'H100 SXM'; // Best for large training
@@ -245,6 +257,11 @@ export class ClusterOptimizer {
     const needsHighBandwidth = serviceTiers.bareMetalWhale > 20 || 
                                (serviceTiers.bareMetalWhale + serviceTiers.orchestratedK8s) > 50;
 
+    // Respect user-selected networking when provided
+    if (this.selectedNetworking === 'roce-800') return 'Ethernet 800GbE RoCEv2';
+    if (this.selectedNetworking === 'roce-400') return 'Ethernet 400GbE RoCEv2';
+    if (this.selectedNetworking === 'roce-200') return 'Ethernet 200GbE RoCEv2';
+
     if (this.constraints.scale === 'hyperscale' && needsHighBandwidth) {
       return 'InfiniBand NDR 400Gb (Non-blocking)';
     } else if (this.constraints.scale === 'large' && needsHighBandwidth) {
@@ -269,23 +286,25 @@ export class ClusterOptimizer {
   }
 
   private calculateRackCount(): number {
-    // Assuming 8 GPUs per node, 4 nodes per rack typically
-    const nodes = Math.ceil(this.gpus / 8);
-    const racksForCompute = Math.ceil(nodes / 4);
-    const racksForNetworking = Math.ceil(racksForCompute * 0.1); // 10% for switches
-    const racksForStorage = Math.ceil(this.storage / 5); // 5PB per rack typical
-
+    // Use rack sizing from the selected GPU spec when available
+    let rackSize = 8; // default GPUs per node
+    if (this.selectedGpuKey && gpuSpecs[this.selectedGpuKey]) {
+      rackSize = gpuSpecs[this.selectedGpuKey].rackSize;
+    }
+    const nodes = Math.ceil(this.gpus / rackSize);
+    const racksForCompute = Math.ceil(nodes / 4); // assume 4 nodes per rack typical
+    const racksForNetworking = Math.ceil(racksForCompute * 0.1);
+    const racksForStorage = Math.ceil(this.storage / 5);
     return racksForCompute + racksForNetworking + racksForStorage;
   }
 
   private getGPUCost(model: string): number {
-    const costs: Record<string, number> = {
-      'H100 SXM': 40000,
-      'H100 PCIe': 35000,
-      'A100 80GB': 20000,
-      'L40S': 15000
-    };
-    return costs[model] || 25000;
+    // Look up by selected key if available, else fall back by model name
+    if (this.selectedGpuKey && gpuSpecs[this.selectedGpuKey]) {
+      return gpuSpecs[this.selectedGpuKey].unitPrice;
+    }
+    const entry = Object.values(gpuSpecs).find(s => s.name === model);
+    return entry ? entry.unitPrice : 25000;
   }
 
   private calculateRevenuePerGPU(serviceTiers: ServiceTierAllocation): number {
@@ -308,14 +327,24 @@ export class ClusterOptimizer {
   private calculateFinancials(serviceTiers: ServiceTierAllocation): FinancialMetrics {
     // CapEx calculation
     const gpuCost = this.gpus * this.getGPUCost(this.constraints.gpuModel);
-    const networkCost = this.gpus * 15000; // $15k per GPU for networking
+    // Networking cost: scale with selected networking
+    const networkingUnit = this.selectedNetworking === 'roce-800' ? 25000 : this.selectedNetworking === 'roce-400' ? 18000 : 12000;
+    const networkCost = this.gpus * networkingUnit;
     const storageCost = this.storage * 100000; // $100k per PB average
     const facilityCost = (this.power / 1000) * 2000000; // $2M per MW
 
     const capex = gpuCost + networkCost + storageCost + facilityCost;
 
     // OpEx calculation (annual)
-    const powerCost = this.power * 8760 * 0.07; // $0.07 per kWh
+    // Power cost informed by PUE from spec when available (defaults if not)
+    const pue = (() => {
+      if (this.selectedGpuKey && gpuSpecs[this.selectedGpuKey]) {
+        const spec = gpuSpecs[this.selectedGpuKey];
+        return (spec.pue?.liquid ?? spec.pue?.air ?? 1.3);
+      }
+      return 1.3;
+    })();
+    const powerCost = this.power * pue * 8760 * 0.07; // $0.07 per kWh
     const staffCost = Math.ceil(this.gpus / 500) * 200000; // 1 FTE per 500 GPUs
     const maintenanceCost = capex * 0.05; // 5% of CapEx
 

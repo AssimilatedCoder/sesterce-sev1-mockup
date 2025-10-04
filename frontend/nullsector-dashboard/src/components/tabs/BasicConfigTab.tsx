@@ -9,6 +9,7 @@ import {
   getPowerStatus,
   getStorageRatioStatus
 } from '../../utils/clusterOptimizer';
+import { gpuSpecs } from '../../data/gpuSpecs';
 
 interface BasicConfigTabProps {
   onSwitchToAdvanced?: (config: any) => void;
@@ -22,14 +23,12 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
   const [storageCapacity, setStorageCapacity] = useState(125); // PB
   const [networkingType, setNetworkingType] = useState('roce-400'); // RoCEv2 400Gbps default
 
-  // GPU model options (must be defined before use in useMemo below)
-  const gpuOptions = [
-    { value: 'gb200', label: 'GB200 NVL72', description: 'Latest Blackwell architecture' },
-    { value: 'h100-sxm', label: 'H100 SXM', description: 'High-performance training' },
-    { value: 'h100-pcie', label: 'H100 PCIe', description: 'Flexible deployment' },
-    { value: 'a100-80gb', label: 'A100 80GB', description: 'Proven performance' },
-    { value: 'l40s', label: 'L40S', description: 'Inference optimized' }
-  ];
+  // GPU model options (built from authoritative gpuSpecs data)
+  const gpuOptions = Object.entries(gpuSpecs).map(([key, spec]) => ({
+    value: key,
+    label: spec.name,
+    description: `${spec.vendor.toUpperCase()} ${spec.architecture} • ${spec.memoryPerGPU}GB • ~${spec.powerPerGPU}W` as string
+  }));
 
   // Networking options (must be defined before use in useMemo below)
   const networkingOptions = [
@@ -61,12 +60,12 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
 
   // Optimization results - now includes GPU model and networking selections
   const optimizedConfig = useMemo(() => {
-    const optimizer = new ClusterOptimizer(gpuCount, powerCapacity, storageCapacity);
+    const optimizer = new ClusterOptimizer(gpuCount, powerCapacity, storageCapacity, gpuModel, networkingType);
     const config = optimizer.calculateOptimalConfiguration();
     
     // Override with user selections
-    config.constraints.gpuModel = gpuOptions.find(opt => opt.value === gpuModel)?.label || 'H100 SXM';
-    config.infrastructure.network = networkingOptions.find(opt => opt.value === networkingType)?.label || 'RoCEv2 400Gbps';
+    config.constraints.gpuModel = gpuOptions.find(opt => opt.value === gpuModel)?.label || config.constraints.gpuModel;
+    config.infrastructure.network = networkingOptions.find(opt => opt.value === networkingType)?.label || config.infrastructure.network;
     
     return config;
   }, [gpuCount, powerCapacity, storageCapacity, gpuModel, networkingType]);
@@ -448,6 +447,17 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
                 <span className="text-sm text-gray-600">Selected GPU Model</span>
                 <span className="text-sm font-medium text-gray-900">{optimizedConfig.constraints.gpuModel}</span>
               </div>
+              {(() => {
+                const spec = gpuSpecs[gpuModel];
+                return spec ? (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Reference</span>
+                    <a href={spec.reference} target="_blank" rel="noreferrer" className="text-sm font-medium text-gray-900 underline">
+                      View Datasheet
+                    </a>
+                  </div>
+                ) : null;
+              })()}
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Network Fabric</span>
                 <span className="text-sm font-medium text-gray-900">{optimizedConfig.infrastructure.network}</span>
