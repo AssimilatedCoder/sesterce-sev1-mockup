@@ -186,41 +186,36 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
         )}
       </div>
 
-      {/* Service Tiers */}
-      <div className="space-y-4">
+      {/* Service Tiers - 2x2 Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {serviceTiers.map((tier, index) => (
-          <div key={tier.id} className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-medium text-gray-900">{tier.name}</h4>
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    tier.serviceCategory === 'IaaS' ? 'bg-gray-200 text-gray-800' :
-                    tier.serviceCategory === 'PaaS' ? 'bg-gray-300 text-gray-800' :
-                    'bg-gray-400 text-gray-800'
-                  }`}>
-                    {tier.serviceCategory}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-600">{tier.description}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  <span className="font-medium">Typical customers:</span> {tier.typicalCustomers}
-                </p>
+          <div key={tier.id} className="bg-white rounded-lg p-3 border border-gray-200">
+            {/* Header with title and percentage */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-medium text-gray-900">{tier.name}</h4>
+                <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                  tier.serviceCategory === 'IaaS' ? 'bg-gray-200 text-gray-800' :
+                  tier.serviceCategory === 'PaaS' ? 'bg-gray-300 text-gray-800' :
+                  'bg-gray-400 text-gray-800'
+                }`}>
+                  {tier.serviceCategory}
+                </span>
               </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-gray-900">
-                  {tier.clusterPercent.toFixed(1)}%
-                </div>
-                <div className="text-xs text-gray-500">of cluster</div>
+              <div className="text-lg font-bold text-gray-900">
+                {tier.clusterPercent.toFixed(1)}%
               </div>
             </div>
+            
+            {/* Description - more compact */}
+            <p className="text-xs text-gray-600 mb-2">{tier.description}</p>
 
             {/* Cluster Allocation Slider */}
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Cluster Allocation (% of {totalGPUs.toLocaleString()} GPUs)
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Cluster Allocation
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <input
                   type="range"
                   min="0"
@@ -237,20 +232,20 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                   step={1}
                   value={Math.round(tier.clusterPercent)}
                   onChange={(e) => handleClusterPercentChange(tier.id, parseInt(e.target.value) || 0)}
-                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded"
+                  className="w-14 px-1 py-1 text-xs border border-gray-300 rounded"
                 />
-                <span className="text-sm font-semibold text-gray-600">%</span>
+                <span className="text-xs font-semibold text-gray-600">%</span>
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                {Math.round((tier.clusterPercent / 100) * totalGPUs).toLocaleString()} GPUs allocated
+                {Math.round((tier.clusterPercent / 100) * totalGPUs).toLocaleString()} GPUs
               </div>
             </div>
 
-            {/* Workload Split */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Workload Split - Compact */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Training Workloads
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Training
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -262,18 +257,15 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                     onChange={(e) => handleWorkloadSplitChange(tier.id, parseInt(e.target.value))}
                     className="flex-1"
                   />
-                  <div className="w-12 text-sm font-medium text-gray-900">
+                  <div className="w-10 text-xs font-medium text-gray-900">
                     {tier.trainingPercent}%
                   </div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  High bandwidth, checkpoint writes
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Inference Workloads
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Inference
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-gray-100 rounded h-2 relative">
@@ -282,18 +274,15 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                       style={{ width: `${tier.inferencePercent}%` }}
                     />
                   </div>
-                  <div className="w-12 text-sm font-medium text-gray-900">
+                  <div className="w-10 text-xs font-medium text-gray-900">
                     {tier.inferencePercent}%
                   </div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  High IOPS, model serving
                 </div>
               </div>
             </div>
 
-            {/* SLA Requirement */}
-            <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+            {/* SLA Requirement - Compact */}
+            <div className="mt-2 text-xs text-gray-500">
               <span className="font-medium">SLA:</span> {tier.slaRequirement}
             </div>
           </div>
