@@ -22,6 +22,22 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
   const [storageCapacity, setStorageCapacity] = useState(125); // PB
   const [networkingType, setNetworkingType] = useState('roce-400'); // RoCEv2 400Gbps default
 
+  // GPU model options (must be defined before use in useMemo below)
+  const gpuOptions = [
+    { value: 'gb200', label: 'GB200 NVL72', description: 'Latest Blackwell architecture' },
+    { value: 'h100-sxm', label: 'H100 SXM', description: 'High-performance training' },
+    { value: 'h100-pcie', label: 'H100 PCIe', description: 'Flexible deployment' },
+    { value: 'a100-80gb', label: 'A100 80GB', description: 'Proven performance' },
+    { value: 'l40s', label: 'L40S', description: 'Inference optimized' }
+  ];
+
+  // Networking options (must be defined before use in useMemo below)
+  const networkingOptions = [
+    { value: 'roce-200', label: 'RoCEv2 200Gbps', description: 'Cost-effective for most workloads' },
+    { value: 'roce-400', label: 'RoCEv2 400Gbps', description: 'Balanced performance and cost' },
+    { value: 'roce-800', label: 'RoCEv2 800Gbps', description: 'Maximum performance for large models' }
+  ];
+
   // Notify parent of configuration changes
   useEffect(() => {
     if (onConfigChange) {
@@ -55,21 +71,7 @@ export const BasicConfigTab: React.FC<BasicConfigTabProps> = ({ onSwitchToAdvanc
     return config;
   }, [gpuCount, powerCapacity, storageCapacity, gpuModel, networkingType]);
 
-  // GPU model options
-  const gpuOptions = [
-    { value: 'gb200', label: 'GB200 NVL72', description: 'Latest Blackwell architecture' },
-    { value: 'h100-sxm', label: 'H100 SXM', description: 'High-performance training' },
-    { value: 'h100-pcie', label: 'H100 PCIe', description: 'Flexible deployment' },
-    { value: 'a100-80gb', label: 'A100 80GB', description: 'Proven performance' },
-    { value: 'l40s', label: 'L40S', description: 'Inference optimized' }
-  ];
-
-  // Networking options
-  const networkingOptions = [
-    { value: 'roce-200', label: 'RoCEv2 200Gbps', description: 'Cost-effective for most workloads' },
-    { value: 'roce-400', label: 'RoCEv2 400Gbps', description: 'Balanced performance and cost' },
-    { value: 'roce-800', label: 'RoCEv2 800Gbps', description: 'Maximum performance for large models' }
-  ];
+  // (gpuOptions and networkingOptions are defined above)
 
   // Formatted tier data for display
   const optimizedTiers = useMemo(() => {
