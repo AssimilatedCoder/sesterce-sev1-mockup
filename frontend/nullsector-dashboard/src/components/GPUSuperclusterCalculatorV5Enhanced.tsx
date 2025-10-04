@@ -26,6 +26,7 @@ import { AccessLogsTab } from './tabs/AccessLogsTab';
 import { UserManagementTab } from './tabs/UserManagementTab';
 import { LandingOverviewTab } from './tabs/LandingOverviewTab';
 import { TCOOverrideTab, TCOOverrides } from './tabs/TCOOverrideTab';
+import { BasicConfigTab } from './tabs/BasicConfigTab';
 import { formatNumber } from '../utils/formatters';
 import { CurrencySelector } from './common/CurrencySelector';
 import { useCurrency } from '../hooks/useCurrency';
@@ -90,6 +91,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
   const currentUser = sessionStorage.getItem('nullSectorUser');
   const isAdmin = currentUser === 'admin' || currentUser === 'David' || currentUser === 'Thomas' || currentUser === 'Kiko' || currentUser === 'Maciej';
   const isSuperAdmin = currentUser === 'admin'; // Only admin can see access logs
+  const isPowerUser = isAdmin; // Power users have same access as admins for now
   
   // Determine user role for display
   const getUserRole = () => {
@@ -104,7 +106,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
   console.log('Is super admin:', isSuperAdmin);
   
   // State management
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('basic');
   
   // Currency conversion hook (for future use in calculations)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -711,19 +713,28 @@ const GPUSuperclusterCalculator: React.FC = () => {
     });
   };
 
+  // Handle switching from Basic to Advanced mode
+  const handleSwitchToAdvanced = (basicConfig: any) => {
+    // Populate advanced configuration with optimized values
+    console.log('Switching to Advanced mode with config:', basicConfig);
+    setActiveTab('advanced');
+    // TODO: Apply the basic config to the advanced settings
+  };
+
   // Organized tab structure with logical groupings
   const tabGroups = [
+    {
+      title: 'Configuration',
+      tabs: [
+        { id: 'basic', label: 'Basic Config', icon: <Zap className="w-4 h-4" />, description: 'Quick setup with automatic optimization', default: true },
+        ...(isPowerUser || isAdmin ? [{ id: 'advanced', label: 'Advanced Config', icon: <Settings className="w-4 h-4" />, description: 'Full control over service tiers and infrastructure' }] : []),
+        { id: 'overrides', label: 'TCO Overrides', icon: <DollarSign className="w-4 h-4" />, description: 'Fine-tune calculations' }
+      ]
+    },
     {
       title: 'Overview',
       tabs: [
         { id: 'overview', label: 'TCO Calculator Overview', icon: <FileText className="w-4 h-4" /> }
-      ]
-    },
-    {
-      title: 'User Input',
-      tabs: [
-        { id: 'calculator', label: 'Cluster Config Options', icon: <Calculator className="w-4 h-4" /> },
-        { id: 'overrides', label: 'TCO Overrides', icon: <Settings className="w-4 h-4" /> }
       ]
     },
     {
@@ -737,6 +748,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
     {
       title: 'Technical Analysis',
       tabs: [
+        { id: 'calculator', label: 'Advanced Config Details', icon: <Calculator className="w-4 h-4" /> },
         { id: 'networking', label: 'Networking', icon: <Network className="w-4 h-4" /> },
         { id: 'storage', label: 'Storage Analysis', icon: <HardDrive className="w-4 h-4" /> },
         { id: 'software', label: 'Software Stack', icon: <Cpu className="w-4 h-4" /> },
@@ -971,10 +983,65 @@ const GPUSuperclusterCalculator: React.FC = () => {
             <div className="p-2 md:p-6">
               <div className="bg-white rounded-2xl shadow-xl border border-gray-200">
                 <div className="p-4 md:p-8">
+                  {activeTab === 'basic' && (
+                    <BasicConfigTab onSwitchToAdvanced={handleSwitchToAdvanced} />
+                  )}
+
+                  {activeTab === 'advanced' && (isPowerUser || isAdmin) && (
+                    <CalculatorTabRedesigned
+                      config={config}
+                      setTierDistribution={setTierDistribution}
+                      setGpuModel={setGpuModel}
+                      setNumGPUs={setNumGPUs}
+                      setCoolingType={setCoolingType}
+                      setRegion={setRegion}
+                      setUtilization={setUtilization}
+                      setDepreciation={setDepreciation}
+                      setTotalStorage={setTotalStorage}
+                      setStorageArchitecture={setStorageArchitecture}
+                      setHotPercent={setHotPercent}
+                      setWarmPercent={setWarmPercent}
+                      setColdPercent={setColdPercent}
+                      setArchivePercent={setArchivePercent}
+                      setHotVendor={setHotVendor}
+                      setWarmVendor={setWarmVendor}
+                      setColdVendor={setColdVendor}
+                      setArchiveVendor={setArchiveVendor}
+                      setFabricType={setFabricType}
+                      setTopology={setTopology}
+                      setOversubscription={setOversubscription}
+                      setRailsPerGPU={setRailsPerGPU}
+                      setEnableBluefield={setEnableBluefield}
+                      setPueOverride={setPueOverride}
+                      setGpuPriceOverride={setGpuPriceOverride}
+                      setMaintenancePercent={setMaintenancePercent}
+                      setStaffMultiplier={setStaffMultiplier}
+                      setCustomEnergyRate={setCustomEnergyRate}
+                      setWorkloadTraining={setWorkloadTraining}
+                      setWorkloadInference={setWorkloadInference}
+                      setWorkloadFinetuning={setWorkloadFinetuning}
+                      setTenantWhale={setTenantWhale}
+                      setTenantMedium={setTenantMedium}
+                      setTenantSmall={setTenantSmall}
+                      setSelectedStorageTiers={setSelectedStorageTiers}
+                      setStorageTierDistribution={setStorageTierDistribution}
+                      setStoragePreset={setStoragePreset}
+                      setSoftwareStack={setSoftwareStack}
+                      setSupportTier={setSupportTier}
+                      setBudget={setBudget}
+                      setExpertise={setExpertise}
+                      setComplianceRequirements={setComplianceRequirements}
+                      coolingRequired={true}
+                      calculate={calculate}
+                      results={results}
+                      formatNumber={formatNumber}
+                    />
+                  )}
+
                   {activeTab === 'overview' && (
                     <LandingOverviewTab 
                       currentUser={currentUser || 'Guest'} 
-                      userRole={getUserRole()} 
+                      userRole={getUserRole()}
                     />
                   )}
 

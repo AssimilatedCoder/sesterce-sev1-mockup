@@ -2,6 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Basic Config Styling */
+.basic-config-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Custom slider styling */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+.slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+/* Status color classes */
+.status-good {
+  color: #10b981;
+}
+
+.status-warning {
+  color: #f59e0b;
+}
+
+.status-critical {
+  color: #ef4444;
+}
+
+/* Input card hover effects */
+.input-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Optimization results animations */
+.tier-allocation {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.tier-allocation:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.tier-allocation:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.tier-allocation:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Metric card scaling */
+.metric-card {
+  transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: scale(1.02);
+}
+
+/* Power bar gradient */
+.power-bar {
+  background: linear-gradient(90deg, #e5e7eb 0%, #e5e7eb 100%);
+}
+
+/* Quick select button animations */
+.quick-select-buttons button {
+  transition: all 0.2s ease;
+}
+
+.quick-select-buttons button:active {
+  transform: scale(0.95);
+}
+
 /* Custom styles */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
