@@ -51,59 +51,70 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
     const oldValue = newTiers[tierIndex].clusterPercent;
     const diff = clampedValue - oldValue;
     
-    // Calculate current total of other tiers
-    const otherTiersTotal = newTiers
-      .filter((_, i) => i !== tierIndex)
-      .reduce((sum, t) => sum + t.clusterPercent, 0);
-    
-    // Check if the new value would cause total to exceed 100%
-    const wouldExceed100 = clampedValue + otherTiersTotal > 100;
-    
-    if (wouldExceed100) {
-      // Calculate the maximum allowed value for this tier
-      const maxAllowed = 100 - otherTiersTotal;
-      const finalValue = Math.max(0, Math.min(maxAllowed, clampedValue));
-      
-      // Only update if the value actually changed
-      if (Math.abs(finalValue - oldValue) > 0.01) {
-        newTiers[tierIndex].clusterPercent = finalValue;
-        setServiceTiers(newTiers);
-      }
-      return;
-    }
-    
-    // Update the changed tier
+    // Update the changed tier first
     newTiers[tierIndex].clusterPercent = clampedValue;
     
-    // If we have room to adjust other tiers and there's a meaningful change
-    if (Math.abs(diff) > 0.1 && otherTiersTotal > 0) {
+    // Calculate current total
+    const currentTotal = newTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+    
+    // If total exceeds 100%, we need to adjust other tiers
+    if (currentTotal > 100) {
+      const excess = currentTotal - 100;
       const otherTiers = newTiers.filter((_, i) => i !== tierIndex);
+      
+      // Prioritize adjusting untouched tiers first, then touched tiers
       const untouchedTiers = otherTiers.filter(t => !touchedTiers.includes(t.id));
       const adjustableTiers = untouchedTiers.length > 0 ? untouchedTiers : otherTiers;
       
       if (adjustableTiers.length > 0) {
         const totalAdjustable = adjustableTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
         
-        if (totalAdjustable > 0) {
-          // Distribute the difference proportionally among adjustable tiers
+        if (totalAdjustable >= excess) {
+          // Proportionally reduce adjustable tiers to absorb the excess
           adjustableTiers.forEach(tier => {
             const proportion = tier.clusterPercent / totalAdjustable;
-            const adjustment = diff * proportion;
-            tier.clusterPercent = Math.max(0, tier.clusterPercent - adjustment);
+            const reduction = excess * proportion;
+            tier.clusterPercent = Math.max(0, tier.clusterPercent - reduction);
+          });
+        } else {
+          // Not enough in adjustable tiers, zero them out and reduce the changed tier
+          adjustableTiers.forEach(tier => {
+            tier.clusterPercent = 0;
+          });
+          const remainingExcess = excess - totalAdjustable;
+          newTiers[tierIndex].clusterPercent = Math.max(0, clampedValue - remainingExcess);
+        }
+      } else {
+        // No other tiers to adjust, limit this tier to 100%
+        newTiers[tierIndex].clusterPercent = 100;
+      }
+    }
+    
+    // If total is less than 100% and we're increasing, try to maintain 100% total
+    else if (currentTotal < 100 && diff > 0) {
+      const shortfall = 100 - currentTotal;
+      const otherTiers = newTiers.filter((_, i) => i !== tierIndex);
+      const untouchedTiers = otherTiers.filter(t => !touchedTiers.includes(t.id));
+      
+      // Only auto-adjust if there are untouched tiers and the shortfall is small
+      if (untouchedTiers.length > 0 && shortfall < 10) {
+        const totalUntouched = untouchedTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
+        
+        if (totalUntouched > shortfall) {
+          // Proportionally reduce untouched tiers to maintain 100% total
+          untouchedTiers.forEach(tier => {
+            const proportion = tier.clusterPercent / totalUntouched;
+            const reduction = shortfall * proportion;
+            tier.clusterPercent = Math.max(0, tier.clusterPercent - reduction);
           });
         }
       }
     }
 
-    // Final safety check - ensure total doesn't exceed 100%
-    const finalTotal = newTiers.reduce((sum, t) => sum + t.clusterPercent, 0);
-    if (finalTotal > 100.01) { // Small tolerance for floating point
-      // Proportionally reduce all tiers to sum to 100%
-      const scaleFactor = 100 / finalTotal;
-      newTiers.forEach(tier => {
-        tier.clusterPercent = tier.clusterPercent * scaleFactor;
-      });
-    }
+    // Final cleanup - ensure no negative values and round to reasonable precision
+    newTiers.forEach(tier => {
+      tier.clusterPercent = Math.max(0, Math.round(tier.clusterPercent * 10) / 10);
+    });
 
     setServiceTiers(newTiers);
   };
@@ -143,9 +154,37 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
         </button>
       </div>
 
-      <p className="text-xs text-gray-600 mb-4">
+      <p className="text-xs text-gray-600 mb-2">
         Define your customer service mix. Each tier's workload split determines storage performance requirements.
       </p>
+      
+      {/* Total Allocation Indicator */}
+      <div className={`mb-4 p-3 rounded-lg border ${
+        Math.abs(totalClusterPercent - 100) < 0.1 
+          ? 'bg-green-50 border-green-200' 
+          : 'bg-yellow-50 border-yellow-200'
+      }`}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">
+            Total Cluster Allocation:
+          </span>
+          <span className={`text-sm font-bold ${
+            Math.abs(totalClusterPercent - 100) < 0.1 
+              ? 'text-green-700' 
+              : 'text-yellow-700'
+          }`}>
+            {totalClusterPercent.toFixed(1)}%
+          </span>
+        </div>
+        {Math.abs(totalClusterPercent - 100) >= 0.1 && (
+          <p className="text-xs text-yellow-600 mt-1">
+            {totalClusterPercent > 100 
+              ? `Over-allocated by ${(totalClusterPercent - 100).toFixed(1)}%. Adjust sliders to reach exactly 100%.`
+              : `Under-allocated by ${(100 - totalClusterPercent).toFixed(1)}%. Adjust sliders to reach exactly 100%.`
+            }
+          </p>
+        )}
+      </div>
 
       {/* Service Tiers */}
       <div className="space-y-4">
@@ -185,7 +224,7 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                 <input
                   type="range"
                   min="0"
-                  max={Math.min(100, tier.clusterPercent + (100 - totalClusterPercent))}
+                  max="100"
                   step="1"
                   value={tier.clusterPercent}
                   onChange={(e) => handleClusterPercentChange(tier.id, parseInt(e.target.value))}
@@ -194,7 +233,7 @@ export const ServiceTierConfiguration: React.FC<ServiceTierConfigurationProps> =
                 <input
                   type="number"
                   min={0}
-                  max={Math.min(100, tier.clusterPercent + (100 - totalClusterPercent))}
+                  max={100}
                   step={1}
                   value={Math.round(tier.clusterPercent)}
                   onChange={(e) => handleClusterPercentChange(tier.id, parseInt(e.target.value) || 0)}
