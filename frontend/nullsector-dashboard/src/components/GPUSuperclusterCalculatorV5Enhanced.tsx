@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Calculator, Cpu, HardDrive, Network, Thermometer, Zap, AlertTriangle,
   FileText, BookOpen, DollarSign, TrendingUp, Package, Settings, Shield
@@ -935,14 +935,22 @@ const GPUSuperclusterCalculator: React.FC = () => {
   };
 
   // Check if configuration is complete for financial analysis
-  const isConfigComplete = isConfigurationComplete(config);
-  const isBasicConfigSufficient = isBasicConfigurationSufficient(
-    basicConfigData.gpuCount,
-    basicConfigData.powerCapacity,
-    basicConfigData.storageCapacity,
-    basicConfigData.gpuModel,
-    basicConfigData.networkingType
-  );
+  const configValidation = useMemo(() => {
+    const isConfigComplete = isConfigurationComplete(config);
+    const isBasicConfigSufficient = isBasicConfigurationSufficient(
+      basicConfigData.gpuCount,
+      basicConfigData.powerCapacity,
+      basicConfigData.storageCapacity,
+      basicConfigData.gpuModel,
+      basicConfigData.networkingType
+    );
+    
+    return {
+      isConfigComplete,
+      isBasicConfigSufficient,
+      showFinancialTabs: isConfigComplete || (isUsingBasicConfig && isBasicConfigSufficient)
+    };
+  }, [config, basicConfigData, isUsingBasicConfig]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('nullSectorUser');
@@ -1231,7 +1239,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
             )}
             
             {activeTab === 'financial' && (
-              (isConfigComplete || (isUsingBasicConfig && isBasicConfigSufficient)) ? (
+              configValidation.showFinancialTabs ? (
                 <FinancialAnalyticsTab config={config} results={results} />
               ) : (
                 <ConfigurationIncompleteMessage 
@@ -1242,7 +1250,7 @@ const GPUSuperclusterCalculator: React.FC = () => {
             )}
             
             {activeTab === 'capex' && (
-              (isConfigComplete || (isUsingBasicConfig && isBasicConfigSufficient)) ? (
+              configValidation.showFinancialTabs ? (
                 <CapexBreakdownTab config={config} results={results} />
               ) : (
                 <ConfigurationIncompleteMessage 
